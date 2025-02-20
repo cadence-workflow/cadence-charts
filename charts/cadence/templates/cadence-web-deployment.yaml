@@ -22,8 +22,8 @@ spec:
         ports:
         - containerPort: 8088
         env:
-        - name: CADENCE_TCHANNEL_PEERS
-          value: cadence-frontend.{{ .Release.Namespace }}.svc.cluster.local:{{ $.Values.frontend.port }}
+        - name: CADENCE_GRPC_PEERS
+          value: cadence-frontend.{{ .Release.Namespace }}.svc.cluster.local:{{ $.Values.frontend.grpcPort }}
         resources:
           limits:
             cpu: {{ $.Values.web.cpu.limit }}
