@@ -75,4 +75,7 @@ cadencechart/README.md file should be updated.
 
 ## Publish chart
 
+After making changes to templates, increment the chart version in charts/cadence/Chart.yaml.
+Then merge your changes and automation will take care of publishing the new version.
 Cadence chart is hosted on github pages and automation is done using [Chart Releaser Action](https://helm.sh/docs/howto/chart_releaser_action/).
+After new version is available in helm repo, deploy it to a K8s cluster to validate.
