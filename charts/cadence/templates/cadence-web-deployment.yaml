@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: cadence-web
-        image: ubercadence/web:latest
+        image: {{ $.Values.web.image.repository }}:{{ $.Values.web.image.tag }}
         imagePullPolicy: Always
         ports:
         - containerPort: 8088
