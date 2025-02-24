@@ -9,6 +9,8 @@ spec:
   template:
     metadata:
       name: cadence-schema-setup
+      annotations:
+        schemaVersion: "{{ .Values.cassandra.schema.version }}"
     spec:
       restartPolicy: "OnFailure"
       initContainers:
