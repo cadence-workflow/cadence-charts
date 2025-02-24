@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: cadence-schema-setup
+  name: cadence-schema-setup-v{{ .Values.cassandra.schema.version | replace "." "-" }}
   labels:
     {{- include "cadence.commonlabels" . | nindent 4 }}
 spec:

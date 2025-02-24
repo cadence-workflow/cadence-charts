@@ -8,9 +8,9 @@ cassandra:
   endpoint: ""
   schema:
     # -- Cassandra schema version of the Cadence keyspace to use. Latest value can be found at https://github.com/uber/cadence/blob/master/schema/cassandra/version.go
-    version: 0.40
+    version: "0.40"
     # -- Cassandra schema version of the Cadence visibility keyspace to use. Latest value can be found at https://github.com/uber/cadence/blob/master/schema/cassandra/version.go
-    visibility_version: 0.9
+    visibility_version: "0.9"
   deployment:
     # -- When enabled, a single instance Cassandra will be deployed as part of the Helm chart
     # -- When disabled, the Cassandra deployment is expected to be provided externally. For production use cases, it is recommended to use an external Cassandra deployment.
