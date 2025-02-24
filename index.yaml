@@ -3,6 +3,16 @@ entries:
   cadence:
   - apiVersion: v2
     appVersion: 0.0.1
+    created: "2025-02-24T19:16:16.099822459Z"
+    description: Cadence Helm chart for Kubernetes
+    digest: 388c53de3d3deec7d6577e49b52cdbc5bb29e1898cf16f335cc736098f7589fc
+    name: cadence
+    type: application
+    urls:
+    - https://github.com/cadence-workflow/cadence-charts/releases/download/cadence-0.1.3/cadence-0.1.3.tgz
+    version: 0.1.3
+  - apiVersion: v2
+    appVersion: 0.0.1
     created: "2025-02-24T18:29:51.389118724Z"
     description: Cadence Helm chart for Kubernetes
     digest: 4f927f4fab8dcdd547956a291a0a6a3a360a5574e0e69f1a878d4de5bbc41264
@@ -31,4 +41,4 @@ entries:
     urls:
     - https://github.com/uber/cadence-charts/releases/download/cadence-0.1.0/cadence-0.1.0.tgz
     version: 0.1.0
-generated: "2025-02-24T18:29:51.389130666Z"
+generated: "2025-02-24T19:16:16.099838058Z"
