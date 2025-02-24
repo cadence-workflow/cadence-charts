@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: cadence-schema-setup
+  name: cadence-schema-setup-v{{ .Values.cassandra.schema.version | replace "." "-" }}
   labels:
     {{- include "cadence.commonlabels" . | nindent 4 }}
 spec:
@@ -9,8 +9,6 @@ spec:
   template:
     metadata:
       name: cadence-schema-setup
-      annotations:
-        schemaVersion: "{{ .Values.cassandra.schema.version }}"
     spec:
       restartPolicy: "OnFailure"
       initContainers:
