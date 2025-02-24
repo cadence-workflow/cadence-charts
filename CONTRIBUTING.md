@@ -4,14 +4,14 @@
 
 ```
 helm package ./charts/cadence
-helm template cadence-release cadencechart-0.1.0.tgz > template_out.yaml
+helm template cadence-release cadence-0.1.3.tgz > template_out.yaml
 ```
 
 ## Build and deploy to a k8s cluster
 
 ```
 helm package ./charts/cadence
-helm upgrade --install cadence-release cadencechart-0.1.0.tgz \
+helm upgrade --install cadence-release cadence-0.1.3.tgz \
     -n cadencetest \
     --create-namespace
 ```
