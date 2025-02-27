@@ -16,6 +16,10 @@ spec:
       protocol: TCP
       port: {{ $.Values.frontend.port }}
       targetPort: rpc
+    - name: grpc
+      protocol: TCP
+      port: {{ $.Values.frontend.grpcPort }}
+      targetPort: grpc
 
 ---
 
