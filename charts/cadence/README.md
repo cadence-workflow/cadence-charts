@@ -1,6 +1,6 @@
 # cadence
 
-![Version: 0.1.4](https://img.shields.io/badge/Version-0.1.4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.0.1](https://img.shields.io/badge/AppVersion-0.0.1-informational?style=flat-square)
+![Version: 0.1.5](https://img.shields.io/badge/Version-0.1.5-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.0.1](https://img.shields.io/badge/AppVersion-0.0.1-informational?style=flat-square)
 
 Cadence Helm chart for Kubernetes
 
@@ -51,7 +51,7 @@ Cadence Helm chart for Kubernetes
 | web.cpu.limit | string | `"500m"` |  |
 | web.cpu.request | string | `"500m"` |  |
 | web.image.repository | string | `"docker.io/ubercadence/web"` | Docker image repository to use for the Cadence Web UI |
-| web.image.tag | string | `"v3.35.6"` | Docker image tag to use for the Cadence Web UI |
+| web.image.tag | string | `"v4.0.3"` | Docker image tag to use for the Cadence Web UI |
 | web.memory.limit | string | `"1Gi"` |  |
 | web.memory.request | string | `"1Gi"` |  |
 | web.replicas | int | `1` |  |

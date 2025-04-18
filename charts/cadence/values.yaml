@@ -108,7 +108,7 @@ web:
     # -- Docker image repository to use for the Cadence Web UI
     repository: "docker.io/ubercadence/web"
     # -- Docker image tag to use for the Cadence Web UI
-    tag: "v3.35.6"
+    tag: "v4.0.3"
   cpu:
     limit: "500m"
     request: "500m"
