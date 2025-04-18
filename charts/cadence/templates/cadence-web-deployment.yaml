@@ -22,12 +22,8 @@ spec:
         ports:
         - containerPort: 8088
         env:
-         - name: CADENCE_TCHANNEL_PEERS
-           value: cadence-frontend.{{ .Release.Namespace }}.svc.cluster.local:{{ $.Values.frontend.port }}
-        # TODO: Switch image version to v4.0.0 and uncomment below after the port forwarding issue is fixed
-        # Something must have changed in the way the web service is started in > v3.35.6 which prevents localhost:8088 port forwarding
-        # - name: CADENCE_GRPC_PEERS
-        #   value: cadence-frontend.{{ .Release.Namespace }}.svc.cluster.local:{{ $.Values.frontend.grpcPort }}
+        - name: CADENCE_GRPC_PEERS
+          value: cadence-frontend.{{ .Release.Namespace }}.svc.cluster.local:{{ $.Values.frontend.grpcPort }}
         resources:
           limits:
             cpu: {{ $.Values.web.cpu.limit }}
