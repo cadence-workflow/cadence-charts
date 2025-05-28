@@ -46,10 +46,12 @@ spec:
       protocol: TCP
       port: {{ $serviceCfg.port }}
       targetPort: rpc
-    - name: metrics
+    {{- if $dot.Values.metrics.enabled }}
+    - name: {{ $dot.Values.metrics.portName }}
       protocol: TCP
-      port: 9090
-      targetPort: metrics
+      port: {{ $dot.Values.metrics.port }}
+      targetPort: {{ $dot.Values.metrics.portName }}
+    {{- end }}
     {{- if ne $service "worker" }}
     - name: grpc
       protocol: TCP

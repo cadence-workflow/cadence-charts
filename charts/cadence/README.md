@@ -1,6 +1,6 @@
 # cadence
 
-![Version: 0.1.5](https://img.shields.io/badge/Version-0.1.5-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.0.1](https://img.shields.io/badge/AppVersion-0.0.1-informational?style=flat-square)
+![Version: 0.1.6](https://img.shields.io/badge/Version-0.1.6-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.0.1](https://img.shields.io/badge/AppVersion-0.0.1-informational?style=flat-square)
 
 Cadence Helm chart for Kubernetes
 
@@ -48,6 +48,18 @@ Cadence Helm chart for Kubernetes
 | matching.memory.request | string | `"1Gi"` |  |
 | matching.port | int | `7935` | Tchannel port of cadence matching service. DO NOT CHANGE |
 | matching.replicas | int | `3` | Number of matching replicas to deploy |
+| metrics.enabled | bool | `true` |  |
+| metrics.port | int | `9090` |  |
+| metrics.portName | string | `"metrics"` |  |
+| metrics.serviceMonitor.additionalLabels | object | `{}` |  |
+| metrics.serviceMonitor.annotations | object | `{}` | Annotations to be added to the ServiceMonitor. |
+| metrics.serviceMonitor.enabled | bool | `false` |  |
+| metrics.serviceMonitor.metricRelabelings | list | `[]` |  |
+| metrics.serviceMonitor.namespace | string | `""` |  |
+| metrics.serviceMonitor.namespaceSelector | object | `{}` |  |
+| metrics.serviceMonitor.relabelings | list | `[]` |  |
+| metrics.serviceMonitor.scrapeInterval | string | `"15s"` |  |
+| metrics.serviceMonitor.targetLabels | list | `[]` |  |
 | web.cpu.limit | string | `"500m"` |  |
 | web.cpu.request | string | `"500m"` |  |
 | web.image.repository | string | `"docker.io/ubercadence/web"` | Docker image repository to use for the Cadence Web UI |
