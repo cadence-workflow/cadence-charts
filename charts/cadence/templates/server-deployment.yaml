@@ -47,9 +47,11 @@ spec:
             - name: rpc
               containerPort: {{ $serviceCfg.port }}
               protocol: TCP
-            - name: metrics
-              containerPort: 9090
+            {{- if $dot.Values.metrics.enabled }}
+            - name: {{ $dot.Values.metrics.portName }}
+              containerPort: {{ $dot.Values.metrics.port }}
               protocol: TCP
+            {{- end }}
              {{- if ne $service "worker" }}
             - name: grpc
               containerPort: {{ $serviceCfg.grpcPort }}
