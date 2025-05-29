@@ -593,7 +593,7 @@ metrics:
     # -- Namespace for ServiceMonitor (defaults to release namespace)
     namespace: ""
     # -- Joblabel for ServiceMonitor
-    jobLabel: {}
+    jobLabel: ""
     # -- Namespace selector for ServiceMonitor
     namespaceSelector: {}
     # -- Scrape interval
