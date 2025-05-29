@@ -1,147 +1,798 @@
+# -- Provide a name to override the name of the chart
+nameOverride: ~
+# -- Provide a name to override the full names of resources
+fullnameOverride: ~
 
-log:
-  stdout: true
-  level: "debug"
+# Global configuration
+global:
+  # -- Global image configuration (shared only by Cadence Server services [frontend, worker, matching and history])
+  image:
+    repository: "docker.io/ubercadence/server"
+    tag: "v1.2.16-auto-setup"
+    pullPolicy: IfNotPresent
+  
+  # -- Image pull secrets for private registries
+  imagePullSecrets: []
+  # - name: myregistrykey
 
-cassandra:
-  # -- External Cassandra endpoint to connect to. Required when cassandra.deployment.enabled is set to false
-  endpoint: ""
-  schema:
-    # -- Cassandra schema version of the Cadence keyspace to use. Latest value can be found at https://github.com/uber/cadence/blob/master/schema/cassandra/version.go
-    version: "0.40"
-    # -- Cassandra schema version of the Cadence visibility keyspace to use. Latest value can be found at https://github.com/uber/cadence/blob/master/schema/cassandra/version.go
-    visibility_version: "0.9"
-  deployment:
-    # -- When enabled, a single instance Cassandra will be deployed as part of the Helm chart
-    # -- When disabled, the Cassandra deployment is expected to be provided externally. For production use cases, it is recommended to use an external Cassandra deployment.
-    enabled: true
-    image:
-      repository: "cassandra"
-      tag: "4.1.1"
-    cpu:
-      limit: "500m"
-      request: "500m"
-    memory:
-      limit: "1Gi"
-      request: "1Gi"
+  # -- Global environment variables (shared only by Cadence Server services [frontend, worker, matching and history])
+  env: []
+  # - name: GLOBAL_ENV_VAR
+  #   value: "value"
 
+  # -- Global secret environment variables (shared only by Cadence Server services [frontend, worker, matching and history])
+  secretEnv: []
+  # - name: GLOBAL_SECRET_ENV_VAR
+  #   valueFrom:
+  #     secretKeyRef:
+  #       name: my-secret
+  #       key: secret-key
+  
+  # -- Global security context
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1000
+    runAsGroup: 1000
+    fsGroup: 1000
+  
+  # -- Global pod security context
+  podSecurityContext:
+    seccompProfile:
+      type: RuntimeDefault
+  
+  # -- Global container security context
+  containerSecurityContext:
+    allowPrivilegeEscalation: false
+    readOnlyRootFilesystem: true
+    capabilities:
+      drop:
+        - ALL
+  
+  # -- Global affinity rules
+  affinity: {}
+  
+  # -- Global tolerations
+  tolerations: []
+  
+  # -- Global node selector
+  nodeSelector: {}
 
+  # -- Global logging configuration
+  log:
+    # -- Enable stdout logging
+    stdout: true
+    # -- Logging level (debug, info, warn, error)
+    level: "info"
 
+  # -- Global priority class name for pod scheduling
+  priorityClassName: ""
+  
+  # -- Global topology spread constraints
+  topologySpreadConstraints: []
+  # - maxSkew: 1
+  #   topologyKey: topology.kubernetes.io/zone
+  #   whenUnsatisfiable: DoNotSchedule
 
+# Frontend service configuration
 frontend:
+  # -- Image configuration (inherits from global if not specified)
+  image: {}
+    # repository: "docker.io/ubercadence/server"
+    # tag: ""
+    # pullPolicy: IfNotPresent
+    # imagePullSecrets: []
+      # - name: myregistrykey
+
+  # -- Number of frontend replicas to deploy
+  replicas: 2
+  
   # -- Tchannel port of cadence frontend service. DO NOT CHANGE
   port: 7933
   # -- GRPC port of cadence frontend service. DO NOT CHANGE
   grpcPort: 7833
-  # -- Number of frontend replicas to deploy
-  replicas: 2
-  image:
-    # -- Docker image repository to use for the Cadence server
-    repository: "docker.io/ubercadence/server"
-    # -- Docker image tag to use for the Cadence server
-    tag: "v1.2.16-auto-setup"
-  cpu:
-    limit: "500m"
-    request: "500m"
-  memory:
-    limit: "1Gi"
-    request: "1Gi"
 
+  # -- Environment variables for frontend service
+  env: []
+  # - name: ENV_VAR
+  #   value: "value"
+
+  # -- Secret environment variables for frontend service
+  secretEnv: []
+  # - name: SECRET_ENV_VAR
+  #   value: "value"
+
+  # -- Deployment strategy for frontend service
+  strategy:
+    type: RollingUpdate
+    # rollingUpdate:
+    #   maxSurge: 25%
+    #   maxUnavailable: 25%
+  
+  # -- Resource limits and requests
+  resources:
+    limits:
+      cpu: "500m"
+      memory: "1Gi"
+    requests:
+      cpu: "500m"
+      memory: "1Gi"
+  
+  # -- Pod Disruption Budget
+  podDisruptionBudget:
+    enabled: false # Usually false for single replica services
+    minAvailable: 1
+    # maxUnavailable: 1
+  
+  # -- Security context (inherits from global if not specified)
+  securityContext: {}
+  
+  # -- Pod security context (inherits from global if not specified)
+  podSecurityContext: {}
+  
+  # -- Container security context (inherits from global if not specified)
+  containerSecurityContext: {}
+  
+  # -- Affinity rules (inherits from global if not specified)
+  affinity: {}
+  
+  # -- Tolerations (inherits from global if not specified)
+  tolerations: []
+  
+  # -- Node selector (inherits from global if not specified)
+  nodeSelector: {}
+  
+  # -- Additional pod annotations
+  podAnnotations: {}
+  
+  # -- Additional pod labels
+  podLabels: {}
+  
+  # -- Logging configuration (inherits from global log if not specified)
+  log: {}
+    # -- Enable stdout logging
+    # stdout: true
+    # -- Logging level (debug, info, warn, error)
+    # level: "info"
+
+  # -- Liveness probe configuration
+  livenessProbe:
+    enabled: true
+    initialDelaySeconds: 30
+    periodSeconds: 30
+    timeoutSeconds: 5
+    failureThreshold: 3
+    successThreshold: 1
+  
+  # -- Readiness probe configuration
+  readinessProbe:
+    enabled: true
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+    successThreshold: 1
+
+  # -- Startup probe configuration
+  startupProbe:
+    enabled: false
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 30
+    successThreshold: 1
+
+  # -- Priority class name for pod scheduling (inherits from global if not specified)
+  priorityClassName: ""
+  
+  # -- Topology spread constraints (inherits from global if not specified)
+  topologySpreadConstraints: []
+
+# Matching service configuration
 matching:
+  # -- Image configuration (inherits from global if not specified)
+  image: {}
+    # repository: "docker.io/ubercadence/server"
+    # tag: ""
+    # pullPolicy: IfNotPresent
+    # imagePullSecrets: []
+      # - name: myregistrykey
+
+  # -- Number of matching replicas to deploy
+  replicas: 3
+  
   # -- Tchannel port of cadence matching service. DO NOT CHANGE
   port: 7935
   # -- GRPC port of cadence matching service. DO NOT CHANGE
   grpcPort: 7835
-  # -- Number of matching replicas to deploy
-  replicas: 3
-  image:
-    # -- Docker image repository to use for the Cadence server
-    repository: "docker.io/ubercadence/server"
-    # -- Docker image tag to use for the Cadence server
-    tag: "v1.2.16-auto-setup"
-  cpu:
-    limit: "500m"
-    request: "500m"
-  memory:
-    limit: "1Gi"
-    request: "1Gi"
 
+  # -- Environment variables for matching service
+  env: []
+  # - name: ENV_VAR
+  #   value: "value"
+
+  # -- Secret environment variables for matching service
+  secretEnv: []
+  # - name: SECRET_ENV_VAR
+  #   value: "value"
+
+  # -- Deployment strategy for matching service
+  strategy:
+    type: RollingUpdate
+    # rollingUpdate:
+    #   maxSurge: 25%
+    #   maxUnavailable: 25%
+  
+  # -- Resource limits and requests
+  resources:
+    limits:
+      cpu: "500m"
+      memory: "1Gi"
+    requests:
+      cpu: "500m"
+      memory: "1Gi"
+  
+  # -- Pod Disruption Budget
+  podDisruptionBudget:
+    enabled: true # Recommended for multi-replica services
+    minAvailable: 2
+    # maxUnavailable: 1
+  
+  # -- Security context (inherits from global if not specified)
+  securityContext: {}
+  
+  # -- Pod security context (inherits from global if not specified)
+  podSecurityContext: {}
+  
+  # -- Container security context (inherits from global if not specified)
+  containerSecurityContext: {}
+  
+  # -- Affinity rules (inherits from global if not specified)
+  affinity: {}
+  
+  # -- Tolerations (inherits from global if not specified)
+  tolerations: []
+  
+  # -- Node selector (inherits from global if not specified)
+  nodeSelector: {}
+  
+  # -- Additional pod annotations
+  podAnnotations: {}
+  
+  # -- Additional pod labels
+  podLabels: {}
+  
+  # -- Logging configuration (inherits from global log if not specified)
+  log: {}
+    # -- Enable stdout logging
+    # stdout: true
+    # -- Logging level (debug, info, warn, error)
+    # level: "info"
+
+  # -- Liveness probe configuration
+  livenessProbe:
+    enabled: true
+    initialDelaySeconds: 30
+    periodSeconds: 30
+    timeoutSeconds: 5
+    failureThreshold: 3
+    successThreshold: 1
+  
+  # -- Readiness probe configuration
+  readinessProbe:
+    enabled: true
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+    successThreshold: 1
+
+  # -- Startup probe configuration
+  startupProbe:
+    enabled: false
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 30
+    successThreshold: 1
+
+  # -- Priority class name for pod scheduling (inherits from global if not specified)
+  priorityClassName: ""
+  
+  # -- Topology spread constraints (inherits from global if not specified)
+  topologySpreadConstraints: []
+
+# History service configuration
 history:
+  # -- Image configuration (inherits from global if not specified)
+  image: {}
+    # repository: "docker.io/ubercadence/server"
+    # tag: ""
+    # pullPolicy: IfNotPresent
+    # imagePullSecrets: []
+      # - name: myregistrykey
+
+  # -- Number of history replicas to deploy
+  replicas: 3
+  
   # -- Tchannel port of cadence history service. DO NOT CHANGE
   port: 7934
   # -- GRPC port of cadence history service. DO NOT CHANGE
   grpcPort: 7834
-  # -- Number of history replicas to deploy
-  replicas: 3
-  image:
-    # -- Docker image repository to use for the Cadence server
-    repository: "docker.io/ubercadence/server"
-    # -- Docker image tag to use for the Cadence server
-    tag: "v1.2.16-auto-setup"
-  cpu:
-    limit: "500m"
-    request: "500m"
-  memory:
-    limit: "1Gi"
-    request: "1Gi"
+  
+  # -- Environment variables for history service
+  env: []
+  # - name: ENV_VAR
+  #   value: "value"
 
+  # -- Secret environment variables for history service
+  secretEnv: []
+  # - name: SECRET_ENV_VAR
+  #   value: "value"
+
+  # -- Deployment strategy for history service
+  strategy:
+    type: RollingUpdate
+    # rollingUpdate:
+    #   maxSurge: 25%
+    #   maxUnavailable: 25%
+
+  # -- Resource limits and requests
+  resources:
+    limits:
+      cpu: "500m"
+      memory: "1Gi"
+    requests:
+      cpu: "500m"
+      memory: "1Gi"
+  
+  # -- Pod Disruption Budget
+  podDisruptionBudget:
+    enabled: true # Recommended for multi-replica services
+    minAvailable: 2
+    # maxUnavailable: 1
+  
+  # -- Security context (inherits from global if not specified)
+  securityContext: {}
+  
+  # -- Pod security context (inherits from global if not specified)
+  podSecurityContext: {}
+  
+  # -- Container security context (inherits from global if not specified)
+  containerSecurityContext: {}
+  
+  # -- Affinity rules (inherits from global if not specified)
+  affinity: {}
+  
+  # -- Tolerations (inherits from global if not specified)
+  tolerations: []
+  
+  # -- Node selector (inherits from global if not specified)
+  nodeSelector: {}
+  
+  # -- Additional pod annotations
+  podAnnotations: {}
+  
+  # -- Additional pod labels
+  podLabels: {}
+  
+  # -- Logging configuration (inherits from global log if not specified)
+  log: {}
+    # -- Enable stdout logging
+    # stdout: true
+    # -- Logging level (debug, info, warn, error)
+    # level: "info"
+
+  # -- Liveness probe configuration
+  livenessProbe:
+    enabled: true
+    initialDelaySeconds: 30
+    periodSeconds: 30
+    timeoutSeconds: 5
+    failureThreshold: 3
+    successThreshold: 1
+  
+  # -- Readiness probe configuration
+  readinessProbe:
+    enabled: true
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+    successThreshold: 1
+
+  # -- Startup probe configuration
+  startupProbe:
+    enabled: false
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 30
+    successThreshold: 1
+
+  # -- Priority class name for pod scheduling (inherits from global if not specified)
+  priorityClassName: ""
+  
+  # -- Topology spread constraints (inherits from global if not specified)
+  topologySpreadConstraints: []
+
+# Worker service configuration
 worker:
-  # -- Tchannel port of cadence worker service. DO NOT CHANGE
-  port: 7939
+  # -- Image configuration (inherits from global if not specified)
+  image: {}
+    # repository: "docker.io/ubercadence/server"
+    # tag: ""
+    # pullPolicy: IfNotPresent
+    # imagePullSecrets: []
+      # - name: myregistrykey
+
   # -- Number of worker replicas to deploy
   replicas: 1
-  image:
-    # -- Docker image repository to use for the Cadence server
-    repository: "docker.io/ubercadence/server"
-    # -- Docker image tag to use for the Cadence server
-    tag: "v1.2.16-auto-setup"
-  cpu:
-    limit: "500m"
-    request: "500m"
-  memory:
-    limit: "1Gi"
-    request: "1Gi"
+  
+  # -- Tchannel port of cadence worker service. DO NOT CHANGE
+  port: 7939
+  
+  # -- Environment variables for worker service
+  env: []
+  # - name: ENV_VAR
+  #   value: "value"
 
+  # -- Secret environment variables for worker service
+  secretEnv: []
+  # - name: SECRET_ENV_VAR
+  #   value: "value"
+
+  # -- Deployment strategy for worker service
+  strategy:
+    type: RollingUpdate
+    # rollingUpdate:
+    #   maxSurge: 25%
+    #   maxUnavailable: 25%
+
+  # -- Resource limits and requests
+  resources:
+    limits:
+      cpu: "500m"
+      memory: "1Gi"
+    requests:
+      cpu: "500m"
+      memory: "1Gi"
+  
+  # -- Pod Disruption Budget
+  podDisruptionBudget:
+    enabled: false  # Usually false for single replica services
+    minAvailable: 1
+    # maxUnavailable: 0
+  
+  # -- Security context (inherits from global if not specified)
+  securityContext: {}
+  
+  # -- Pod security context (inherits from global if not specified)
+  podSecurityContext: {}
+  
+  # -- Container security context (inherits from global if not specified)
+  containerSecurityContext: {}
+  
+  # -- Affinity rules (inherits from global if not specified)
+  affinity: {}
+  
+  # -- Tolerations (inherits from global if not specified)
+  tolerations: []
+  
+  # -- Node selector (inherits from global if not specified)
+  nodeSelector: {}
+  
+  # -- Additional pod annotations
+  podAnnotations: {}
+  
+  # -- Additional pod labels
+  podLabels: {}
+  
+  # -- Logging configuration (inherits from global log if not specified)
+  log: {}
+    # -- Enable stdout logging
+    # stdout: true
+    # -- Logging level (debug, info, warn, error)
+    # level: "info"
+
+  # -- Liveness probe configuration
+  livenessProbe:
+    enabled: true
+    initialDelaySeconds: 30
+    periodSeconds: 30
+    timeoutSeconds: 5
+    failureThreshold: 3
+    successThreshold: 1
+  
+  # -- Readiness probe configuration
+  readinessProbe:
+    enabled: true
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+    successThreshold: 1
+
+  # -- Startup probe configuration
+  startupProbe:
+    enabled: false
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 30
+    successThreshold: 1
+
+  # -- Priority class name for pod scheduling (inherits from global if not specified)
+  priorityClassName: ""
+  
+  # -- Topology spread constraints (inherits from global if not specified)
+  topologySpreadConstraints: []
+
+# Web UI configuration
 web:
-  replicas: 1
+  # -- Image configuration for Web UI
   image:
-    # -- Docker image repository to use for the Cadence Web UI
     repository: "docker.io/ubercadence/web"
-    # -- Docker image tag to use for the Cadence Web UI
     tag: "v4.0.3"
-  cpu:
-    limit: "500m"
-    request: "500m"
-  memory:
-    limit: "1Gi"
-    request: "1Gi"
+    pullPolicy: IfNotPresent
+    imagePullSecrets: []
+      # - name: myregistrykey
 
-# -- Dynamic config values to be set in the Cadence server. List of keys can be found at https://github.com/uber/cadence/blob/master/common/dynamicconfig/constants.go
+  # -- Number of web UI replicas to deploy
+  replicas: 1
+  
+  # -- Environment variables for web UI
+  env: []
+  # - name: ENV_VAR
+  #   value: "value"
+
+  # -- Secret environment variables for web UI
+  secretEnv: []
+  # - name: SECRET_ENV_VAR
+  #   value: "value"
+
+  # -- Deployment strategy for web UI
+  strategy:
+    type: RollingUpdate
+    # rollingUpdate:
+    #   maxSurge: 25%
+    #   maxUnavailable: 25%
+
+  # -- Resource limits and requests
+  resources:
+    limits:
+      cpu: "500m"
+      memory: "1Gi"
+    requests:
+      cpu: "500m"
+      memory: "1Gi"
+  
+  # -- Pod Disruption Budget
+  podDisruptionBudget:
+    enabled: false # Usually false for single replica services
+    minAvailable: 1
+    # maxUnavailable: 0
+  
+  # -- Security context (inherits from global if not specified)
+  securityContext: {}
+  
+  # -- Pod security context (inherits from global if not specified)
+  podSecurityContext: {}
+  
+  # -- Container security context (inherits from global if not specified)
+  containerSecurityContext: {}
+  
+  # -- Affinity rules (inherits from global if not specified)
+  affinity: {}
+  
+  # -- Tolerations (inherits from global if not specified)
+  tolerations: []
+  
+  # -- Node selector (inherits from global if not specified)
+  nodeSelector: {}
+  
+  # -- Additional pod annotations
+  podAnnotations: {}
+  
+  # -- Additional pod labels
+  podLabels: {}
+  
+  # -- Logging configuration (inherits from global log if not specified)
+  log: {}
+    # -- Enable stdout logging
+    # stdout: true
+    # -- Logging level (debug, info, warn, error)
+    # level: "info"
+
+  # -- Liveness probe configuration
+  livenessProbe:
+    enabled: true
+    initialDelaySeconds: 30
+    periodSeconds: 30
+    timeoutSeconds: 5
+    failureThreshold: 3
+    successThreshold: 1
+  
+  # -- Readiness probe configuration
+  readinessProbe:
+    enabled: true
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+    successThreshold: 1
+
+  # -- Startup probe configuration
+  startupProbe:
+    enabled: false
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 30
+    successThreshold: 1
+
+  # -- Priority class name for pod scheduling (inherits from global if not specified)
+  priorityClassName: ""
+  
+  # -- Topology spread constraints (inherits from global if not specified)
+  topologySpreadConstraints: []
+
+  # Cadence web ingress configuration (if needed)
+  ingress:
+    # -- Enable ingress
+    enabled: false
+    # -- Ingress class name
+    className: ""
+    # -- Ingress annotations
+    annotations: {}
+    # -- Ingress hosts configuration
+    hosts: []
+    # -- TLS configuration
+    tls: []
+
+# Dynamic configuration
 dynamicConfig:
+  # -- Dynamic config values to be set in the Cadence server
+  # List of keys can be found at https://github.com/uber/cadence/blob/master/common/dynamicconfig/constants.go
   values:
     history.workflowIDExternalRateLimitEnabled:
       - value: true
 
-metrics:
-  enabled: true
-  port: 9090
-  portName: metrics
+# Service Account configuration
+serviceAccount:
+  # -- Enable service account creation
+  create: true
+  # -- Service account name (generated if not set)
+  name: ""
+  # -- Annotations for service account
+  annotations: {}
+  # -- Automatically mount service account token
+  automountServiceAccountToken: true
 
+# RBAC configuration
+rbac:
+  # -- Enable RBAC creation
+  create: false
+
+# Network Policies
+networkPolicy:
+  # -- Enable network policies
+  enabled: false
+  # -- Ingress rules
+  ingress: []
+  # -- Egress rules
+  egress: []
+
+# Metrics configuration
+metrics:
+  # -- Enable metrics collection
+  enabled: true
+  # -- Metrics port
+  port: 9090
+  # -- Metrics port name
+  portName: metrics
+  
+  # ServiceMonitor for Prometheus Operator
   serviceMonitor:
+    # -- Enable ServiceMonitor creation
     enabled: false
+    # -- Additional labels for ServiceMonitor
     additionalLabels: {}
-    # -- Annotations to be added to the ServiceMonitor.
+    # -- Annotations for ServiceMonitor
     annotations: {}
-    ## The label to use to retrieve the job name from.
-    ## jobLabel: "app.kubernetes.io/name"
+    # -- Namespace for ServiceMonitor (defaults to release namespace)
     namespace: ""
+    # -- Joblabel for ServiceMonitor
+    jobLabel: ""
+    # -- Namespace selector for ServiceMonitor
     namespaceSelector: {}
-    ## Default: scrape .Release.Namespace or namespaceOverride only
-    ## To scrape all, use the following:
-    ## namespaceSelector:
-    ##   any: true
+    # -- Scrape interval
     scrapeInterval: 15s
-    # honorLabels: true
+    # -- Honor labels from target
+    honorLabels: false
+    # -- Target labels to be added
     targetLabels: []
+    # -- Relabeling configs
     relabelings: []
+    # -- Metric relabeling configs
     metricRelabelings: []
+
+# HorizontalPodAutoscaler configuration
+autoscaling:
+  # -- Enable HPA for frontend service
+  frontend:
+    enabled: false
+    minReplicas: 2
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 80
+    # behavior:
+    #   scaleDown:
+    #     stabilizationWindowSeconds: 300
+    #     policies:
+    #     - type: Percent
+    #       value: 50
+    #       periodSeconds: 60
+    #   scaleUp:
+    #     stabilizationWindowSeconds: 60
+    #     policies:
+    #     - type: Percent
+    #       value: 100
+    #       periodSeconds: 15
+
+  # -- Enable HPA for matching service
+  matching:
+    enabled: false
+    minReplicas: 3
+    maxReplicas: 15
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 80
+
+  # -- Enable HPA for history service
+  history:
+    enabled: false
+    minReplicas: 3
+    maxReplicas: 15
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 80
+
+  # -- Enable HPA for worker service
+  worker:
+    enabled: false
+    minReplicas: 3
+    maxReplicas: 15
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 80
+
+##############################
+### DATABASE CONFIGURATION ###
+##############################
+
+# Cassandra configuration
+cassandra:
+  # -- External Cassandra endpoint to connect to. Required when cassandra.deployment.enabled is set to false
+  endpoint: ""
+  
+  schema:
+    # -- Cassandra schema version of the Cadence keyspace to use
+    version: "0.40"
+    # -- Cassandra schema version of the Cadence visibility keyspace to use
+    visibility_version: "0.9"
+  
+  deployment:
+    # -- When enabled, a single instance Cassandra will be deployed as part of the Helm chart
+    # -- When disabled, the Cassandra deployment is expected to be provided externally
+    enabled: true
+    
+    image:
+      repository: "cassandra"
+      tag: "4.1.1"
+      pullPolicy: IfNotPresent
+    
+    # -- Resource limits and requests for Cassandra
+    resources:
+      limits:
+        cpu: "500m"
+        memory: "1Gi"
+      requests:
+        cpu: "500m"
+        memory: "1Gi"
