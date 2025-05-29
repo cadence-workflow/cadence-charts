@@ -85,16 +85,6 @@ Get image pull policy for Cadence services
 {{- end }}
 
 {{/*
-Get security context (with global fallback)
-*/}}
-{{- define "cadence.securityContext" -}}
-{{- $global := .Values.global.securityContext | default dict }}
-{{- $service := .service }}
-{{- $securityContext := $service.securityContext | default $global }}
-{{- toYaml $securityContext }}
-{{- end }}
-
-{{/*
 Get pod security context (with global fallback)
 */}}
 {{- define "cadence.podSecurityContext" -}}

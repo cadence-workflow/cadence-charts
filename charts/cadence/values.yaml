@@ -28,15 +28,12 @@ global:
   #       name: my-secret
   #       key: secret-key
   
-  # -- Global security context
-  securityContext:
+  # -- Global pod security context
+  podSecurityContext:
     runAsNonRoot: true
     runAsUser: 1000
     runAsGroup: 1000
     fsGroup: 1000
-  
-  # -- Global pod security context
-  podSecurityContext:
     seccompProfile:
       type: RuntimeDefault
   
@@ -123,9 +120,6 @@ frontend:
     minAvailable: 1
     # maxUnavailable: 1
   
-  # -- Security context (inherits from global if not specified)
-  securityContext: {}
-  
   # -- Pod security context (inherits from global if not specified)
   podSecurityContext: {}
   
@@ -209,9 +203,6 @@ matching:
     enabled: true # Recommended for multi-replica services
     minAvailable: 2
     # maxUnavailable: 1
-  
-  # -- Security context (inherits from global if not specified)
-  securityContext: {}
   
   # -- Pod security context (inherits from global if not specified)
   podSecurityContext: {}
@@ -297,9 +288,6 @@ history:
     minAvailable: 2
     # maxUnavailable: 1
   
-  # -- Security context (inherits from global if not specified)
-  securityContext: {}
-  
   # -- Pod security context (inherits from global if not specified)
   podSecurityContext: {}
   
@@ -382,9 +370,6 @@ worker:
     minAvailable: 1
     # maxUnavailable: 0
   
-  # -- Security context (inherits from global if not specified)
-  securityContext: {}
-  
   # -- Pod security context (inherits from global if not specified)
   podSecurityContext: {}
   
@@ -463,9 +448,6 @@ web:
     enabled: false # Usually false for single replica services
     minAvailable: 1
     # maxUnavailable: 0
-  
-  # -- Security context (inherits from global if not specified)
-  securityContext: {}
   
   # -- Pod security context (inherits from global if not specified)
   podSecurityContext: {}
