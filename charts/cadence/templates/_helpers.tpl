@@ -245,18 +245,6 @@ app.kubernetes.io/component: {{ $serviceName }}
 {{- end }}
 
 {{/*
-Create pod labels including service-specific labels
-*/}}
-{{- define "cadence.podLabels" -}}
-{{- $serviceName := .serviceName }}
-{{- $service := .service }}
-{{ include "cadence.serviceLabels" (dict "serviceName" $serviceName "Values" .Values "Chart" .Chart "Release" .Release) }}
-{{- if $service.podLabels }}
-{{ toYaml $service.podLabels }}
-{{- end }}
-{{- end }}
-
-{{/*
 Create pod annotations including service-specific annotations
 */}}
 {{- define "cadence.podAnnotations" -}}
