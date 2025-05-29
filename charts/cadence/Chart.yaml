@@ -26,25 +26,3 @@ sources:
 maintainers:
   - name: Cadence Community
     url: https://github.com/cadence-workflow/cadence-charts
-
-# Dependencies (currently none, but prepared for future additions)
-dependencies: []
-  # Future dependencies will be added here:
-  # - name: cassandra
-  #   version: "9.x.x"
-  #   repository: "oci://registry-1.docker.io/bitnamicharts"
-  #   condition: cassandra.enabled
-  #   tags:
-  #     - database
-  # - name: postgresql
-  #   version: "12.x.x"
-  #   repository: "oci://registry-1.docker.io/bitnamicharts"
-  #   condition: postgresql.enabled
-  #   tags:
-  #     - database
-  # - name: mysql
-  #   version: "9.x.x"
-  #   repository: "oci://registry-1.docker.io/bitnamicharts" 
-  #   condition: mysql.enabled
-  #   tags:
-  #     - database
