@@ -54,7 +54,7 @@ global:
   # -- Global node selector
   nodeSelector: {}
 
-  # -- Global logging configuration
+  # -- Global logging configuration (shared only by Cadence Server services [frontend, worker, matching and history])
   log:
     # -- Enable stdout logging
     stdout: true
@@ -469,13 +469,6 @@ web:
   
   # -- Additional pod labels
   podLabels: {}
-  
-  # -- Logging configuration (inherits from global log if not specified)
-  log: {}
-    # -- Enable stdout logging
-    # stdout: true
-    # -- Logging level (debug, info, warn, error)
-    # level: "info"
 
   # -- Priority class name for pod scheduling (inherits from global if not specified)
   priorityClassName: ""
