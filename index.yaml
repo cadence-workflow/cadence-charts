@@ -2,6 +2,33 @@ apiVersion: v1
 entries:
   cadence:
   - apiVersion: v2
+    appVersion: 1.2.16
+    created: "2025-05-29T20:52:52.971052261Z"
+    description: 'Cadence is a distributed, scalable, durable, and highly available
+      orchestration engine  to execute asynchronous long-running business logic in
+      a scalable and resilient way. This chart deploys Uber Cadence server components
+      and web UI. '
+    digest: fdca2150f0cfed7f996d10c25806b4d0c51f15ee764f9ef9231914728c1ce1f2
+    home: https://cadenceworkflow.io/
+    icon: https://cadenceworkflow.io/img/cadence-logo.svg
+    keywords:
+    - cadence
+    - uber
+    - workflow
+    - orchestration
+    - workflow-engine
+    maintainers:
+    - name: Cadence Community
+      url: https://github.com/cadence-workflow/cadence-charts
+    name: cadence
+    sources:
+    - https://github.com/cadence-workflow/cadence
+    - https://github.com/cadence-workflow/cadence-web
+    type: application
+    urls:
+    - https://github.com/cadence-workflow/cadence-charts/releases/download/cadence-0.1.7/cadence-0.1.7.tgz
+    version: 0.1.7
+  - apiVersion: v2
     appVersion: 0.0.1
     created: "2025-05-28T16:28:33.946637569Z"
     description: Cadence Helm chart for Kubernetes
@@ -71,4 +98,4 @@ entries:
     urls:
     - https://github.com/uber/cadence-charts/releases/download/cadence-0.1.0/cadence-0.1.0.tgz
     version: 0.1.0
-generated: "2025-05-28T16:28:33.946696199Z"
+generated: "2025-05-29T20:52:52.971090062Z"
