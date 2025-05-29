@@ -595,7 +595,7 @@ metrics:
     # -- Joblabel for ServiceMonitor
     jobLabel: ""
     # -- Namespace selector for ServiceMonitor
-    namespaceSelector: {}
+    namespaceSelector: []
     # -- Scrape interval
     scrapeInterval: 15s
     # -- Honor labels from target
