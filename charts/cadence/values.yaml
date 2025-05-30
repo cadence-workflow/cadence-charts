@@ -22,7 +22,7 @@ global:
 
   # -- Global secret environment variables (shared only by Cadence Server services [frontend, worker, matching and history])
   secretEnv: []
-  # - name: GLOBAL_ENV_VAR
+  # - name: GLOBAL_SECRET_ENV_VAR
   #   value: "value"
   
   # -- Global pod security context
