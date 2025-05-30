@@ -28,6 +28,9 @@ spec:
         {{- end }}
         app.kubernetes.io/component: web
     spec:
+      {{- if $.Values.serviceAccount.create }}
+      serviceAccountName: {{ include "cadence.serviceAccountName" $ }}
+      {{- end }}
       {{- $globalImagePullSecrets := .Values.global.imagePullSecrets | default list }}
       {{- $serviceImagePullSecrets := .Values.web.image.imagePullSecrets | default list }}
       {{- $mergedImagePullSecrets := concat $globalImagePullSecrets $serviceImagePullSecrets }}
