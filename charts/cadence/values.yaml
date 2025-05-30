@@ -78,7 +78,7 @@ frontend:
       # - name: myregistrykey
 
   # -- Number of frontend replicas to deploy
-  replicas: 2
+  replicas: 1
   
   # -- Tchannel port of cadence frontend service. DO NOT CHANGE
   port: 7933
@@ -162,7 +162,7 @@ matching:
       # - name: myregistrykey
 
   # -- Number of matching replicas to deploy
-  replicas: 3
+  replicas: 1
   
   # -- Tchannel port of cadence matching service. DO NOT CHANGE
   port: 7935
@@ -246,7 +246,7 @@ history:
       # - name: myregistrykey
 
   # -- Number of history replicas to deploy
-  replicas: 3
+  replicas: 1
   
   # -- Tchannel port of cadence history service. DO NOT CHANGE
   port: 7934
