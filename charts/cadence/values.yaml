@@ -570,8 +570,8 @@ metrics:
     namespaceSelector: []
     # -- Scrape interval
     scrapeInterval: 15s
-    # -- Honor labels from target
-    honorLabels: false
+    # -- Honor labels from target (False if it's commented | True if it's uncomment)
+    # honorLabels: true
     # -- Target labels to be added
     targetLabels: []
     # -- Relabeling configs
