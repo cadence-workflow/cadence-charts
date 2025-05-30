@@ -3,7 +3,7 @@ kind: Job
 metadata:
   name: cadence-schema-setup-v{{ .Values.cassandra.schema.version | replace "." "-" }}
   labels:
-    {{- include "cadence.commonlabels" . | nindent 4 }}
+    {{- include "cadence.labels" . | nindent 4 }}
 spec:
   backoffLimit: 4
   template:
@@ -24,7 +24,11 @@ spec:
           ']
         # Check Cassandra readiness using cqlsh
         - name: check-cassandra-ready
-          image: {{ .Values.history.image.repository }}:{{ .Values.history.image.tag }}
+          {{- $globalImage := $.Values.global.image | default dict }}
+          {{- $serviceImage := $.Values.history.image | default dict }}
+          {{- $repository := $serviceImage.repository | default $globalImage.repository }}
+          {{- $tag := $serviceImage.tag | default $globalImage.tag }}
+          image: {{ $repository }}:{{ $tag }}
           imagePullPolicy: Always
           command: ['sh', '-c', '
             until cqlsh {{ include "cassandra.endpoint" . }} 9042 -e "SHOW VERSION"; do
@@ -35,7 +39,11 @@ spec:
           ']
       containers:
         - name: schema-setup
-          image: {{ .Values.history.image.repository }}:{{ .Values.history.image.tag }}
+          {{- $globalImage := $.Values.global.image | default dict }}
+          {{- $serviceImage := $.Values.history.image | default dict }}
+          {{- $repository := $serviceImage.repository | default $globalImage.repository }}
+          {{- $tag := $serviceImage.tag | default $globalImage.tag }}
+          image: {{ $repository }}:{{ $tag }}
           imagePullPolicy: Always
           env:
             - name: CASSANDRA_SEEDS
