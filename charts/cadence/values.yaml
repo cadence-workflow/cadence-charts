@@ -1,4 +1,3 @@
-
 log:
   stdout: true
   level: "debug"
@@ -128,20 +127,57 @@ metrics:
   portName: metrics
 
   serviceMonitor:
-    enabled: false
-    additionalLabels: {}
-    # -- Annotations to be added to the ServiceMonitor.
+    enabled: true
+    namespace: "vishwa-test" # Replace with the namespace where Prometheus is deployed
+    namespaceSelector:
+      matchNames:
+        - vishwa-test # Ensure this matches Prometheus's namespace
+    scrapeInterval: 30s
+    additionalLabels:
+      release: my-prometheus # Ensure this matches Prometheus's Helm release name
     annotations: {}
-    ## The label to use to retrieve the job name from.
-    ## jobLabel: "app.kubernetes.io/name"
-    namespace: ""
-    namespaceSelector: {}
-    ## Default: scrape .Release.Namespace or namespaceOverride only
-    ## To scrape all, use the following:
-    ## namespaceSelector:
-    ##   any: true
-    scrapeInterval: 15s
-    # honorLabels: true
-    targetLabels: []
+    jobLabel: "app.kubernetes.io/name"
+    targetLabels:
+      - app.kubernetes.io/name
     relabelings: []
     metricRelabelings: []
+
+prometheus:
+  prometheusSpec:
+    serviceMonitorSelector:
+      matchLabels:
+        release: my-cadence
+
+grafana:
+  enabled: true
+  adminPassword: "admin" # Set Grafana admin password
+  datasources:
+    datasources.yaml:
+      apiVersion: 1
+      datasources:
+        - name: my-prometheus
+          type: prometheus
+          access: proxy
+          url: http://my-prometheus-kube-prometh-prometheus # Replace with Prometheus service URL
+          isDefault: true
+
+  dashboards:
+    enabled: true
+    provider:
+      folders:
+        - name: Cadence
+          folder: ""
+          type: file
+          options:
+            path: /dashboards
+  sidecar:
+    dashboards:
+      enabled: true
+      label: grafana_dashboard
+  extraVolumeMounts:
+    - name: dashboards
+      mountPath: /dashboards
+  extraVolumes:
+    - name: dashboards
+      hostPath:
+        path: /charts/cadence/dashboards
