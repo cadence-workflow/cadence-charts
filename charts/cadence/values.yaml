@@ -21,7 +21,7 @@ global:
   #   value: "value"
 
   # -- Global secret environment variables (shared only by Cadence Server services [frontend, worker, matching and history])
-  secretEnv:
+  secretEnv: []
   # - name: GLOBAL_ENV_VAR
   #   value: "value"
   
