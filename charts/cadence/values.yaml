@@ -197,7 +197,7 @@ matching:
   
   # -- Pod Disruption Budget
   podDisruptionBudget:
-    enabled: true # Recommended for multi-replica services
+    enabled: false # Recommended for multi-replica services
     minAvailable: 2
     # maxUnavailable: 1
   
@@ -281,7 +281,7 @@ history:
   
   # -- Pod Disruption Budget
   podDisruptionBudget:
-    enabled: true # Recommended for multi-replica services
+    enabled: false # Recommended for multi-replica services
     minAvailable: 2
     # maxUnavailable: 1
   
