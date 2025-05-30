@@ -1,24 +1,28 @@
 apiVersion: v2
 name: cadence
-description: Cadence Helm chart for Kubernetes
+version: 0.1.7
+appVersion: "1.2.16"
 
-# A chart can be either an 'application' or a 'library' chart.
-#
-# Application charts are a collection of templates that can be packaged into versioned archives
-# to be deployed.
-#
-# Library charts provide useful utilities or functions for the chart developer. They're included as
-# a dependency of application charts to inject those utilities and functions into the rendering
-# pipeline. Library charts do not define any templates and therefore cannot be deployed.
+description: |
+  Cadence is a distributed, scalable, durable, and highly available orchestration engine 
+  to execute asynchronous long-running business logic in a scalable and resilient way.
+  This chart deploys Uber Cadence server components and web UI.
+
 type: application
+home: https://cadenceworkflow.io/
+icon: https://cadenceworkflow.io/img/cadence-logo.svg
 
-# This is the chart version. This version number should be incremented each time you make changes
-# to the chart and its templates, including the app version.
-# Versions are expected to follow Semantic Versioning (https://semver.org/)
-version: 0.1.6
+keywords:
+  - cadence
+  - uber
+  - workflow
+  - orchestration
+  - workflow-engine
 
-# This is the version number of the application being deployed. This version number should be
-# incremented each time you make changes to the application. Versions are not expected to
-# follow Semantic Versioning. They should reflect the version the application is using.
-# It is recommended to use it with quotes.
-appVersion: "0.0.1"
+sources:
+  - https://github.com/cadence-workflow/cadence
+  - https://github.com/cadence-workflow/cadence-web
+
+maintainers:
+  - name: Cadence Community
+    url: https://github.com/cadence-workflow/cadence-charts
