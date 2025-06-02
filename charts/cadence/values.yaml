@@ -19,8 +19,6 @@ global:
   env:
     - name: BIND_ON_IP
       value: "0.0.0.0"
-    - name: PROMETHEUS_ENDPOINT
-      value: ":9090"
     - name: DYNAMIC_CONFIG_FILE_PATH
       value: "config/dynamicconfig/development.yaml"
     - name: ENABLE_ES
@@ -36,21 +34,21 @@ global:
   #   value: "value"
   
   # -- Global pod security context
-  podSecurityContext:
-    runAsNonRoot: true
-    runAsUser: 1000
-    runAsGroup: 1000
-    fsGroup: 1000
-    seccompProfile:
-      type: RuntimeDefault
+  podSecurityContext: {}
+    # runAsNonRoot: true
+    # runAsUser: 1000
+    # runAsGroup: 1000
+    # fsGroup: 1000
+    # seccompProfile:
+    #   type: RuntimeDefault
   
   # -- Global container security context
-  containerSecurityContext:
-    allowPrivilegeEscalation: false
-    readOnlyRootFilesystem: true
-    capabilities:
-      drop:
-        - ALL
+  containerSecurityContext: {}
+    # allowPrivilegeEscalation: false
+    # readOnlyRootFilesystem: true
+    # capabilities:
+    #   drop:
+    #     - ALL
   
   # -- Global affinity rules
   affinity: {}
