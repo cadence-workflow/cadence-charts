@@ -44,6 +44,15 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end }}
 
 {{/*
+Create service selector labels for a specific service
+*/}}
+{{- define "cadence.serviceLabels" -}}
+{{- $serviceName := .serviceName }}
+{{ include "cadence.selectorLabels" . }}
+app.kubernetes.io/component: {{ $serviceName }}
+{{- end }}
+
+{{/*
 Selector labels
 */}}
 {{- define "cadence.selectorLabels" -}}
@@ -60,26 +69,6 @@ Create the name of the service account to use
 {{- else }}
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}
-{{- end }}
-
-{{/*
-Get log configuration (with global fallback)
-*/}}
-{{- define "cadence.logLevel" -}}
-{{- $global := .Values.global.log | default dict }}
-{{- $service := .service }}
-{{- $log := $service.log | default $global }}
-{{- $log.level | default "info" }}
-{{- end }}
-
-{{/*
-Get log stdout configuration (with global fallback)
-*/}}
-{{- define "cadence.logStdout" -}}
-{{- $global := .Values.global.log | default dict }}
-{{- $service := .service }}
-{{- $log := $service.log | default $global }}
-{{- $log.stdout | default true }}
 {{- end }}
 
 {{/*
@@ -100,45 +89,6 @@ Check if HPA is enabled for a specific service
 {{- $hpaConfig.enabled | default false }}
 {{- else }}
 {{- false }}
-{{- end }}
-{{- end }}
-
-{{/*
-Get HPA configuration for a service
-*/}}
-{{- define "cadence.hpaConfig" -}}
-{{- $serviceName := .serviceName }}
-{{- $hpaConfig := index .Values.autoscaling $serviceName }}
-{{- toYaml $hpaConfig }}
-{{- end }}
-
-{{/*
-Create service selector labels for a specific service
-*/}}
-{{- define "cadence.serviceLabels" -}}
-{{- $serviceName := .serviceName }}
-{{ include "cadence.selectorLabels" . }}
-app.kubernetes.io/component: {{ $serviceName }}
-{{- end }}
-
-{{/*
-Create pod annotations including service-specific annotations
-*/}}
-{{- define "cadence.podAnnotations" -}}
-{{- $service := .service }}
-{{- if $service.podAnnotations }}
-{{ toYaml $service.podAnnotations }}
-{{- end }}
-{{- end }}
-
-{{/*
-Generate metrics port configuration
-*/}}
-{{- define "cadence.metricsPort" -}}
-{{- if .Values.metrics.enabled }}
-- name: {{ .Values.metrics.portName | default "metrics" }}
-  containerPort: {{ .Values.metrics.port | default 9090 }}
-  protocol: TCP
 {{- end }}
 {{- end }}
 
