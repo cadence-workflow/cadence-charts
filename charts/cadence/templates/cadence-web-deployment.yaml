@@ -90,16 +90,12 @@ spec:
         env:
         - name: CADENCE_GRPC_PEERS
           value: {{ include "cadence.fullname" . }}-frontend.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.frontend.grpcPort | default 7833 }}
-        {{- $globalEnv := .Values.global.env | default list }}
-        {{- $serviceEnv := .Values.web.env | default list }}
-        {{- $mergedEnv := concat $globalEnv $serviceEnv }}
-        {{- if $mergedEnv }}
-        {{- toYaml $mergedEnv | nindent 8 }}
+        {{- $webEnv := .Values.web.env | default list -}}
+        {{- if $webEnv }}
+        {{- toYaml $webEnv | nindent 8 }}
         {{- end }}
-        {{- $globalSecrets := .Values.global.secretEnv | default list }}
-        {{- $serviceSecrets := .Values.web.secretEnv | default list }}
-        {{- $mergedSecrets := concat $globalSecrets $serviceSecrets }}
-        {{- if $mergedSecrets }}
+        {{- $webSecrets := .Values.web.secretEnv | default list -}}
+        {{- if $webSecrets }}
         envFrom:
         - secretRef:
             name: {{ include "cadence.fullname" . }}-web-secrets
