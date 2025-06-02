@@ -135,18 +135,12 @@ spec:
         env:
         - name: SERVICES
           value: {{ $serviceName }}
-        - name: BIND_ON_IP
-          value: "0.0.0.0"
         - name: BROADCAST_ADDRESS
           valueFrom:
             fieldRef:
               fieldPath: status.podIP
         - name: CASSANDRA_SEEDS
           value: {{ include "cassandra.endpoint" $ }}
-        - name: PROMETHEUS_ENDPOINT
-          value: ":9090"
-        - name: DYNAMIC_CONFIG_FILE_PATH
-          value: "config/dynamicconfig/development.yaml"
         - name: PRIMARY_FRONTEND_SERVICE
           value: {{ include "cadence.fullname" $ }}-frontend.{{ $.Release.Namespace }}.svc.cluster.local
         {{- $globalLog := $.Values.global.log | default dict }}
@@ -155,12 +149,6 @@ spec:
           value: {{ $serviceLog.level | default "info" | quote }}
         - name: LOG_STDOUT
           value: {{ $serviceLog.stdout | default true | quote }}
-        - name: ENABLE_ES
-          value: "false"
-        - name: SKIP_SCHEMA_SETUP
-          value: "true"
-        - name: RINGPOP_BOOTSTRAP_MODE
-          value: "dns"
         - name: RINGPOP_SEEDS
           value: {{ include "cadence.ringpopSeeds" $ }}
         {{- $globalEnv := $.Values.global.env | default list }}
