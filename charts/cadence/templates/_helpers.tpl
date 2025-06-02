@@ -92,6 +92,13 @@ Check if HPA is enabled for a specific service
 {{- end }}
 {{- end }}
 
+{/*
+Cadence GRPC Peers endpoint
+*/}}
+{{- define "cadence.grpcPeers" -}}
+{{ include "cadence.fullname" . }}-frontend.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.frontend.grpcPort | default 7833 }}
+{{- end }}
+
 {{/*
 Generate Ringpop seeds for service discovery
 */}}

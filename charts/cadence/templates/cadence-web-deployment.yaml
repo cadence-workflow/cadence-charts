@@ -89,7 +89,7 @@ spec:
           protocol: TCP
         env:
         - name: CADENCE_GRPC_PEERS
-          value: {{ include "cadence.fullname" . }}-frontend.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.frontend.grpcPort | default 7833 }}
+          value: {{ include "cadence.grpcPeers" . }}
         {{- $webEnv := .Values.web.env | default list -}}
         {{- if $webEnv }}
         {{- toYaml $webEnv | nindent 8 }}
