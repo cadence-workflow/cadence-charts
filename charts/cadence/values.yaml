@@ -419,9 +419,9 @@ web:
   replicas: 1
   
   # -- Environment variables for web UI
-  env: []
-  # - name: ENV_VAR
-  #   value: "value"
+  env:
+  - name: CADENCE_WEB_PORT
+    value: "8088"
 
   # -- Secret environment variables for web UI
   secretEnv: []
