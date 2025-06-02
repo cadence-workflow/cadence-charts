@@ -135,14 +135,16 @@ spec:
         env:
         - name: SERVICES
           value: {{ $serviceName }}
+        - name: DYNAMIC_CONFIG_FILE_PATH
+          value: "config/dynamicconfig/development.yaml"
+        - name: PRIMARY_FRONTEND_SERVICE
+          value: {{ include "cadence.fullname" $ }}-frontend.{{ $.Release.Namespace }}.svc.cluster.local
         - name: BROADCAST_ADDRESS
           valueFrom:
             fieldRef:
               fieldPath: status.podIP
         - name: CASSANDRA_SEEDS
           value: {{ include "cassandra.endpoint" $ }}
-        - name: PRIMARY_FRONTEND_SERVICE
-          value: {{ include "cadence.fullname" $ }}-frontend.{{ $.Release.Namespace }}.svc.cluster.local
         {{- $globalLog := $.Values.global.log | default dict }}
         {{- $serviceLog := $service.log | default $globalLog }}
         - name: LOG_LEVEL

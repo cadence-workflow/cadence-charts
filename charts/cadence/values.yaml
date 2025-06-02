@@ -17,10 +17,6 @@ global:
 
   # -- Global environment variables (shared only by Cadence Server services [frontend, worker, matching and history])
   env:
-    - name: BIND_ON_IP
-      value: "0.0.0.0"
-    - name: DYNAMIC_CONFIG_FILE_PATH
-      value: "config/dynamicconfig/development.yaml"
     - name: ENABLE_ES
       value: "false"
     - name: SKIP_SCHEMA_SETUP
