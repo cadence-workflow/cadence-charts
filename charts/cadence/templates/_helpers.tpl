@@ -63,88 +63,6 @@ Create the name of the service account to use
 {{- end }}
 
 {{/*
-Get image configuration for Cadence services (with global fallback)
-*/}}
-{{- define "cadence.image" -}}
-{{- $global := .Values.global.image | default dict }}
-{{- $service := .service }}
-{{- $repository := $service.repository | default $global.repository }}
-{{- $tag := $service.tag | default $global.tag }}
-{{- $pullPolicy := $service.pullPolicy | default $global.pullPolicy | default "IfNotPresent" }}
-{{- printf "%s:%s" $repository $tag }}
-{{- end }}
-
-{{/*
-Get image pull policy for Cadence services
-*/}}
-{{- define "cadence.imagePullPolicy" -}}
-{{- $global := .Values.global.image | default dict }}
-{{- $service := .service }}
-{{- $pullPolicy := $service.pullPolicy | default $global.pullPolicy | default "IfNotPresent" }}
-{{- $pullPolicy }}
-{{- end }}
-
-{{/*
-Get pod security context (with global fallback)
-*/}}
-{{- define "cadence.podSecurityContext" -}}
-{{- $global := .Values.global.podSecurityContext | default dict }}
-{{- $service := .service }}
-{{- $podSecurityContext := $service.podSecurityContext | default $global }}
-{{- toYaml $podSecurityContext }}
-{{- end }}
-
-{{/*
-Get container security context (with global fallback)
-*/}}
-{{- define "cadence.containerSecurityContext" -}}
-{{- $global := .Values.global.containerSecurityContext | default dict }}
-{{- $service := .service }}
-{{- $containerSecurityContext := $service.containerSecurityContext | default $global }}
-{{- toYaml $containerSecurityContext }}
-{{- end }}
-
-{{/*
-Get affinity (with global fallback)
-*/}}
-{{- define "cadence.affinity" -}}
-{{- $global := .Values.global.affinity | default dict }}
-{{- $service := .service }}
-{{- $affinity := $service.affinity | default $global }}
-{{- toYaml $affinity }}
-{{- end }}
-
-{{/*
-Get tolerations (with global fallback)
-*/}}
-{{- define "cadence.tolerations" -}}
-{{- $global := .Values.global.tolerations | default list }}
-{{- $service := .service }}
-{{- $tolerations := $service.tolerations | default $global }}
-{{- toYaml $tolerations }}
-{{- end }}
-
-{{/*
-Get node selector (with global fallback)
-*/}}
-{{- define "cadence.nodeSelector" -}}
-{{- $global := .Values.global.nodeSelector | default dict }}
-{{- $service := .service }}
-{{- $nodeSelector := $service.nodeSelector | default $global }}
-{{- toYaml $nodeSelector }}
-{{- end }}
-
-{{/*
-Get image pull secrets (with global fallback)
-*/}}
-{{- define "cadence.imagePullSecrets" -}}
-{{- $global := .Values.global.imagePullSecrets | default list }}
-{{- $service := .service }}
-{{- $imagePullSecrets := $service.imagePullSecrets | default $global }}
-{{- toYaml $imagePullSecrets }}
-{{- end }}
-
-{{/*
 Get log configuration (with global fallback)
 */}}
 {{- define "cadence.logLevel" -}}
@@ -162,37 +80,6 @@ Get log stdout configuration (with global fallback)
 {{- $service := .service }}
 {{- $log := $service.log | default $global }}
 {{- $log.stdout | default true }}
-{{- end }}
-
-{{/*
-Get priority class name (with global fallback)
-*/}}
-{{- define "cadence.priorityClassName" -}}
-{{- $global := .Values.global.priorityClassName | default "" }}
-{{- $service := .service }}
-{{- $priorityClassName := $service.priorityClassName | default $global }}
-{{- $priorityClassName }}
-{{- end }}
-
-{{/*
-Get topology spread constraints (with global fallback)
-*/}}
-{{- define "cadence.topologySpreadConstraints" -}}
-{{- $global := .Values.global.topologySpreadConstraints | default list }}
-{{- $service := .service }}
-{{- $topologySpreadConstraints := $service.topologySpreadConstraints | default $global }}
-{{- toYaml $topologySpreadConstraints }}
-{{- end }}
-
-{{/*
-Get environment variables (merge global and service specific)
-*/}}
-{{- define "cadence.env" -}}
-{{- $global := .Values.global.env | default list }}
-{{- $service := .service }}
-{{- $serviceEnv := $service.env | default list }}
-{{- $mergedEnv := concat $global $serviceEnv }}
-{{- toYaml $mergedEnv }}
 {{- end }}
 
 {{/*
