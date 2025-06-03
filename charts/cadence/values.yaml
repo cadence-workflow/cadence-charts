@@ -516,14 +516,6 @@ web:
       #   hosts:
       #     - cadence.example.com
 
-# Dynamic configuration
-dynamicConfig:
-  # -- Dynamic config values to be set in the Cadence server
-  # List of keys can be found at https://github.com/uber/cadence/blob/master/common/dynamicconfig/constants.go
-  values:
-    history.workflowIDExternalRateLimitEnabled:
-      - value: true
-
 # Service Account configuration
 serviceAccount:
   # -- Enable service account creation
@@ -630,9 +622,186 @@ autoscaling:
     targetCPUUtilizationPercentage: 70
     targetMemoryUtilizationPercentage: 80
 
-##############################
-### DATABASE CONFIGURATION ###
-##############################
+
+#############################################
+########### CADENCE CONFIGURATION ###########
+#############################################
+
+config:
+  # Log configuration
+  log:
+    stdout: true
+    level: "info"
+  
+  # Persistence configuration
+  persistence:
+    numHistoryShards: 4
+    defaultStore: "default"
+    visibilityStore: "visibility"
+    advancedVisibilityStore: "es-visibility"
+    
+    # Database configuration
+    database:
+      driver: "cassandra"  # cassandra, mysql, postgres
+      
+      # Cassandra configuration
+      cassandra:
+        hosts: ""
+        keyspace: "cadence"
+        visibilityKeyspace: "cadence_visibility"
+        user: ""
+        password: ""
+        protoVersion: 4
+      
+      # MySQL configuration
+      mysql:
+        hosts: ""
+        port: 3306
+        dbname: "cadence"
+        visibilityDbname: "cadence_visibility"
+        user: ""
+        password: ""
+        txIsolationCompat: false
+      
+      # PostgreSQL configuration
+      postgres:
+        hosts: ""
+        port: 5432
+        dbname: "cadence"
+        visibilityDbname: "cadence_visibility"
+        user: ""
+        password: ""
+        maxConns: 20
+        maxIdleConns: 20
+        maxConnLifetime: "1h"
+    
+    # Elasticsearch configuration
+    elasticsearch:
+      enabled: false
+      version: ""
+      user: ""
+      password: ""
+      hosts: ""
+      port: 9200
+      visibilityIndex: "cadence-visibility-dev"
+  
+  # Ringpop configuration
+  ringpop:
+    name: "cadence"
+    broadcastAddress: ""
+    bootstrapMode: "dns"  # hosts, dns
+    seeds: ""
+    maxJoinDuration: "30s"
+  
+  # Services configuration
+  services:
+    bindOnIP: "0.0.0.0"
+    
+    # Metrics configuration
+    metrics:
+      type: "prometheus"  # statsd, prometheus
+      statsd:
+        endpoint: ""
+        prefixes:
+          frontend: "cadence-frontend"
+          matching: "cadence-matching"
+          history: "cadence-history"
+          worker: "cadence-worker"
+      prometheus:
+        timerType: "histogram"
+        endpoints: []
+    
+    # Pprof configuration
+    pprof:
+      enabled: false
+      ports:
+        frontend: 6060
+        matching: 6061
+        history: 6062
+        worker: 6063
+  
+  # Cluster configuration
+  cluster:
+    redirectionPolicy: "all-domain-apis-forwarding"
+    failoverVersionIncrement: 10
+    primaryClusterName: "cluster0"
+    currentClusterName: "cluster0"
+    isNotPrimary: false
+    
+    primaryFrontendService: "cadence"
+    secondaryFrontendService: "cadence-secondary"
+    
+    oauth:
+      enabled: false
+      privateKey: ""
+      publicKey: ""
+      maxJwtTTL: 86400
+    
+    globalDomain:
+      enabled: false
+  
+  # Archival configuration
+  archival:
+    history:
+      status: "disabled"
+      enableRead: false
+      fileMode: ""
+      dirMode: ""
+    visibility:
+      status: "disabled"
+      enableRead: false
+      fileMode: ""
+      dirMode: ""
+  
+  # Domain defaults
+  domainDefaults:
+    archival:
+      history:
+        status: "disabled"
+        uri: ""
+      visibility:
+        status: "disabled"
+        uri: ""
+  
+  # Kafka configuration
+  kafka:
+    enabled: false
+    tls:
+      enabled: false
+    hosts: ""
+    port: 9092
+    visibilityTopic: "cadence-visibility-dev"
+  
+  # Public client configuration
+  publicClient:
+    frontendService: "cadence"
+  
+  # Dynamic config file path
+  dynamicConfigFilePath: "/etc/cadence/config/dynamicconfig/config.yaml"
+  
+  # Blob store configuration
+  blobstore:
+    outputDirectory: ""
+  
+  # Async workflow queues
+  asyncWorkflowQueues:
+    enabled: false
+    kafkaQueue:
+      topic: "default-topic"
+
+# Dynamic configuration
+dynamicConfig:
+  # -- Dynamic config values to be set in the Cadence server
+  # List of keys can be found at https://pkg.go.dev/github.com/uber/cadence@v1.3.0/common/dynamicconfig/dynamicproperties
+  values:
+    history.workflowIDExternalRateLimitEnabled:
+      - value: true
+
+
+###############################################################
+################### DATABASE CONFIGURATION ####################
+# Use only if you want to deploy the database from this chart #
+###############################################################
 
 # Cassandra configuration
 cassandra:

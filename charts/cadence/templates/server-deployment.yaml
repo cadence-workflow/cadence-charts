@@ -130,7 +130,10 @@ spec:
         {{- end }}
         volumeMounts:
         - name: config
-          mountPath: /etc/cadence/config/dynamicconfig/config.yaml
+          mountPath: /etc/cadence/config/config_template.yaml
+          subPath: config_template.yaml
+        - name: config
+          mountPath: {{ $.Values.config.dynamicConfigFilePath | default "/etc/cadence/config/dynamicconfig/config.yaml" }}
           subPath: dynamic_config.yaml
         env:
         - name: SERVICES

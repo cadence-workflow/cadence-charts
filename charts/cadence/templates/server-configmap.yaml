@@ -13,3 +13,398 @@ data:
     # Default dynamic configuration - empty config is valid
     {}
     {{- end }}
+  
+  config_template.yaml: |-
+    log:
+      stdout: {{ .Values.config.log.stdout | default .Values.global.log.stdout | default true }}
+      level: {{ .Values.config.log.level | default .Values.global.log.level | default "info" }}
+
+    persistence:
+      numHistoryShards: {{ .Values.config.persistence.numHistoryShards | default 4 }}
+      defaultStore: {{ .Values.config.persistence.defaultStore | default "default" }}
+      visibilityStore: {{ .Values.config.persistence.visibilityStore | default "visibility" }}
+      {{- if or .Values.config.elasticsearch.enabled .Values.global.env }}
+      {{- $es := "false" }}
+      {{- range .Values.global.env }}
+      {{- if and (eq .name "ENABLE_ES") (eq .value "true") }}
+      {{- $es = "true" }}
+      {{- end }}
+      {{- end }}
+      {{- if or (eq $es "true") .Values.config.elasticsearch.enabled }}
+      advancedVisibilityStore: {{ .Values.config.persistence.advancedVisibilityStore | default "es-visibility" }}
+      {{- end }}
+      {{- end }}
+      
+      datastores:
+        {{- $db := .Values.config.persistence.database.driver | default "cassandra" | lower }}
+        {{- if or (eq $db "cassandra") (eq $db "scylla") }}
+        default:
+          nosql:
+            pluginName: "cassandra"
+            hosts: {{ .Values.config.persistence.database.cassandra.hosts | default .Values.cassandra.endpoint | quote }}
+            keyspace: {{ .Values.config.persistence.database.cassandra.keyspace | default "cadence" | quote }}
+            {{- if .Values.config.persistence.database.cassandra.user }}
+            user: {{ .Values.config.persistence.database.cassandra.user | quote }}
+            {{- end }}
+            {{- if .Values.config.persistence.database.cassandra.password }}
+            password: {{ .Values.config.persistence.database.cassandra.password | quote }}
+            {{- end }}
+            protoVersion: {{ .Values.config.persistence.database.cassandra.protoVersion | default 4 }}
+        visibility:
+          nosql:
+            pluginName: "cassandra"
+            hosts: {{ .Values.config.persistence.database.cassandra.hosts | default .Values.cassandra.endpoint | quote }}
+            keyspace: {{ .Values.config.persistence.database.cassandra.visibilityKeyspace | default "cadence_visibility" | quote }}
+            {{- if .Values.config.persistence.database.cassandra.user }}
+            user: {{ .Values.config.persistence.database.cassandra.user | quote }}
+            {{- end }}
+            {{- if .Values.config.persistence.database.cassandra.password }}
+            password: {{ .Values.config.persistence.database.cassandra.password | quote }}
+            {{- end }}
+            protoVersion: {{ .Values.config.persistence.database.cassandra.protoVersion | default 4 }}
+        {{- else if eq $db "mysql" }}
+        default:
+          sql:
+            pluginName: "mysql"
+            databaseName: {{ .Values.config.persistence.database.mysql.dbname | default "cadence" | quote }}
+            connectAddr: "{{ .Values.config.persistence.database.mysql.hosts }}:{{ .Values.config.persistence.database.mysql.port | default 3306 }}"
+            connectProtocol: "tcp"
+            {{- if .Values.config.persistence.database.mysql.user }}
+            user: {{ .Values.config.persistence.database.mysql.user | quote }}
+            {{- end }}
+            {{- if .Values.config.persistence.database.mysql.password }}
+            password: {{ .Values.config.persistence.database.mysql.password | quote }}
+            {{- end }}
+            {{- if .Values.config.persistence.database.mysql.txIsolationCompat }}
+            connectAttributes:
+              tx_isolation: 'READ-COMMITTED'
+            {{- end }}
+        visibility:
+          sql:
+            pluginName: "mysql"
+            databaseName: {{ .Values.config.persistence.database.mysql.visibilityDbname | default "cadence_visibility" | quote }}
+            connectAddr: "{{ .Values.config.persistence.database.mysql.hosts }}:{{ .Values.config.persistence.database.mysql.port | default 3306 }}"
+            connectProtocol: "tcp"
+            {{- if .Values.config.persistence.database.mysql.user }}
+            user: {{ .Values.config.persistence.database.mysql.user | quote }}
+            {{- end }}
+            {{- if .Values.config.persistence.database.mysql.password }}
+            password: {{ .Values.config.persistence.database.mysql.password | quote }}
+            {{- end }}
+            {{- if .Values.config.persistence.database.mysql.txIsolationCompat }}
+            connectAttributes:
+              tx_isolation: 'READ-COMMITTED'
+            {{- end }}
+        {{- else if eq $db "postgres" }}
+        default:
+          sql:
+            pluginName: "postgres"
+            encodingType: "thriftrw"
+            decodingTypes: ["thriftrw"]
+            databaseName: {{ .Values.config.persistence.database.postgres.dbname | default "cadence" | quote }}
+            connectAddr: "{{ .Values.config.persistence.database.postgres.hosts }}:{{ .Values.config.persistence.database.postgres.port | default 5432 }}"
+            connectProtocol: "tcp"
+            {{- if .Values.config.persistence.database.postgres.user }}
+            user: {{ .Values.config.persistence.database.postgres.user | quote }}
+            {{- end }}
+            {{- if .Values.config.persistence.database.postgres.password }}
+            password: {{ .Values.config.persistence.database.postgres.password | quote }}
+            {{- end }}
+            maxConns: {{ .Values.config.persistence.database.postgres.maxConns | default 20 }}
+            maxIdleConns: {{ .Values.config.persistence.database.postgres.maxIdleConns | default 20 }}
+            maxConnLifetime: {{ .Values.config.persistence.database.postgres.maxConnLifetime | default "1h" | quote }}
+        visibility:
+          sql:
+            pluginName: "postgres"
+            encodingType: "thriftrw"
+            decodingTypes: ["thriftrw"]
+            databaseName: {{ .Values.config.persistence.database.postgres.visibilityDbname | default "cadence_visibility" | quote }}
+            connectAddr: "{{ .Values.config.persistence.database.postgres.hosts }}:{{ .Values.config.persistence.database.postgres.port | default 5432 }}"
+            connectProtocol: "tcp"
+            {{- if .Values.config.persistence.database.postgres.user }}
+            user: {{ .Values.config.persistence.database.postgres.user | quote }}
+            {{- end }}
+            {{- if .Values.config.persistence.database.postgres.password }}
+            password: {{ .Values.config.persistence.database.postgres.password | quote }}
+            {{- end }}
+            maxConns: {{ .Values.config.persistence.database.postgres.maxConns | default 20 }}
+            maxIdleConns: {{ .Values.config.persistence.database.postgres.maxIdleConns | default 20 }}
+            maxConnLifetime: {{ .Values.config.persistence.database.postgres.maxConnLifetime | default "1h" | quote }}
+        {{- end }}
+        
+        {{- if .Values.config.elasticsearch.enabled }}
+        es-visibility:
+          elasticsearch:
+            {{- if .Values.config.elasticsearch.version }}
+            version: {{ .Values.config.elasticsearch.version | quote }}
+            {{- end }}
+            {{- if .Values.config.elasticsearch.user }}
+            username: {{ .Values.config.elasticsearch.user | quote }}
+            {{- end }}
+            {{- if .Values.config.elasticsearch.password }}
+            password: {{ .Values.config.elasticsearch.password | quote }}
+            {{- end }}
+            url:
+              scheme: "http"
+              host: "{{ .Values.config.elasticsearch.hosts }}:{{ .Values.config.elasticsearch.port | default 9200 }}"
+            indices:
+              visibility: {{ .Values.config.elasticsearch.visibilityIndex | default "cadence-visibility-dev" | quote }}
+        {{- end }}
+
+    ringpop:
+      name: {{ .Values.config.ringpop.name | default "cadence" | quote }}
+      {{- if .Values.config.ringpop.broadcastAddress }}
+      broadcastAddress: {{ .Values.config.ringpop.broadcastAddress | quote }}
+      {{- end }}
+      bootstrapMode: {{ .Values.config.ringpop.bootstrapMode | default "dns" | quote }}
+      {{- if .Values.config.ringpop.seeds }}
+      bootstrapHosts:
+        {{- range (split "," .Values.config.ringpop.seeds) }}
+        - {{ . | trim }}
+        {{- end }}
+      {{- else if eq (.Values.config.ringpop.bootstrapMode | default "dns") "hosts" }}
+      bootstrapHosts:
+        - "127.0.0.1:{{ .Values.frontend.port | default 7933 }}"
+        - "127.0.0.1:{{ .Values.history.port | default 7934 }}"
+        - "127.0.0.1:{{ .Values.matching.port | default 7935 }}"
+        - "127.0.0.1:{{ .Values.worker.port | default 7939 }}"
+      {{- end }}
+      maxJoinDuration: {{ .Values.config.ringpop.maxJoinDuration | default "30s" | quote }}
+
+    services:
+      frontend:
+        rpc:
+          port: {{ .Values.frontend.port | default 7933 }}
+          grpcPort: {{ .Values.frontend.grpcPort | default 7833 }}
+          bindOnIP: {{ .Values.config.services.bindOnIP | default "0.0.0.0" | quote }}
+        {{- if and .Values.config.services.metrics (eq .Values.config.services.metrics.type "statsd") }}
+        {{- if .Values.config.services.metrics.statsd.endpoint }}
+        metrics:
+          statsd:
+            hostPort: {{ .Values.config.services.metrics.statsd.endpoint | quote }}
+            prefix: {{ .Values.config.services.metrics.statsd.prefixes.frontend | default "cadence-frontend" | quote }}
+        {{- end }}
+        {{- else if and .Values.config.services.metrics (eq .Values.config.services.metrics.type "prometheus") }}
+        {{- if .Values.metrics.enabled }}
+        metrics:
+          prometheus:
+            timerType: {{ .Values.config.services.metrics.prometheus.timerType | default "histogram" | quote }}
+            listenAddress: "0.0.0.0:{{ .Values.metrics.port | default 9090 }}"
+        {{- end }}
+        {{- end }}
+        {{- if and .Values.config.services.pprof.enabled .Values.config.services.pprof.ports.frontend }}
+        pprof:
+          port: {{ .Values.config.services.pprof.ports.frontend }}
+          host: {{ .Values.config.services.bindOnIP | default "0.0.0.0" | quote }}
+        {{- end }}
+      
+      matching:
+        rpc:
+          port: {{ .Values.matching.port | default 7935 }}
+          grpcPort: {{ .Values.matching.grpcPort | default 7835 }}
+          bindOnIP: {{ .Values.config.services.bindOnIP | default "0.0.0.0" | quote }}
+        {{- if and .Values.config.services.metrics (eq .Values.config.services.metrics.type "statsd") }}
+        {{- if .Values.config.services.metrics.statsd.endpoint }}
+        metrics:
+          statsd:
+            hostPort: {{ .Values.config.services.metrics.statsd.endpoint | quote }}
+            prefix: {{ .Values.config.services.metrics.statsd.prefixes.matching | default "cadence-matching" | quote }}
+        {{- end }}
+        {{- else if and .Values.config.services.metrics (eq .Values.config.services.metrics.type "prometheus") }}
+        {{- if .Values.metrics.enabled }}
+        metrics:
+          prometheus:
+            timerType: {{ .Values.config.services.metrics.prometheus.timerType | default "histogram" | quote }}
+            listenAddress: "0.0.0.0:{{ .Values.metrics.port | default 9090 }}"
+        {{- end }}
+        {{- end }}
+        {{- if and .Values.config.services.pprof.enabled .Values.config.services.pprof.ports.matching }}
+        pprof:
+          port: {{ .Values.config.services.pprof.ports.matching }}
+          host: {{ .Values.config.services.bindOnIP | default "0.0.0.0" | quote }}
+        {{- end }}
+      
+      history:
+        rpc:
+          port: {{ .Values.history.port | default 7934 }}
+          grpcPort: {{ .Values.history.grpcPort | default 7834 }}
+          bindOnIP: {{ .Values.config.services.bindOnIP | default "0.0.0.0" | quote }}
+        {{- if and .Values.config.services.metrics (eq .Values.config.services.metrics.type "statsd") }}
+        {{- if .Values.config.services.metrics.statsd.endpoint }}
+        metrics:
+          statsd:
+            hostPort: {{ .Values.config.services.metrics.statsd.endpoint | quote }}
+            prefix: {{ .Values.config.services.metrics.statsd.prefixes.history | default "cadence-history" | quote }}
+        {{- end }}
+        {{- else if and .Values.config.services.metrics (eq .Values.config.services.metrics.type "prometheus") }}
+        {{- if .Values.metrics.enabled }}
+        metrics:
+          prometheus:
+            timerType: {{ .Values.config.services.metrics.prometheus.timerType | default "histogram" | quote }}
+            listenAddress: "0.0.0.0:{{ .Values.metrics.port | default 9090 }}"
+        {{- end }}
+        {{- end }}
+        {{- if and .Values.config.services.pprof.enabled .Values.config.services.pprof.ports.history }}
+        pprof:
+          port: {{ .Values.config.services.pprof.ports.history }}
+          host: {{ .Values.config.services.bindOnIP | default "0.0.0.0" | quote }}
+        {{- end }}
+      
+      worker:
+        rpc:
+          port: {{ .Values.worker.port | default 7939 }}
+          bindOnIP: {{ .Values.config.services.bindOnIP | default "0.0.0.0" | quote }}
+        {{- if and .Values.config.services.metrics (eq .Values.config.services.metrics.type "statsd") }}
+        {{- if .Values.config.services.metrics.statsd.endpoint }}
+        metrics:
+          statsd:
+            hostPort: {{ .Values.config.services.metrics.statsd.endpoint | quote }}
+            prefix: {{ .Values.config.services.metrics.statsd.prefixes.worker | default "cadence-worker" | quote }}
+        {{- end }}
+        {{- else if and .Values.config.services.metrics (eq .Values.config.services.metrics.type "prometheus") }}
+        {{- if .Values.metrics.enabled }}
+        metrics:
+          prometheus:
+            timerType: {{ .Values.config.services.metrics.prometheus.timerType | default "histogram" | quote }}
+            listenAddress: "0.0.0.0:{{ .Values.metrics.port | default 9090 }}"
+        {{- end }}
+        {{- end }}
+        {{- if and .Values.config.services.pprof.enabled .Values.config.services.pprof.ports.worker }}
+        pprof:
+          port: {{ .Values.config.services.pprof.ports.worker }}
+          host: {{ .Values.config.services.bindOnIP | default "0.0.0.0" | quote }}
+        {{- end }}
+
+    clusterGroupMetadata:
+      clusterRedirectionPolicy:
+        policy: {{ .Values.config.cluster.redirectionPolicy | default "all-domain-apis-forwarding" | quote }}
+      failoverVersionIncrement: {{ .Values.config.cluster.failoverVersionIncrement | default 10 }}
+      primaryClusterName: {{ .Values.config.cluster.primaryClusterName | default "cluster0" | quote }}
+      {{- if .Values.config.cluster.isNotPrimary }}
+      currentClusterName: "cluster1"
+      {{- else }}
+      currentClusterName: {{ .Values.config.cluster.currentClusterName | default "cluster0" | quote }}
+      {{- end }}
+      clusterGroup:
+        {{ .Values.config.cluster.primaryClusterName | default "cluster0" }}:
+          enabled: true
+          initialFailoverVersion: 0
+          rpcName: "cadence-frontend"
+          rpcAddress: {{ .Values.config.cluster.primaryFrontendService | default "cadence" }}:{{ .Values.frontend.grpcPort | default 7833 }}
+          rpcTransport: "grpc"
+          {{- if .Values.config.cluster.oauth.enabled }}
+          authorizationProvider:
+            enable: true
+            type: "OAuthAuthorization"
+            privateKey: {{ .Values.config.cluster.oauth.privateKey | quote }}
+          {{- end }}
+        {{- if .Values.config.cluster.globalDomain.enabled }}
+        cluster1:
+          enabled: true
+          initialFailoverVersion: 2
+          rpcName: "cadence-frontend"
+          rpcAddress: {{ .Values.config.cluster.secondaryFrontendService | default "cadence-secondary" }}:{{ .Values.frontend.grpcPort | default 7833 }}
+          rpcTransport: "grpc"
+          {{- if .Values.config.cluster.oauth.enabled }}
+          authorizationProvider:
+            enable: true
+            type: "OAuthAuthorization"
+            privateKey: {{ .Values.config.cluster.oauth.privateKey | quote }}
+          {{- end }}
+        {{- end }}
+
+    archival:
+      history:
+        status: {{ .Values.config.archival.history.status | default "disabled" | quote }}
+        enableRead: {{ .Values.config.archival.history.enableRead | default false }}
+        {{- if or .Values.config.archival.history.fileMode .Values.config.archival.history.dirMode }}
+        provider:
+          filestore:
+            {{- if .Values.config.archival.history.fileMode }}
+            fileMode: {{ .Values.config.archival.history.fileMode | quote }}
+            {{- end }}
+            {{- if .Values.config.archival.history.dirMode }}
+            dirMode: {{ .Values.config.archival.history.dirMode | quote }}
+            {{- end }}
+        {{- end }}
+      visibility:
+        status: {{ .Values.config.archival.visibility.status | default "disabled" | quote }}
+        enableRead: {{ .Values.config.archival.visibility.enableRead | default false }}
+        {{- if or .Values.config.archival.visibility.fileMode .Values.config.archival.visibility.dirMode }}
+        provider:
+          filestore:
+            {{- if .Values.config.archival.visibility.fileMode }}
+            fileMode: {{ .Values.config.archival.visibility.fileMode | quote }}
+            {{- end }}
+            {{- if .Values.config.archival.visibility.dirMode }}
+            dirMode: {{ .Values.config.archival.visibility.dirMode | quote }}
+            {{- end }}
+        {{- end }}
+
+    domainDefaults:
+      archival:
+        history:
+          status: {{ .Values.config.domainDefaults.archival.history.status | default "disabled" | quote }}
+          {{- if .Values.config.domainDefaults.archival.history.uri }}
+          URI: {{ .Values.config.domainDefaults.archival.history.uri | quote }}
+          {{- end }}
+        visibility:
+          status: {{ .Values.config.domainDefaults.archival.visibility.status | default "disabled" | quote }}
+          {{- if .Values.config.domainDefaults.archival.visibility.uri }}
+          URI: {{ .Values.config.domainDefaults.archival.visibility.uri | quote }}
+          {{- end }}
+
+    {{- if .Values.config.kafka.enabled }}
+    kafka:
+      tls:
+        enabled: {{ .Values.config.kafka.tls.enabled | default false }}
+      clusters:
+        test:
+          brokers:
+            - {{ .Values.config.kafka.hosts }}:{{ .Values.config.kafka.port | default 9092 }}
+      topics:
+        {{ .Values.config.kafka.visibilityTopic | default "cadence-visibility-dev" }}:
+          cluster: test
+        {{ .Values.config.kafka.visibilityTopic | default "cadence-visibility-dev" }}-dlq:
+          cluster: test
+      applications:
+        visibility:
+          topic: {{ .Values.config.kafka.visibilityTopic | default "cadence-visibility-dev" }}
+          dlq-topic: {{ .Values.config.kafka.visibilityTopic | default "cadence-visibility-dev" }}-dlq
+    {{- end }}
+
+    publicClient:
+      hostPort: {{ .Values.config.publicClient.frontendService | default "cadence" }}:{{ .Values.frontend.grpcPort | default 7833 }}
+
+    dynamicconfig:
+      client: filebased
+      filebased:
+        filepath: {{ .Values.config.dynamicConfigFilePath | default "/etc/cadence/config/dynamicconfig/config.yaml" | quote }}
+        pollInterval: "60s"
+
+    {{- if .Values.config.blobstore.outputDirectory }}
+    blobstore:
+      filestore:
+        outputDirectory: {{ .Values.config.blobstore.outputDirectory | quote }}
+    {{- end }}
+
+    {{- if .Values.config.cluster.oauth.enabled }}
+    authorization:
+      oauthAuthorizer:
+        enable: true
+        maxJwtTTL: {{ .Values.config.cluster.oauth.maxJwtTTL | default 86400 }}
+        jwtCredentials:
+          algorithm: "RS256"
+          publicKey: {{ .Values.config.cluster.oauth.publicKey | quote }}
+    {{- end }}
+
+    {{- if .Values.config.asyncWorkflowQueues.enabled }}
+    asyncWorkflowQueues:
+      queue1:
+        type: "kafka"
+        config:
+          connection:
+            brokers:
+              - {{ .Values.config.kafka.hosts }}:{{ .Values.config.kafka.port | default 9092 }}
+          topic: {{ .Values.config.asyncWorkflowQueues.kafkaQueue.topic | default "default-topic" }}
+    {{- end }}
