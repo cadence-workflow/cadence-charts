@@ -16,13 +16,9 @@ global:
   # - name: myregistrykey
 
   # -- Global environment variables (shared only by Cadence Server services [frontend, worker, matching and history])
-  env:
-    - name: ENABLE_ES
-      value: "false"
-    - name: SKIP_SCHEMA_SETUP
-      value: "true"
-    - name: RINGPOP_BOOTSTRAP_MODE
-      value: "dns"
+  env: []
+  # - name: ENV_VAR
+  #   value: "value"
 
   # -- Global secret environment variables (shared only by Cadence Server services [frontend, worker, matching and history])
   secretEnv: []
