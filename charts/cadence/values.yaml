@@ -626,90 +626,143 @@ autoscaling:
 config:
   # Log configuration
   log:
-    stdout: true
-    level: "info"
+    # -- Enable stdout logging (inherits from global.log if not specified)
+    stdout: ~
+    # -- Logging level: debug, info, warn, error (inherits from global.log if not specified)
+    level: ~
+    # -- Allow using environment variables for log configuration if you want a different log level for each server component.
+    useEnvVars: false
   
   # Persistence configuration
   persistence:
+    # -- Number of history shards for partitioning
     numHistoryShards: 4
+    # -- Name of the default datastore
     defaultStore: "default"
+    # -- Name of the visibility datastore
     visibilityStore: "visibility"
+    # -- Name of the advanced visibility datastore (Elasticsearch)
     advancedVisibilityStore: "es-visibility"
     
     # Database configuration
     database:
-      driver: "cassandra"  # cassandra, mysql, postgres
+      # -- Database driver: cassandra, mysql, postgres
+      driver: "cassandra"
       
       # Cassandra configuration
       cassandra:
+        # -- Cassandra hosts. Can reference Kubernetes services
         hosts: ""
+        # -- Cassandra keyspace for main data
         keyspace: "cadence"
+        # -- Cassandra keyspace for visibility data
         visibilityKeyspace: "cadence_visibility"
+        # -- Cassandra username (optional)
         user: ""
+        # -- Cassandra password (optional)
         password: ""
+        # -- Cassandra protocol version
         protoVersion: 4
       
       # MySQL configuration
       mysql:
+        # -- MySQL host. Can reference Kubernetes services
         hosts: ""
+        # -- MySQL port
         port: 3306
+        # -- Database name for main data
         dbname: "cadence"
+        # -- Database name for visibility data
         visibilityDbname: "cadence_visibility"
-        user: ""
+        # -- MySQL username
+        user: "cadence"
+        # -- MySQL password
         password: ""
+        # -- Enable transaction isolation compatibility mode
         txIsolationCompat: false
       
       # PostgreSQL configuration
       postgres:
+        # -- PostgreSQL host. Can reference Kubernetes services
         hosts: ""
+        # -- PostgreSQL port
         port: 5432
+        # -- Database name for main data
         dbname: "cadence"
+        # -- Database name for visibility data
         visibilityDbname: "cadence_visibility"
-        user: ""
+        # -- PostgreSQL username
+        user: "cadence"
+        # -- PostgreSQL password
         password: ""
+        # -- Maximum number of connections
         maxConns: 20
+        # -- Maximum number of idle connections
         maxIdleConns: 20
+        # -- Maximum connection lifetime
         maxConnLifetime: "1h"
     
-    # Elasticsearch configuration
+    # Elasticsearch configuration for advanced visibility
     elasticsearch:
+      # -- Enable Elasticsearch for advanced visibility
       enabled: false
-      version: ""
+      # -- Elasticsearch version (v6, v7, v8)
+      version: "v7"
+      # -- Elasticsearch username
       user: ""
+      # -- Elasticsearch password
       password: ""
+      # -- Elasticsearch hosts. Can reference Kubernetes services
       hosts: ""
+      # -- Elasticsearch port
       port: 9200
-      visibilityIndex: "cadence-visibility-dev"
+      # -- Elasticsearch visibility index name
+      visibilityIndex: "cadence-visibility"
   
-  # Ringpop configuration
+  # Ringpop configuration for service discovery
   ringpop:
-    name: "cadence"
+    # -- Ringpop cluster name
+    name: ""
+    # -- Broadcast address for this node (usually auto-detected)
     broadcastAddress: ""
-    bootstrapMode: "dns"  # hosts, dns
+    # -- Bootstrap mode: dns, hosts
+    bootstrapMode: "dns"
+    # -- Bootstrap seeds
     seeds: ""
+    # -- Maximum duration to wait for joining the ring
     maxJoinDuration: "30s"
   
   # Services configuration
   services:
+    # -- IP address to bind services to
     bindOnIP: "0.0.0.0"
     
     # Metrics configuration
     metrics:
-      type: "prometheus"  # statsd, prometheus
+      # -- Metrics type: statsd, prometheus
+      type: "prometheus"
+      # StatsD configuration
       statsd:
+        # -- StatsD endpoint. Can reference Kubernetes services
         endpoint: ""
+        # -- Metric prefixes for each service
         prefixes:
           frontend: "cadence-frontend"
           matching: "cadence-matching"
           history: "cadence-history"
           worker: "cadence-worker"
+      # Prometheus configuration
       prometheus:
+        # -- Timer type: histogram, summary
         timerType: "histogram"
+        # -- Additional prometheus endpoints
         endpoints: []
     
     # Pprof configuration
     pprof:
+      # -- Enable pprof endpoints
       enabled: false
+      # -- Pprof ports for each service
       ports:
         frontend: 6060
         matching: 6061
@@ -718,71 +771,167 @@ config:
   
   # Cluster configuration
   cluster:
+    # -- Cluster redirection policy
     redirectionPolicy: "all-domain-apis-forwarding"
+    # -- Failover version increment
     failoverVersionIncrement: 10
+    # -- Primary cluster name
     primaryClusterName: "cluster0"
+    # -- Current cluster name
     currentClusterName: "cluster0"
+    # -- Whether this cluster is not the primary
     isNotPrimary: false
     
+    # -- Primary frontend service name for cross-cluster communication
     primaryFrontendService: "cadence"
+    # -- Secondary frontend service name for cross-cluster communication
     secondaryFrontendService: "cadence-secondary"
     
+    # OAuth configuration for cross-cluster auth
     oauth:
+      # -- Enable OAuth for cross-cluster communication
       enabled: false
+      # -- OAuth private key for signing tokens
       privateKey: ""
+      # -- OAuth public key for verifying tokens
       publicKey: ""
+      # -- Maximum JWT token TTL in seconds
       maxJwtTTL: 86400
     
+    # Global domain configuration
     globalDomain:
+      # -- Enable global domain support
       enabled: false
   
   # Archival configuration
   archival:
+    # History archival configuration
     history:
+      # -- Archival status: enabled, disabled
       status: "disabled"
+      # -- Enable reading from archives
       enableRead: false
-      fileMode: ""
-      dirMode: ""
+      ### PENDING REVIEW FROM HERE (HISTORY SUB-BLOCK)
+      # -- File mode for archived files
+      fileMode: "0644"
+      # -- Directory mode for archive directories
+      dirMode: "0755"
+      # -- Archive storage provider configuration
+      provider:
+        # -- Storage type: filestore, s3, gcs
+        type: "filestore"
+        # Filestore configuration
+        filestore:
+          # -- Base directory for file storage
+          baseDir: "/var/lib/cadence/archive"
+        # S3 configuration
+        s3:
+          # -- S3 region
+          region: ""
+          # -- S3 bucket name
+          bucket: ""
+          # -- S3 key prefix
+          keyPrefix: "cadence-archive/"
+        # GCS configuration
+        gcs:
+          # -- GCS bucket name
+          bucket: ""
+          # -- GCS key prefix
+          keyPrefix: "cadence-archive/"
+    
+    # Visibility archival configuration
     visibility:
+      # -- Archival status: enabled, disabled
       status: "disabled"
+      # -- Enable reading from archives
       enableRead: false
-      fileMode: ""
-      dirMode: ""
+
+      ### PENDIGN TO REVIEW FROM HERE (VISIBILITY SUB-BLOCK)
+      # -- File mode for archived files
+      fileMode: "0644"
+      # -- Directory mode for archive directories
+      dirMode: "0755"
+      # -- Archive storage provider configuration
+      provider:
+        # -- Storage type: filestore, s3, gcs
+        type: "filestore"
+        # Filestore configuration
+        filestore:
+          # -- Base directory for file storage
+          baseDir: "/var/lib/cadence/visibility-archive"
   
-  # Domain defaults
+  # Domain defaults configuration
   domainDefaults:
+    # -- Default archival settings for new domains
     archival:
       history:
+        # -- Default history archival status
         status: "disabled"
+        # -- Default history archival URI
         uri: ""
       visibility:
+        # -- Default visibility archival status
         status: "disabled"
+        # -- Default visibility archival URI
         uri: ""
   
-  # Kafka configuration
+  # Kafka configuration for async workflows
   kafka:
+    # -- Enable Kafka for async workflows
     enabled: false
-    tls:
-      enabled: false
+    # -- Kafka hosts. Can reference Kubernetes services
     hosts: ""
+    # -- Kafka port
     port: 9092
-    visibilityTopic: "cadence-visibility-dev"
+    # -- Kafka visibility topic name
+    visibilityTopic: "cadence-visibility"
+    # TLS configuration (NOT TESTED)
+    tls:
+      # -- Enable TLS for Kafka connection
+      enabled: false
+      # -- Path to CA certificate file
+      caFile: ""
+      # -- Path to client certificate file
+      certFile: ""
+      # -- Path to client private key file
+      keyFile: ""
+      # -- Skip certificate verification
+      skipVerify: false
+    # SASL configuration (NOT TESTED)
+    sasl:
+      # -- Enable SASL authentication
+      enabled: false
+      # -- SASL mechanism: PLAIN, SCRAM-SHA-256, SCRAM-SHA-512
+      mechanism: "PLAIN"
+      # -- SASL username
+      username: ""
+      # -- SASL password
+      password: ""
   
   # Public client configuration
   publicClient:
+    # -- Frontend service name for client connections
     frontendService: "cadence"
   
-  # Dynamic config file path
-  dynamicConfigFilePath: "/etc/cadence/config/dynamicconfig/config.yaml"
+  # Dynamic configuration
+  dynamicConfig:
+    # -- Dynamic config file path inside the container
+    filePath: "/etc/cadence/config/dynamicconfig/config.yaml"
+    # -- Poll interval for dynamic config changes
+    pollInterval: "60s"
   
   # Blob store configuration
   blobstore:
+    # -- Output directory for blob storage
     outputDirectory: ""
   
-  # Async workflow queues
+  # Async workflow queues configuration
   asyncWorkflowQueues:
+    # -- Enable async workflow queues
     enabled: false
+    # Kafka queue configuration
     kafkaQueue:
+      # -- Kafka topic for async workflows
       topic: "default-topic"
 
 # Dynamic configuration
