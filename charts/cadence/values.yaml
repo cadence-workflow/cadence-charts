@@ -128,10 +128,10 @@ metrics:
 
   serviceMonitor:
     enabled: true
-    namespace: "vishwa-test" # Replace with the namespace where Prometheus is deployed
+    namespace:  # Replace with the namespace where Prometheus is deployed
     namespaceSelector:
       matchNames:
-        - vishwa-test # Ensure this matches Prometheus's namespace
+        -  # Ensure this matches Prometheus's namespace
     scrapeInterval: 30s
     additionalLabels:
       release: my-prometheus # Ensure this matches Prometheus's Helm release name
