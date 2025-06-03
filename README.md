@@ -45,15 +45,17 @@ To uninstall the chart:
 
 To upgrade the chart to a newer changes/version:
 
-    helm upgrade my-cadence cadence/cadence -n <namespace if any>
+    helm upgrade my-cadence cadence/cadence -n <namespace>
 
 To add repo for Prometheus and Grafana:
     helm repo add prometheus-community https://prometheus-community.github.io/helm-charts -n <namespace if any>
 
 To install the prometheus and grafana thats added in previous setup:
-    helm install my-prometheus -n vishwa-test prometheus-community/kube-prometheus-stack -n <namespace if any>    
+
+    helm install my-prometheus -n <namespace> prometheus-community/kube-prometheus-stack -n <namespace if any>    
 
 To access admin password needed to access the Grafana dashboard locally after port forwarding:
+
     kubectl get secret --namespace <namespace>  my-prometheus-grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
 
 To view the status of the release:
