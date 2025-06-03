@@ -941,7 +941,7 @@ config:
         gstorage:
           projectId: ""
           keyFile: ""
-  
+
   # Domain defaults configuration
   domainDefaults:
     # -- Default archival settings for new domains
