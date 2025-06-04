@@ -107,13 +107,13 @@ frontend:
     #   maxUnavailable: 25%
   
   # -- Resource limits and requests
-  resources:
-    limits:
-      cpu: "500m"
-      memory: "1Gi"
-    requests:
-      cpu: "500m"
-      memory: "1Gi"
+  resources: {}
+    # limits:
+    #   cpu: "500m"
+    #   memory: "1Gi"
+    # requests:
+    #   cpu: "500m"
+    #   memory: "1Gi"
   
   # -- Pod Disruption Budget
   podDisruptionBudget:
@@ -191,13 +191,13 @@ matching:
     #   maxUnavailable: 25%
   
   # -- Resource limits and requests
-  resources:
-    limits:
-      cpu: "500m"
-      memory: "1Gi"
-    requests:
-      cpu: "500m"
-      memory: "1Gi"
+  resources: {}
+    # limits:
+    #   cpu: "500m"
+    #   memory: "1Gi"
+    # requests:
+    #   cpu: "500m"
+    #   memory: "1Gi"
   
   # -- Pod Disruption Budget
   podDisruptionBudget:
@@ -275,13 +275,13 @@ history:
     #   maxUnavailable: 25%
 
   # -- Resource limits and requests
-  resources:
-    limits:
-      cpu: "500m"
-      memory: "1Gi"
-    requests:
-      cpu: "500m"
-      memory: "1Gi"
+  resources: {}
+    # limits:
+    #   cpu: "500m"
+    #   memory: "1Gi"
+    # requests:
+    #   cpu: "500m"
+    #   memory: "1Gi"
   
   # -- Pod Disruption Budget
   podDisruptionBudget:
@@ -357,13 +357,13 @@ worker:
     #   maxUnavailable: 25%
 
   # -- Resource limits and requests
-  resources:
-    limits:
-      cpu: "500m"
-      memory: "1Gi"
-    requests:
-      cpu: "500m"
-      memory: "1Gi"
+  resources: {}
+    # limits:
+    #   cpu: "500m"
+    #   memory: "1Gi"
+    # requests:
+    #   cpu: "500m"
+    #   memory: "1Gi"
   
   # -- Pod Disruption Budget
   podDisruptionBudget:
@@ -436,13 +436,13 @@ web:
     #   maxUnavailable: 25%
 
   # -- Resource limits and requests
-  resources:
-    limits:
-      cpu: "500m"
-      memory: "1Gi"
-    requests:
-      cpu: "500m"
-      memory: "1Gi"
+  resources: {}
+    # limits:
+    #   cpu: "500m"
+    #   memory: "1Gi"
+    # requests:
+    #   cpu: "500m"
+    #   memory: "1Gi"
   
   # -- Pod Disruption Budget
   podDisruptionBudget:
