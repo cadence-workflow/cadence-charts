@@ -658,8 +658,8 @@ cassandra:
     # -- Resource limits and requests for Cassandra
     resources:
       limits:
-        cpu: 500m
-        memory: 1Gi
+        cpu: 1
+        memory: 2Gi
       requests:
         cpu: 500m
         memory: 1Gi
