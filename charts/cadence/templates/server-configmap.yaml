@@ -311,10 +311,6 @@ data:
       failoverVersionIncrement: {{ .Values.config.cluster.failoverVersionIncrement | default 10 }}
       primaryClusterName: {{ .Values.config.cluster.primaryClusterName | default "cluster0" }}
       currentClusterName: {{ .Values.config.cluster.currentClusterName | default "cluster0" }}
-      {{- if .Values.config.cluster.clusterRedirectionPolicy }}
-      clusterRedirectionPolicy:
-        policy: {{ .Values.config.cluster.clusterRedirectionPolicy.policy | default "noop" }}
-      {{- end }}
       clusterGroup:
         {{ .Values.config.cluster.currentClusterName | default "cluster0" }}:
           enabled: true
@@ -338,6 +334,10 @@ data:
           {{- end }}
           rpcTransport: {{ $clusterTransport | quote }}
         {{- end }}
+      {{- if .Values.config.cluster.clusterRedirectionPolicy }}
+      clusterRedirectionPolicy:
+        policy: {{ .Values.config.cluster.clusterRedirectionPolicy.policy | default "noop" }}
+      {{- end }}
 
     # Services configuration
     services:
@@ -563,8 +563,8 @@ data:
       {{- end }}
     {{- end }}
 
-    # Async workflow queues configuration
     {{- if .Values.config.asyncWorkflowQueues.enabled }}
+    # Async workflow queues configuration
     asyncWorkflowQueues:
       {{- range $queueName, $queue := .Values.config.asyncWorkflowQueues }}
       {{- if ne $queueName "enabled" }}
