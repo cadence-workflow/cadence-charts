@@ -993,7 +993,7 @@ config:
     # Filestore blobstore
     filestore:
       # -- Output directory for blob storage
-      outputDirectory: "/var/lib/cadence/blobstore"
+      outputDirectory: "/etc/cadence/blobstore"
   
   # Public client configuration
   publicClient:
