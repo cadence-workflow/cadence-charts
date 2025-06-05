@@ -38,17 +38,6 @@ data:
       encoding: json
       {{- end }}
 
-    # Ringpop configuration
-    ringpop:
-      name: {{ .Values.config.ringpop.name | default "cadence" }}
-      bootstrapMode: {{ .Values.config.ringpop.bootstrapMode | default "dns" }}
-      bootstrapHosts:
-        - {{ include "cadence.fullname" . }}-frontend-headless:{{ .Values.frontend.port | default 7933 }}
-        - {{ include "cadence.fullname" . }}-history-headless:{{ .Values.history.port | default 7934 }}
-        - {{ include "cadence.fullname" . }}-matching-headless:{{ .Values.matching.port | default 7935 }}
-        - {{ include "cadence.fullname" . }}-worker-headless:{{ .Values.worker.port | default 7939 }}
-      maxJoinDuration: {{ .Values.config.ringpop.maxJoinDuration | default "30s" }}
-
     # Persistence configuration
     persistence:
       numHistoryShards: {{ .Values.config.persistence.numHistoryShards | default 4 }}
@@ -304,6 +293,17 @@ data:
               skipHostVerification: {{ .Values.config.persistence.elasticsearch.tls.skipHostVerification | default false }}
             {{- end }}
         {{- end }}
+
+    # Ringpop configuration
+    ringpop:
+      name: {{ .Values.config.ringpop.name | default "cadence" }}
+      bootstrapMode: {{ .Values.config.ringpop.bootstrapMode | default "dns" }}
+      bootstrapHosts:
+        - {{ include "cadence.fullname" . }}-frontend-headless:{{ .Values.frontend.port | default 7933 }}
+        - {{ include "cadence.fullname" . }}-history-headless:{{ .Values.history.port | default 7934 }}
+        - {{ include "cadence.fullname" . }}-matching-headless:{{ .Values.matching.port | default 7935 }}
+        - {{ include "cadence.fullname" . }}-worker-headless:{{ .Values.worker.port | default 7939 }}
+      maxJoinDuration: {{ .Values.config.ringpop.maxJoinDuration | default "30s" }}
 
     # Cluster configuration
     clusterGroupMetadata:
