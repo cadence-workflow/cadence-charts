@@ -43,10 +43,10 @@ data:
       name: {{ .Values.config.ringpop.name | default "cadence" }}
       bootstrapMode: {{ .Values.config.ringpop.bootstrapMode | default "dns" }}
       bootstrapHosts:
-        - {{ include "cadence.fullname" (list . "frontend-headless") }}:{{ .Values.frontend.port | default 7933 }}
-        - {{ include "cadence.fullname" (list . "history-headless") }}:{{ .Values.history.port | default 7934 }}
-        - {{ include "cadence.fullname" (list . "matching-headless") }}:{{ .Values.matching.port | default 7935 }}
-        - {{ include "cadence.fullname" (list . "worker-headless") }}:{{ .Values.worker.port | default 7939 }}
+        - {{ include "cadence.fullname" . }}-frontend-headless:{{ .Values.frontend.port | default 7933 }}
+        - {{ include "cadence.fullname" . }}-history-headless:{{ .Values.history.port | default 7934 }}
+        - {{ include "cadence.fullname" . }}-matching-headless:{{ .Values.matching.port | default 7935 }}
+        - {{ include "cadence.fullname" . }}-worker-headless:{{ .Values.worker.port | default 7939 }}
       maxJoinDuration: {{ .Values.config.ringpop.maxJoinDuration | default "30s" }}
 
     # Persistence configuration
