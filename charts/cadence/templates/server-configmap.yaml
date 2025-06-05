@@ -40,9 +40,8 @@ data:
 
     # Ringpop configuration
     ringpop:
-      name: {{ .Values.config.ringpop.name | default "cadence"}}
-      broadcastAddress: {{ .Values.server.broadcastAddress | default "${POD_IP}" }}
-      bootstrapMode: {{ .Values.config.ringpop.bootstrapMode | default "dns"}}
+      name: {{ .Values.config.ringpop.name | default "cadence" }}
+      bootstrapMode: {{ .Values.config.ringpop.bootstrapMode | default "dns" }}
       bootstrapHosts:
         - {{ include "cadence.fullname" (list . "frontend-headless") }}:{{ .Values.frontend.port | default 7933 }}
         - {{ include "cadence.fullname" (list . "history-headless") }}:{{ .Values.history.port | default 7934 }}
