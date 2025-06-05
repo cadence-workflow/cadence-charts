@@ -142,7 +142,7 @@ spec:
           value: "config/dynamicconfig/development.yaml"
         - name: PRIMARY_FRONTEND_SERVICE
           value: {{ include "cadence.fullname" $ }}-frontend.{{ $.Release.Namespace }}.svc.cluster.local
-        - name: BROADCAST_ADDRESS
+        - name: POD_IP
           valueFrom:
             fieldRef:
               fieldPath: status.podIP

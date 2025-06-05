@@ -334,6 +334,9 @@ worker:
   
   # -- Tchannel port of cadence worker service. DO NOT CHANGE
   port: 7939
+
+  # -- GRPC port of cadence worker service. DO NOT CHANGE
+  grpcPort: 7839
   
   # -- Environment variables for worker service
   env: []
@@ -643,12 +646,8 @@ config:
   ringpop:
     # -- Ringpop cluster name
     name: "cadence"
-    # -- Broadcast address for this node (usually auto-detected)
-    broadcastAddress: ""
     # -- Bootstrap mode: dns, hosts, file
     bootstrapMode: "dns"
-    # -- Bootstrap seeds (comma separated hosts or DNS name)
-    seeds: ""
     # -- Maximum duration to wait for joining the ring
     maxJoinDuration: "30s"
   
