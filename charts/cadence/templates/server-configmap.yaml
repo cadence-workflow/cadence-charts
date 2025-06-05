@@ -343,94 +343,81 @@ data:
     services:
       frontend:
         rpc:
-          port: 7933
-          grpcPort: 7933
-          bindOnIP: {{ .Values.config.services.bindOnIP | default "0.0.0.0" | quote }}
-          grpcMaxMsgSize: {{ .Values.config.services.grpcMaxMsgSize | default 4194304 }}
+          port: {{ .Values.frontend.port | default 7933 }}
+          grpcPort: {{ .Values.frontend.grpcPort | default 7833 }}
+          bindOnIP: {{ `{{ default .Env.POD_IP "0.0.0.0" }}` }}
+          grpcMaxMsgSize: {{ .Values.config.services.grpcMaxMsgSize | default 4194304 | int }}
         metrics:
           {{- if eq .Values.config.services.metrics.type "statsd" }}
           statsd:
             hostPort: {{ .Values.config.services.metrics.statsd.endpoint | quote }}
-            prefix: {{ .Values.config.services.metrics.statsd.prefixes.frontend | default "cadence-frontend" | quote }}
+            prefix: {{ .Values.config.services.metrics.statsd.prefixes.frontend | default "cadence-frontend" }}
           {{- else if eq .Values.config.services.metrics.type "prometheus" }}
           prometheus:
-            timerType: {{ .Values.config.services.metrics.prometheus.timerType | default "histogram" | quote }}
-            {{- if .Values.config.services.metrics.prometheus.endpoints }}
-            listenNetwork: "tcp"
-            listenAddress: "0.0.0.0:9090"
-            {{- end }}
+            timerType: {{ .Values.config.services.metrics.prometheus.timerType | default "histogram" }}
+            listenAddress: "0.0.0.0:{{ .Values.metrics.port | default 9090 }}"
           {{- end }}
         {{- if .Values.config.services.pprof.enabled }}
         pprof:
           port: {{ .Values.config.services.pprof.ports.frontend | default 6060 }}
         {{- end }}
 
-      matching:
-        rpc:
-          port: 7935
-          grpcPort: 7935
-          bindOnIP: {{ .Values.config.services.bindOnIP | default "0.0.0.0" | quote }}
-          grpcMaxMsgSize: {{ .Values.config.services.grpcMaxMsgSize | default 4194304 }}
-        metrics:
-          {{- if eq .Values.config.services.metrics.type "statsd" }}
-          statsd:
-            hostPort: {{ .Values.config.services.metrics.statsd.endpoint | quote }}
-            prefix: {{ .Values.config.services.metrics.statsd.prefixes.matching | default "cadence-matching" | quote }}
-          {{- else if eq .Values.config.services.metrics.type "prometheus" }}
-          prometheus:
-            timerType: {{ .Values.config.services.metrics.prometheus.timerType | default "histogram" | quote }}
-            {{- if .Values.config.services.metrics.prometheus.endpoints }}
-            listenNetwork: "tcp"
-            listenAddress: "0.0.0.0:9091"
-            {{- end }}
-          {{- end }}
-        {{- if .Values.config.services.pprof.enabled }}
-        pprof:
-          port: {{ .Values.config.services.pprof.ports.matching | default 6061 }}
-        {{- end }}
-
       history:
         rpc:
-          port: 7934
-          grpcPort: 7934
-          bindOnIP: {{ .Values.config.services.bindOnIP | default "0.0.0.0" | quote }}
-          grpcMaxMsgSize: {{ .Values.config.services.grpcMaxMsgSize | default 4194304 }}
+          port: {{ .Values.history.port | default 7934 }}
+          grpcPort: {{ .Values.history.grpcPort | default 7834 }}
+          bindOnIP: {{ `{{ default .Env.POD_IP "0.0.0.0" }}` }}
+          grpcMaxMsgSize: {{ .Values.config.services.grpcMaxMsgSize | default 4194304 | int }}
         metrics:
           {{- if eq .Values.config.services.metrics.type "statsd" }}
           statsd:
             hostPort: {{ .Values.config.services.metrics.statsd.endpoint | quote }}
-            prefix: {{ .Values.config.services.metrics.statsd.prefixes.history | default "cadence-history" | quote }}
+            prefix: {{ .Values.config.services.metrics.statsd.prefixes.history | default "cadence-history" }}
           {{- else if eq .Values.config.services.metrics.type "prometheus" }}
           prometheus:
-            timerType: {{ .Values.config.services.metrics.prometheus.timerType | default "histogram" | quote }}
-            {{- if .Values.config.services.metrics.prometheus.endpoints }}
-            listenNetwork: "tcp"
-            listenAddress: "0.0.0.0:9092"
-            {{- end }}
+            timerType: {{ .Values.config.services.metrics.prometheus.timerType | default "histogram" }}
+            listenAddress: "0.0.0.0:{{ .Values.metrics.port | default 9090 }}"
           {{- end }}
         {{- if .Values.config.services.pprof.enabled }}
         pprof:
           port: {{ .Values.config.services.pprof.ports.history | default 6062 }}
         {{- end }}
 
-      worker:
+      matching:
         rpc:
-          port: 7939
-          grpcPort: 7939
-          bindOnIP: {{ .Values.config.services.bindOnIP | default "0.0.0.0" | quote }}
-          grpcMaxMsgSize: {{ .Values.config.services.grpcMaxMsgSize | default 4194304 }}
+          port: {{ .Values.matching.port | default 7935 }}
+          grpcPort: {{ .Values.matching.grpcPort | default 7835 }}
+          bindOnIP: {{ `{{ default .Env.POD_IP "0.0.0.0" }}` }}
+          grpcMaxMsgSize: {{ .Values.config.services.grpcMaxMsgSize | default 4194304 | int }}
         metrics:
           {{- if eq .Values.config.services.metrics.type "statsd" }}
           statsd:
             hostPort: {{ .Values.config.services.metrics.statsd.endpoint | quote }}
-            prefix: {{ .Values.config.services.metrics.statsd.prefixes.worker | default "cadence-worker" | quote }}
+            prefix: {{ .Values.config.services.metrics.statsd.prefixes.matching | default "cadence-matching" }}
           {{- else if eq .Values.config.services.metrics.type "prometheus" }}
           prometheus:
-            timerType: {{ .Values.config.services.metrics.prometheus.timerType | default "histogram" | quote }}
-            {{- if .Values.config.services.metrics.prometheus.endpoints }}
-            listenNetwork: "tcp"
-            listenAddress: "0.0.0.0:9093"
-            {{- end }}
+            timerType: {{ .Values.config.services.metrics.prometheus.timerType | default "histogram" }}
+            listenAddress: "0.0.0.0:{{ .Values.metrics.port | default 9090 }}"
+          {{- end }}
+        {{- if .Values.config.services.pprof.enabled }}
+        pprof:
+          port: {{ .Values.config.services.pprof.ports.matching | default 6061 }}
+        {{- end }}
+
+      worker:
+        rpc:
+          port: {{ .Values.worker.port | default 7939 }}
+          bindOnIP: {{ `{{ default .Env.POD_IP "0.0.0.0" }}` }}
+          grpcMaxMsgSize: {{ .Values.config.services.grpcMaxMsgSize | default 4194304 | int }}
+        metrics:
+          {{- if eq .Values.config.services.metrics.type "statsd" }}
+          statsd:
+            hostPort: {{ .Values.config.services.metrics.statsd.endpoint | quote }}
+            prefix: {{ .Values.config.services.metrics.statsd.prefixes.worker | default "cadence-worker" }}
+          {{- else if eq .Values.config.services.metrics.type "prometheus" }}
+          prometheus:
+            timerType: {{ .Values.config.services.metrics.prometheus.timerType | default "histogram" }}
+            listenAddress: "0.0.0.0:{{ .Values.metrics.port | default 9090 }}"
           {{- end }}
         {{- if .Values.config.services.pprof.enabled }}
         pprof:

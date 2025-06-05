@@ -829,9 +829,6 @@ config:
   
   # Services configuration
   services:
-    # -- IP address to bind services to
-    bindOnIP: "0.0.0.0"
-    
     # -- gRPC max message size
     grpcMaxMsgSize: 4194304  # 4MB
 
@@ -853,8 +850,6 @@ config:
       prometheus:
         # -- Timer type: histogram, summary
         timerType: "histogram"
-        # -- Additional prometheus endpoints
-        endpoints: []
     
     # Pprof configuration
     pprof:
