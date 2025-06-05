@@ -156,8 +156,7 @@ data:
               {{- end }}
             {{- end }}
           {{- end }}
-
-        # Visibility datastore (if different from default)
+        # Visibility datastore
         {{- if .Values.config.persistence.visibilityStore }}
         visibility:
           {{- if eq .Values.config.persistence.database.driver "cassandra" }}
@@ -471,7 +470,7 @@ data:
         visibility:
           topic: {{ .Values.config.kafka.visibilityTopic | default "cadence-visibility" }}
           dlq-topic: {{ .Values.config.kafka.visibilityDLQTopic | default "cadence-visibility-dlq" }}
-    {{- end }}
+    {{- end -}}
 
     # Archival configuration
     archival:
