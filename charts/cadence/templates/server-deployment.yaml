@@ -138,14 +138,12 @@ spec:
         env:
         - name: SERVICES
           value: {{ $serviceName }}
-        - name: DYNAMIC_CONFIG_FILE_PATH
-          value: "config/dynamicconfig/development.yaml"
-        - name: PRIMARY_FRONTEND_SERVICE
-          value: {{ include "cadence.fullname" $ }}-frontend.{{ $.Release.Namespace }}.svc.cluster.local
         - name: POD_IP
           valueFrom:
             fieldRef:
               fieldPath: status.podIP
+        - name: PRIMARY_FRONTEND_SERVICE
+          value: {{ include "cadence.fullname" $ }}-frontend.{{ $.Release.Namespace }}.svc.cluster.local
         - name: CASSANDRA_SEEDS
           value: {{ include "cassandra.endpoint" $ }}
         {{- $globalLog := $.Values.global.log | default dict }}
@@ -154,8 +152,6 @@ spec:
           value: {{ $serviceLog.level | default "info" | quote }}
         - name: LOG_STDOUT
           value: {{ $serviceLog.stdout | default true | quote }}
-        - name: RINGPOP_SEEDS
-          value: {{ include "cadence.ringpopSeeds" $ }}
         {{- $globalEnv := $.Values.global.env | default list }}
         {{- $serviceEnv := $service.env | default list }}
         {{- $mergedEnv := concat $globalEnv $serviceEnv }}
