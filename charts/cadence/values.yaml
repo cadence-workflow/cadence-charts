@@ -865,22 +865,26 @@ config:
   # Kafka configuration for async workflows
   kafka:
     # -- Enable Kafka for async workflows
-    enabled: false
-    # -- Kafka hosts. Can reference Kubernetes services
-    hosts: ""
+    enabled: true
+    # -- Kafka broker service. Can reference Kubernetes services
+    brokers: "kafka-cluster.kafka.svc.cluster.local"
     # -- Kafka port
     port: 9092
     # -- Kafka visibility topic name
     visibilityTopic: "cadence-visibility"
-    # TLS configuration (NOT TESTED)
+    # -- Kafka visibility DLQ topic name
+    visibilityDLQTopic: "cadence-visibility-dlq"
+    # -- Topic properties (optional)
+    topicProperties: {}
+    # TLS configuration (Use caFile or certFile & keyFile. Left empty the other option)
     tls:
       # -- Enable TLS for Kafka connection
       enabled: false
-      # -- Path to CA certificate file
+      # -- Path to CA certificate file (I think only .pem)
       caFile: ""
-      # -- Path to client certificate file
+      # -- Path to client certificate file (this option requires keyFile too)
       certFile: ""
-      # -- Path to client private key file
+      # -- Path to client private key file (this option requires certFile too)
       keyFile: ""
       # -- Skip certificate verification
       skipVerify: false
@@ -888,7 +892,7 @@ config:
     sasl:
       # -- Enable SASL authentication
       enabled: false
-      # -- SASL mechanism: PLAIN, SCRAM-SHA-256, SCRAM-SHA-512
+      # -- SASL mechanism: plain, sha512 or sha256
       mechanism: "PLAIN"
       # -- SASL username
       username: ""

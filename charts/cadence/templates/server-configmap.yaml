@@ -424,8 +424,8 @@ data:
           port: {{ .Values.config.services.pprof.ports.worker | default 6063 }}
         {{- end }}
 
-    {{- if .Values.config.kafka.enabled }}
-    # Kafka configuration (if enabled)
+    {{ if .Values.config.kafka.enabled -}}
+    # Kafka configuration
     kafka:
       tls:
         enabled: {{ .Values.config.kafka.tls.enabled | default false }}
@@ -442,7 +442,7 @@ data:
       sasl:
         enabled: {{ .Values.config.kafka.sasl.enabled | default false }}
         {{- if .Values.config.kafka.sasl.enabled }}
-        mechanism: {{ .Values.config.kafka.sasl.mechanism | default "PLAIN" | quote }}
+        algorithm: {{ .Values.config.kafka.sasl.mechanism | default "PLAIN" | quote }}
         {{- if .Values.config.kafka.sasl.username }}
         username: {{ .Values.config.kafka.sasl.username | quote }}
         {{- end }}
@@ -453,10 +453,24 @@ data:
       clusters:
         default:
           brokers:
-            - {{ .Values.config.kafka.hosts }}:{{ .Values.config.kafka.port | default 9092 }}
+            - {{ .Values.config.kafka.brokers }}:{{ .Values.config.kafka.port | default 9092 }}
       topics:
         {{ .Values.config.kafka.visibilityTopic | default "cadence-visibility" }}:
           cluster: default
+          {{- if .Values.config.kafka.topicProperties }}
+          properties:
+            {{- toYaml .Values.config.kafka.topicProperties | nindent 8 }}
+          {{- end }}
+        {{ .Values.config.kafka.visibilityDLQTopic | default "cadence-visibility-dlq" }}:
+          cluster: default
+          {{- if .Values.config.kafka.topicProperties }}
+          properties:
+            {{- toYaml .Values.config.kafka.topicProperties | nindent 8 }}
+          {{- end }}
+      applications:
+        visibility:
+          topic: {{ .Values.config.kafka.visibilityTopic | default "cadence-visibility" }}
+          dlq-topic: {{ .Values.config.kafka.visibilityDLQTopic | default "cadence-visibility-dlq" }}
     {{- end }}
 
     # Archival configuration
