@@ -544,7 +544,7 @@ data:
       hostPort: {{ .Values.config.publicClient.hostPort | quote }}
       {{- end }}
       transport: {{ .Values.config.publicClient.transport | default "grpc" | quote }}
-      refreshInterval: {{ .Values.config.publicClient.refreshInterval | default "10s" | quote }}
+      RefreshInterval: {{ .Values.config.publicClient.refreshInterval | default "10s" | quote }}
     {{- end }}
 
     # Dynamic configuration
