@@ -28,14 +28,14 @@ data:
       outputFile: {{ .Values.config.log.outputFile | quote }}
       {{- end }}
       {{- if .Values.config.log.levelKey }}
-      levelKey: {{ .Values.config.log.levelKey | quote }}
+      levelKey: {{ .Values.config.log.levelKey }}
       {{- else }}
-      levelKey: "level"
+      levelKey: level
       {{- end }}
       {{- if .Values.config.log.encoding }}
-      encoding: {{ .Values.config.log.encoding | quote }}
+      encoding: {{ .Values.config.log.encoding }}
       {{- else }}
-      encoding: "json"
+      encoding: json
       {{- end }}
 
     # Ringpop configuration
@@ -309,14 +309,35 @@ data:
     clusterGroupMetadata:
       enableGlobalDomain: {{ .Values.config.cluster.enableGlobalDomain | default false }}
       failoverVersionIncrement: {{ .Values.config.cluster.failoverVersionIncrement | default 10 }}
-      primaryClusterName: {{ .Values.config.cluster.primaryClusterName | default "cluster0" | quote }}
-      currentClusterName: {{ .Values.config.cluster.currentClusterName | default "cluster0" | quote }}
+      primaryClusterName: {{ .Values.config.cluster.primaryClusterName | default "cluster0" }}
+      currentClusterName: {{ .Values.config.cluster.currentClusterName | default "cluster0" }}
+      {{- if .Values.config.cluster.clusterRedirectionPolicy }}
+      clusterRedirectionPolicy:
+        policy: {{ .Values.config.cluster.clusterRedirectionPolicy.policy | default "noop" }}
+      {{- end }}
       clusterGroup:
         {{ .Values.config.cluster.currentClusterName | default "cluster0" }}:
           enabled: true
-          initialFailoverVersion: 0
-          rpcAddress: {{ .Values.config.services.bindOnIP | default "0.0.0.0" }}:7933
-          rpcTransport: "grpc"
+          initialFailoverVersion: {{ .Values.config.cluster.initialFailoverVersion | default 0 }}
+          {{- $transport := .Values.config.cluster.rpcTransport | default "grpc" }}
+          {{- if eq $transport "grpc" }}
+          rpcAddress: {{ include "cadence.fullname" . }}-frontend:{{ .Values.frontend.grpcPort | default 7833 }}
+          {{- else }}
+          rpcAddress: {{ include "cadence.fullname" . }}-frontend:{{ .Values.frontend.port | default 7933 }}
+          {{- end }}
+          rpcTransport: {{ $transport | quote }}
+        {{- range $clusterName, $clusterConfig := .Values.config.cluster.clusterGroup }}
+        {{ $clusterName }}:
+          enabled: {{ $clusterConfig.enabled | default true }}
+          initialFailoverVersion: {{ $clusterConfig.initialFailoverVersion | default 0 }}
+          {{- $clusterTransport := $clusterConfig.rpcTransport | default "grpc" }}
+          {{- if $clusterConfig.rpcAddress }}
+          rpcAddress: {{ $clusterConfig.rpcAddress | quote }}
+          {{- else }}
+          {{- fail (printf "rpcAddress is required for cluster %s" $clusterName) }}
+          {{- end }}
+          rpcTransport: {{ $clusterTransport | quote }}
+        {{- end }}
 
     # Services configuration
     services:

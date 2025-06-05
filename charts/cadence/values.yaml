@@ -334,9 +334,6 @@ worker:
   
   # -- Tchannel port of cadence worker service. DO NOT CHANGE
   port: 7939
-
-  # -- GRPC port of cadence worker service. DO NOT CHANGE
-  grpcPort: 7839
   
   # -- Environment variables for worker service
   env: []
@@ -636,9 +633,9 @@ config:
     # -- Output file path for logging (if stdout is false)
     outputFile: ""
     # -- Log level key name (defaults to "level")
-    levelKey: "level"
+    levelKey: level
     # -- Log encoding format: json, console (defaults to "json")
-    encoding: "json"
+    encoding: json
     # -- Allow using environment variables for log configuration. If enabled, it will use ENV variable of each server component.
     useEnvVars: false
   
@@ -803,16 +800,32 @@ config:
   
   # Cluster configuration
   cluster:
-    # -- Enable global domain support
-    enableGlobalDomain: false
-    # -- Failover version increment
+    # -- Enable global domain support for multi-cluster deployments
+    enableGlobalDomain: true
+    # -- Version increment used during cluster failover operations
     failoverVersionIncrement: 10
-    # -- Primary cluster name
+    # -- Name of the primary cluster in a multi-cluster setup
     primaryClusterName: "cluster0"
-    # -- Current cluster name
+    # -- Name of the current cluster
     currentClusterName: "cluster0"
-    # -- Whether this cluster is not the primary
+    # -- Whether this cluster is not the primary cluster
     isNotPrimary: false
+    # -- RPC transport protocol (grpc or tchannel)
+    rpcTransport: "grpc"
+    # -- Initial failover version for this cluster
+    initialFailoverVersion: 0
+    # -- Cluster group configuration with additional clusters
+    clusterGroup:
+      # Example of additional cluster configuration:
+      # cluster1:
+      #   enabled: true
+      #   initialFailoverVersion: 0
+      #   rpcAddress: "cadence-cluster1.example.com:7933"
+      #   rpcTransport: "grpc"
+    # -- Cluster redirection policy for cross-cluster operations
+    clusterRedirectionPolicy:
+      # -- Policy for handling cross-cluster requests (noop, selected-apis-forwarding, all-domain-apis-forwarding, selected-apis-forwarding-v2)
+      policy: "noop"
   
   # Services configuration
   services:
