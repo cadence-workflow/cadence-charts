@@ -558,7 +558,7 @@ data:
       {{- end }}
     {{- end }}
 
-    {{- if .Values.config.asyncWorkflowQueues.enabled }}
+    {{ if .Values.config.asyncWorkflowQueues.enabled -}}
     # Async workflow queues configuration
     asyncWorkflowQueues:
       {{- range $queueName, $queue := .Values.config.asyncWorkflowQueues }}

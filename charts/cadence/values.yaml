@@ -873,7 +873,7 @@ config:
   # Kafka configuration for async workflows
   kafka:
     # -- Enable Kafka for async workflows
-    enabled: true
+    enabled: false
     # -- Kafka broker service. Can reference Kubernetes services
     brokers: "kafka-cluster.kafka.svc.cluster.local"
     # -- Kafka port
@@ -1016,6 +1016,7 @@ config:
       pollInterval: "60s"
   
   # Async workflow queues configuration
+  # This is not operative yet. It will be in next releases.
   asyncWorkflowQueues:
     # -- Enable async workflow queues
     enabled: false
