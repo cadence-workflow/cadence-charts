@@ -19,10 +19,18 @@ global:
   env: []
   # - name: ENV_VAR
   #   value: "value"
+  # Enable this variable if you are using Google Storage.
+  # - name: GOOGLE_APPLICATION_CREDENTIALS
+  #   value: "absolute/path/to/json/file"
 
   # -- Global secret environment variables (shared only by Cadence Server services [frontend, worker, matching and history])
   secretEnv: []
   # - name: GLOBAL_SECRET_ENV_VAR
+  #   value: "value"
+  # Enable this variables if you are using S3.
+  # - name: AWS_ACCESS_KEY_ID
+  #   value: "value"
+  # - name: AWS_SECRET_ACCESS_KEY
   #   value: "value"
   
   # -- Global pod security context
@@ -918,6 +926,7 @@ config:
           # -- Directory mode for archive directories
           dirMode: "0755"
         # S3 archiver
+        # - Documentation for S3 here: https://github.com/cadence-workflow/cadence/blob/v1.3.0/common/archiver/s3store/README.md
         s3store:
           # -- AWS region
           region: ""
@@ -926,11 +935,10 @@ config:
           # -- Force path style URLs
           s3ForcePathStyle: false
         # Google Cloud Storage archiver
+        # - Documentation for GStorage here: https://github.com/cadence-workflow/cadence/blob/v1.3.0/common/archiver/gcloud/README.md
         gstorage:
-          # -- GCS project ID
-          projectId: ""
           # -- Path to service account key file
-          keyFile: ""
+          credentialsPath: ""
     
     # Visibility archival configuration
     visibility:
@@ -938,24 +946,36 @@ config:
       status: "disabled"
       # -- Enable reading from archives
       enableRead: false
-      # -- Archive providers configuration (same structure as history)
+      # -- Archive providers configuration
       provider:
         # -- Storage type: filestore, s3, gcs
         type: "filestore"
+        # Filestore archiver
         filestore:
+          # -- File mode for archived files
           fileMode: "0644"
+          # -- Directory mode for archive directories
           dirMode: "0755"
+        # S3 archiver
+        # - Documentation for S3 here: https://github.com/cadence-workflow/cadence/blob/v1.3.0/common/archiver/s3store/README.md
         s3store:
+          # -- AWS region
           region: ""
+          # -- S3 endpoint (for S3-compatible storage)
           endpoint: ""
+          # -- Force path style URLs
           s3ForcePathStyle: false
+        # Google Cloud Storage archiver
+        # - Documentation for GStorage here: https://github.com/cadence-workflow/cadence/blob/v1.3.0/common/archiver/gcloud/README.md
         gstorage:
-          projectId: ""
-          keyFile: ""
+          # -- Path to service account key file
+          credentialsPath: ""
 
   # Domain defaults configuration
   domainDefaults:
     # -- Default archival settings for new domains
+    # - Documentation for S3 here: https://github.com/cadence-workflow/cadence/blob/v1.3.0/common/archiver/s3store/README.md
+    # - Documentation for GStorage here: https://github.com/cadence-workflow/cadence/blob/v1.3.0/common/archiver/gcloud/README.md
     archival:
       history:
         # -- Default history archival status: enabled, disabled

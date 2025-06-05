@@ -492,10 +492,7 @@ data:
             s3ForcePathStyle: {{ .Values.config.archival.history.provider.s3store.s3ForcePathStyle | default false }}
           {{- else if eq .Values.config.archival.history.provider.type "gcs" }}
           gstorage:
-            projectId: {{ .Values.config.archival.history.provider.gstorage.projectId | quote }}
-            {{- if .Values.config.archival.history.provider.gstorage.keyFile }}
-            keyFile: {{ .Values.config.archival.history.provider.gstorage.keyFile | quote }}
-            {{- end }}
+            credentialsPath: {{ .Values.config.archival.history.provider.gstorage.credentialsPath | quote }}
           {{- end }}
       visibility:
         status: {{ .Values.config.archival.visibility.status | default "disabled" | quote }}
@@ -512,12 +509,9 @@ data:
             endpoint: {{ .Values.config.archival.visibility.provider.s3store.endpoint | quote }}
             {{- end }}
             s3ForcePathStyle: {{ .Values.config.archival.visibility.provider.s3store.s3ForcePathStyle | default false }}
-          {{- else if eq .Values.config.archival.visibility.provider.type "gcs" }}
+          {{- else if eq .Values.config.archival.history.provider.type "gcs" }}
           gstorage:
-            projectId: {{ .Values.config.archival.visibility.provider.gstorage.projectId | quote }}
-            {{- if .Values.config.archival.visibility.provider.gstorage.keyFile }}
-            keyFile: {{ .Values.config.archival.visibility.provider.gstorage.keyFile | quote }}
-            {{- end }}
+            credentialsPath: {{ .Values.config.archival.visibility.provider.gstorage.credentialsPath | quote }}
           {{- end }}
 
     # Domain defaults configuration
