@@ -668,7 +668,7 @@ config:
     advancedVisibilityStore: "es-visibility"
     # -- Enable persistence latency histogram metrics
     enablePersistenceLatencyHistogramMetrics: false
-    
+
     # Database configuration
     database:
       # -- Database driver: cassandra, mysql, postgres
