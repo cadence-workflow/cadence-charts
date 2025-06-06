@@ -135,6 +135,10 @@ spec:
         - name: config
           mountPath: {{ $.Values.config.dynamicConfigFilePath | default "/etc/cadence/config/dynamicconfig/config.yaml" }}
           subPath: dynamic_config.yaml
+        {{- $globalTlsVolumeMounts := $.Values.global.tls.volumeMounts | default list }}
+        {{- if $globalTlsVolumeMounts }}
+        {{- toYaml $globalTlsVolumeMounts | nindent 8 }}
+        {{- end }}
         env:
         - name: SERVICES
           value: {{ $serviceName }}
@@ -174,4 +178,8 @@ spec:
       - name: config
         configMap:
           name: {{ include "cadence.fullname" $ }}-configmap
+      {{- $globalTlsVolumes := $.Values.global.tls.volumes | default list }}
+      {{- if $globalTlsVolumes }}
+      {{- toYaml $globalTlsVolumes | nindent 6 }}
+      {{- end }}
 {{- end }}

@@ -59,6 +59,35 @@ global:
   # -- Global node selector
   nodeSelector: {}
 
+  # -- Global TLS volumes configuration
+  tls:
+    # -- Additional volumes for TLS certificates
+    volumes: []
+    # - name: multiple-ca-certs
+    #   configMap:
+    #     name: cassandra-ca-bundle
+    #     items:
+    #       - key: root-ca.crt
+    #         path: root-ca.pem
+    #       - key: intermediate-ca.crt
+    #         path: intermediate-ca.pem
+    # - name: postgres-tls-certs
+    #   secret:
+    #     secretName: postgres-ssl-secret
+    #     items:
+    #       - key: root.crt
+    #         path: postgresql-ca.pem
+    #       - key: postgresql.crt
+    #         path: postgresql-client.pem
+    #       - key: postgresql.key
+    #         path: postgresql-client-key.pem
+
+    # -- Volume mounts for TLS certificates
+    volumeMounts: []
+    # - name: name-of-the-volume
+    #   mountPath: /etc/cadence/ssl/
+    #   readOnly: true
+
   # -- Global logging configuration (shared only by Cadence Server services [frontend, worker, matching and history])
   log:
     # -- Enable stdout logging
