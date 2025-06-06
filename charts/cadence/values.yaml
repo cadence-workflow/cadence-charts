@@ -674,10 +674,78 @@ config:
       # -- Database driver: cassandra, mysql, postgres
       driver: "cassandra"
 
+      # Common SQL configuration (applies to both MySQL and PostgreSQL)
+      sql:
+        # -- Database host. Can reference Kubernetes services
+        hosts: "mysql-service.mysql-namespace.svc.cluster.local"
+        # -- Database port (will use driver default if not specified)
+        port: null
+        # -- Database name for main data
+        dbname: "cadence"
+        # -- Database name for visibility data
+        visibilityDbname: "cadence_visibility"
+        # -- Database username
+        user: "cadence"
+        # -- Database password
+        password: ""
+        # -- Maximum number of connections
+        maxConns: 20
+        # -- Maximum number of idle connections
+        maxIdleConns: 20
+        # -- Maximum connection lifetime
+        maxConnLifetime: "1h"
+        # -- Number of database shards (default: 1)
+        numShards: 1
+        # -- Encoding type for SQL blobs
+        encodingType: "thriftrw"
+        # -- Decoding types for SQL blobs
+        decodingTypes: ["thriftrw"]
+        # -- Use multiple databases for sharding
+        useMultipleDatabases: false
+        # -- Multiple databases configuration (when useMultipleDatabases is true)
+        multipleDatabasesConfig: []
+        # -- Connection attributes (key-value pairs for connection string)
+        connectAttributes: {}
+        # TLS configuration for SQL databases
+        tls:
+          # -- Enable TLS
+          enabled: false
+          # -- SSL mode (for PostgreSQL: disable, allow, prefer, require, verify-ca, verify-full)
+          # -- For MySQL: false, true, skip-verify, preferred
+          sslMode: ""
+          # -- Path to CA certificate file
+          caFile: ""
+          # -- Multiple CA certificate files
+          caFiles: []
+          # -- Path to client certificate file
+          certFile: ""
+          # -- Path to client private key file
+          keyFile: ""
+          # -- Enable hostname verification (inverse of skipHostVerification)
+          enableHostVerification: true
+          # -- Require client authentication for mutual TLS
+          requireClientAuth: false
+          # -- Server name for certificate verification
+          serverName: ""
+
+      # MySQL-specific configuration
+      mysql:
+        # -- Default port for MySQL (overrides sql.port if specified)
+        port: 3306
+        # -- Enable transaction isolation compatibility mode
+        txIsolationCompat: false
+
+      # PostgreSQL-specific configuration
+      postgres:
+        # -- Default port for PostgreSQL (overrides sql.port if specified)
+        port: 5432
+
       # Cassandra configuration
       cassandra:
         # -- Cassandra hosts. Can reference Kubernetes services
-        hosts: ""
+        hosts: "cassandra-service.cassandra-namespace.svc.cluster.local"
+        # -- Cassandra port
+        port: 9042
         # -- Cassandra keyspace for main data
         keyspace: "cadence"
         # -- Cassandra keyspace for visibility data
@@ -690,91 +758,41 @@ config:
         protoVersion: 4
         # -- AWS region filter for Cassandra (if using AWS Keyspaces)
         region: ""
+        # -- Datacenter filter for Cassandra
+        datacenter: ""
+        # -- Maximum number of connections
+        maxConns: 10
+        # -- Connection timeout
+        connectTimeout: "10s"
+        # -- Query timeout
+        timeout: "1s"
+        # -- Default consistency level
+        consistency: "LOCAL_QUORUM"
+        # -- Serial consistency level
+        serialConsistency: "LOCAL_SERIAL"
+        # -- Host selection policy
+        hostSelectionPolicy: "tokenaware,roundrobin"
+        # -- Allowed authenticators for custom authentication
+        allowedAuthenticators: []
+        # -- Additional connection attributes
+        connectAttributes: {}
         # TLS configuration for Cassandra
         tls:
           # -- Enable TLS
           enabled: false
-          # -- Path to CA certificate file
+          # -- CA certificate file to verify server certificates
           caFile: ""
-          # -- Path to client certificate file
+          # -- Multiple CA certificate files (alternative to caFile)
+          caFiles: []
+          # -- Client certificate file for mutual TLS
           certFile: ""
-          # -- Path to client private key file
+          # -- Client private key file for mutual TLS
           keyFile: ""
-          # -- Path to CA certificate data (base64 encoded)
-          caData: ""
-          # -- Path to client certificate data (base64 encoded)
-          certData: ""
-          # -- Path to client private key data (base64 encoded)
-          keyData: ""
-          # -- Skip certificate verification
-          skipHostVerification: false
-          # -- Server name for certificate verification
-          serverName: ""
-      
-      # MySQL configuration
-      mysql:
-        # -- MySQL host. Can reference Kubernetes services
-        hosts: ""
-        # -- MySQL port
-        port: 3306
-        # -- Database name for main data
-        dbname: "cadence"
-        # -- Database name for visibility data
-        visibilityDbname: "cadence_visibility"
-        # -- MySQL username
-        user: "cadence"
-        # -- MySQL password
-        password: ""
-        # -- Enable transaction isolation compatibility mode
-        txIsolationCompat: false
-        # TLS configuration for MySQL
-        tls:
-          # -- Enable TLS
-          enabled: false
-          # -- Path to CA certificate file
-          caFile: ""
-          # -- Path to client certificate file
-          certFile: ""
-          # -- Path to client private key file
-          keyFile: ""
-          # -- Skip certificate verification
-          skipHostVerification: false
-          # -- Server name for certificate verification
-          serverName: ""
-      
-      # PostgreSQL configuration
-      postgres:
-        # -- PostgreSQL host. Can reference Kubernetes services
-        hosts: ""
-        # -- PostgreSQL port
-        port: 5432
-        # -- Database name for main data
-        dbname: "cadence"
-        # -- Database name for visibility data
-        visibilityDbname: "cadence_visibility"
-        # -- PostgreSQL username
-        user: "cadence"
-        # -- PostgreSQL password
-        password: ""
-        # -- Maximum number of connections
-        maxConns: 20
-        # -- Maximum number of idle connections
-        maxIdleConns: 20
-        # -- Maximum connection lifetime
-        maxConnLifetime: "1h"
-        # TLS configuration for PostgreSQL
-        tls:
-          # -- Enable TLS
-          enabled: false
-          # -- Path to CA certificate file
-          caFile: ""
-          # -- Path to client certificate file
-          certFile: ""
-          # -- Path to client private key file
-          keyFile: ""
-          # -- Skip certificate verification
-          skipHostVerification: false
-          # -- Server name for certificate verification
+          # -- Verify server hostname matches certificate
+          enableHostVerification: true
+          # -- Require client certificate authentication
+          requireClientAuth: false
+          # -- Override server name for certificate verification
           serverName: ""
 
     # Elasticsearch configuration for advanced visibility
@@ -798,13 +816,24 @@ config:
         enabled: false
         region: ""
         service: "es"
-      # TLS configuration for Elasticsearch
+      # TLS configuration for ElasticSearch
       tls:
+        # -- Enable TLS
         enabled: false
+        # -- CA certificate file to verify server certificates
         caFile: ""
+        # -- Multiple CA certificate files (alternative to caFile)
+        caFiles: []
+        # -- Client certificate file for mutual TLS
         certFile: ""
+        # -- Client private key file for mutual TLS
         keyFile: ""
-        skipHostVerification: false
+        # -- Verify server hostname matches certificate
+        enableHostVerification: true
+        # -- Require client certificate authentication
+        requireClientAuth: false
+        # -- Override server name for certificate verification
+        serverName: ""
   
   # Cluster configuration
   cluster:
@@ -884,18 +913,24 @@ config:
     visibilityDLQTopic: "cadence-visibility-dlq"
     # -- Topic properties (optional)
     topicProperties: {}
-    # TLS configuration (Use caFile or certFile & keyFile. Left empty the other option)
+    # TLS configuration for Kafka
     tls:
-      # -- Enable TLS for Kafka connection
+      # -- Enable TLS
       enabled: false
-      # -- Path to CA certificate file (I think only .pem)
+      # -- CA certificate file to verify server certificates
       caFile: ""
-      # -- Path to client certificate file (this option requires keyFile too)
+      # -- Multiple CA certificate files (alternative to caFile)
+      caFiles: []
+      # -- Client certificate file for mutual TLS
       certFile: ""
-      # -- Path to client private key file (this option requires certFile too)
+      # -- Client private key file for mutual TLS
       keyFile: ""
-      # -- Skip certificate verification
-      skipVerify: false
+      # -- Verify server hostname matches certificate
+      enableHostVerification: true
+      # -- Require client certificate authentication
+      requireClientAuth: false
+      # -- Override server name for certificate verification
+      serverName: ""
     # SASL configuration
     sasl:
       # -- Enable SASL authentication

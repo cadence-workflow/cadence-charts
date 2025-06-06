@@ -49,7 +49,7 @@ data:
       advancedVisibilityStore: {{ .Values.config.persistence.advancedVisibilityStore | quote }}
       {{- end }}
       enablePersistenceLatencyHistogramMetrics: {{ .Values.config.persistence.enablePersistenceLatencyHistogramMetrics | default false }}
-      
+
       # DataStores configuration
       datastores:
         # Default datastore
@@ -58,6 +58,10 @@ data:
           nosql:
             pluginName: "cassandra"
             hosts: {{ .Values.config.persistence.database.cassandra.hosts | quote }}
+            {{- $port := .Values.config.persistence.database.cassandra.port | default 9042 | int }}
+            {{- if ne $port 9042 }}
+            port: {{ $port }}
+            {{- end }}
             keyspace: {{ .Values.config.persistence.database.cassandra.keyspace | default "cadence" | quote }}
             {{- if .Values.config.persistence.database.cassandra.user }}
             user: {{ .Values.config.persistence.database.cassandra.user | quote }}
@@ -69,11 +73,50 @@ data:
             {{- if .Values.config.persistence.database.cassandra.region }}
             region: {{ .Values.config.persistence.database.cassandra.region | quote }}
             {{- end }}
+            {{- if .Values.config.persistence.database.cassandra.datacenter }}
+            datacenter: {{ .Values.config.persistence.database.cassandra.datacenter | quote }}
+            {{- end }}
+            {{- if .Values.config.persistence.database.cassandra.maxConns }}
+            maxConns: {{ .Values.config.persistence.database.cassandra.maxConns }}
+            {{- end }}
+            {{- if .Values.config.persistence.database.cassandra.connectTimeout }}
+            connectTimeout: {{ .Values.config.persistence.database.cassandra.connectTimeout | quote }}
+            {{- end }}
+            {{- if .Values.config.persistence.database.cassandra.timeout }}
+            timeout: {{ .Values.config.persistence.database.cassandra.timeout | quote }}
+            {{- end }}
+            {{- if .Values.config.persistence.database.cassandra.consistency }}
+            consistency: {{ .Values.config.persistence.database.cassandra.consistency | quote }}
+            {{- end }}
+            {{- if .Values.config.persistence.database.cassandra.serialConsistency }}
+            serialConsistency: {{ .Values.config.persistence.database.cassandra.serialConsistency | quote }}
+            {{- end }}
+            {{- if .Values.config.persistence.database.cassandra.hostSelectionPolicy }}
+            hostSelectionPolicy: {{ .Values.config.persistence.database.cassandra.hostSelectionPolicy | quote }}
+            {{- end }}
+            {{- if .Values.config.persistence.database.cassandra.allowedAuthenticators }}
+            allowedAuthenticators:
+            {{- range .Values.config.persistence.database.cassandra.allowedAuthenticators }}
+            - {{ . | quote }}
+            {{- end }}
+            {{- end }}
+            {{- if .Values.config.persistence.database.cassandra.connectAttributes }}
+            connectAttributes:
+            {{- range $key, $value := .Values.config.persistence.database.cassandra.connectAttributes }}
+              {{ $key }}: {{ $value | quote }}
+            {{- end }}
+            {{- end }}
             {{- if .Values.config.persistence.database.cassandra.tls.enabled }}
             tls:
               enabled: {{ .Values.config.persistence.database.cassandra.tls.enabled }}
               {{- if .Values.config.persistence.database.cassandra.tls.caFile }}
               caFile: {{ .Values.config.persistence.database.cassandra.tls.caFile | quote }}
+              {{- end }}
+              {{- if .Values.config.persistence.database.cassandra.tls.caFiles }}
+              caFiles:
+              {{- range .Values.config.persistence.database.cassandra.tls.caFiles }}
+              - {{ . | quote }}
+              {{- end }}
               {{- end }}
               {{- if .Values.config.persistence.database.cassandra.tls.certFile }}
               certFile: {{ .Values.config.persistence.database.cassandra.tls.certFile | quote }}
@@ -81,88 +124,108 @@ data:
               {{- if .Values.config.persistence.database.cassandra.tls.keyFile }}
               keyFile: {{ .Values.config.persistence.database.cassandra.tls.keyFile | quote }}
               {{- end }}
-              {{- if .Values.config.persistence.database.cassandra.tls.caData }}
-              caData: {{ .Values.config.persistence.database.cassandra.tls.caData | quote }}
+              enableHostVerification: {{ .Values.config.persistence.database.cassandra.tls.enableHostVerification | default true }}
+              {{- if .Values.config.persistence.database.cassandra.tls.requireClientAuth }}
+              requireClientAuth: {{ .Values.config.persistence.database.cassandra.tls.requireClientAuth }}
               {{- end }}
-              {{- if .Values.config.persistence.database.cassandra.tls.certData }}
-              certData: {{ .Values.config.persistence.database.cassandra.tls.certData | quote }}
-              {{- end }}
-              {{- if .Values.config.persistence.database.cassandra.tls.keyData }}
-              keyData: {{ .Values.config.persistence.database.cassandra.tls.keyData | quote }}
-              {{- end }}
-              skipHostVerification: {{ .Values.config.persistence.database.cassandra.tls.skipHostVerification | default false }}
               {{- if .Values.config.persistence.database.cassandra.tls.serverName }}
               serverName: {{ .Values.config.persistence.database.cassandra.tls.serverName | quote }}
               {{- end }}
             {{- end }}
-          {{- else if eq .Values.config.persistence.database.driver "mysql" }}
+          {{ else -}}
+          {{/* SQL configuration for both MySQL and PostgreSQL */}}
           sql:
+            {{- if eq .Values.config.persistence.database.driver "mysql" }}
             pluginName: "mysql"
-            connectAddr: {{ .Values.config.persistence.database.mysql.hosts | quote }}
-            connectProtocol: "tcp"
-            databaseName: {{ .Values.config.persistence.database.mysql.dbname | default "cadence" | quote }}
-            user: {{ .Values.config.persistence.database.mysql.user | default "cadence" | quote }}
-            {{- if .Values.config.persistence.database.mysql.password }}
-            password: {{ .Values.config.persistence.database.mysql.password | quote }}
-            {{- end }}
-            maxConns: {{ .Values.config.persistence.database.mysql.maxConns | default 20 }}
-            maxIdleConns: {{ .Values.config.persistence.database.mysql.maxIdleConns | default 20 }}
-            maxConnLifetime: {{ .Values.config.persistence.database.mysql.maxConnLifetime | default "1h" | quote }}
-            {{- if .Values.config.persistence.database.mysql.tls.enabled }}
-            tls:
-              enabled: {{ .Values.config.persistence.database.mysql.tls.enabled }}
-              {{- if .Values.config.persistence.database.mysql.tls.caFile }}
-              caFile: {{ .Values.config.persistence.database.mysql.tls.caFile | quote }}
-              {{- end }}
-              {{- if .Values.config.persistence.database.mysql.tls.certFile }}
-              certFile: {{ .Values.config.persistence.database.mysql.tls.certFile | quote }}
-              {{- end }}
-              {{- if .Values.config.persistence.database.mysql.tls.keyFile }}
-              keyFile: {{ .Values.config.persistence.database.mysql.tls.keyFile | quote }}
-              {{- end }}
-              skipHostVerification: {{ .Values.config.persistence.database.mysql.tls.skipHostVerification | default false }}
-              {{- if .Values.config.persistence.database.mysql.tls.serverName }}
-              serverName: {{ .Values.config.persistence.database.mysql.tls.serverName | quote }}
-              {{- end }}
-            {{- end }}
-          {{- else if eq .Values.config.persistence.database.driver "postgres" }}
-          sql:
+            {{- $port := .Values.config.persistence.database.mysql.port | default .Values.config.persistence.database.sql.port | default 3306 }}
+            connectAddr: "{{ .Values.config.persistence.database.sql.hosts }}:{{ $port }}"
+            {{- else if eq .Values.config.persistence.database.driver "postgres" }}
             pluginName: "postgres"
-            connectAddr: {{ .Values.config.persistence.database.postgres.hosts | quote }}
-            connectProtocol: "tcp"
-            databaseName: {{ .Values.config.persistence.database.postgres.dbname | default "cadence" | quote }}
-            user: {{ .Values.config.persistence.database.postgres.user | default "cadence" | quote }}
-            {{- if .Values.config.persistence.database.postgres.password }}
-            password: {{ .Values.config.persistence.database.postgres.password | quote }}
+            {{- $port := .Values.config.persistence.database.postgres.port | default .Values.config.persistence.database.sql.port | default 5432 }}
+            connectAddr: "{{ .Values.config.persistence.database.sql.hosts }}:{{ $port }}"
             {{- end }}
-            maxConns: {{ .Values.config.persistence.database.postgres.maxConns | default 20 }}
-            maxIdleConns: {{ .Values.config.persistence.database.postgres.maxIdleConns | default 20 }}
-            maxConnLifetime: {{ .Values.config.persistence.database.postgres.maxConnLifetime | default "1h" | quote }}
-            {{- if .Values.config.persistence.database.postgres.tls.enabled }}
+            connectProtocol: "tcp"
+            databaseName: {{ .Values.config.persistence.database.sql.dbname | default "cadence" | quote }}
+            user: {{ .Values.config.persistence.database.sql.user | default "cadence" | quote }}
+            {{- if .Values.config.persistence.database.sql.password }}
+            password: {{ .Values.config.persistence.database.sql.password | quote }}
+            {{- end }}
+            maxConns: {{ .Values.config.persistence.database.sql.maxConns | default 20 }}
+            maxIdleConns: {{ .Values.config.persistence.database.sql.maxIdleConns | default 20 }}
+            maxConnLifetime: {{ .Values.config.persistence.database.sql.maxConnLifetime | default "1h" | quote }}
+            {{- if ne (.Values.config.persistence.database.sql.numShards | default 1 | int ) 1 }}
+            nShards: {{ .Values.config.persistence.database.sql.numShards }}
+            {{- end }}
+            {{- if .Values.config.persistence.database.sql.encodingType }}
+            encodingType: {{ .Values.config.persistence.database.sql.encodingType | quote }}
+            {{- end }}
+            {{- if .Values.config.persistence.database.sql.decodingTypes }}
+            decodingTypes:
+            {{- range .Values.config.persistence.database.sql.decodingTypes }}
+            - {{ . | quote }}
+            {{- end }}
+            {{- end }}
+            {{- if .Values.config.persistence.database.sql.useMultipleDatabases }}
+            useMultipleDatabases: {{ .Values.config.persistence.database.sql.useMultipleDatabases }}
+            {{- end }}
+            {{- if .Values.config.persistence.database.sql.multipleDatabasesConfig }}
+            multipleDatabasesConfig:
+            {{- range .Values.config.persistence.database.sql.multipleDatabasesConfig }}
+            - {{ . | toYaml | nindent 14 }}
+            {{- end }}
+            {{- end }}
+            {{- if .Values.config.persistence.database.sql.connectAttributes }}
+            connectAttributes:
+            {{- range $key, $value := .Values.config.persistence.database.sql.connectAttributes }}
+              {{ $key }}: {{ $value | quote }}
+            {{- end }}
+            {{- end }}
+            {{- if eq .Values.config.persistence.database.driver "mysql" }}
+            {{- if .Values.config.persistence.database.mysql.txIsolationCompat }}
+            txIsolationCompat: {{ .Values.config.persistence.database.mysql.txIsolationCompat }}
+            {{- end }}
+            {{- end }}
+            {{- if .Values.config.persistence.database.sql.tls.enabled }}
             tls:
-              enabled: {{ .Values.config.persistence.database.postgres.tls.enabled }}
-              {{- if .Values.config.persistence.database.postgres.tls.caFile }}
-              caFile: {{ .Values.config.persistence.database.postgres.tls.caFile | quote }}
+              enabled: {{ .Values.config.persistence.database.sql.tls.enabled }}
+              {{- if .Values.config.persistence.database.sql.tls.sslMode }}
+              sslmode: {{ .Values.config.persistence.database.sql.tls.sslMode | quote }}
               {{- end }}
-              {{- if .Values.config.persistence.database.postgres.tls.certFile }}
-              certFile: {{ .Values.config.persistence.database.postgres.tls.certFile | quote }}
+              {{- if .Values.config.persistence.database.sql.tls.caFile }}
+              caFile: {{ .Values.config.persistence.database.sql.tls.caFile | quote }}
               {{- end }}
-              {{- if .Values.config.persistence.database.postgres.tls.keyFile }}
-              keyFile: {{ .Values.config.persistence.database.postgres.tls.keyFile | quote }}
+              {{- if .Values.config.persistence.database.sql.tls.caFiles }}
+              caFiles:
+              {{- range .Values.config.persistence.database.sql.tls.caFiles }}
+              - {{ . | quote }}
               {{- end }}
-              skipHostVerification: {{ .Values.config.persistence.database.postgres.tls.skipHostVerification | default false }}
-              {{- if .Values.config.persistence.database.postgres.tls.serverName }}
-              serverName: {{ .Values.config.persistence.database.postgres.tls.serverName | quote }}
+              {{- end }}
+              {{- if .Values.config.persistence.database.sql.tls.certFile }}
+              certFile: {{ .Values.config.persistence.database.sql.tls.certFile | quote }}
+              {{- end }}
+              {{- if .Values.config.persistence.database.sql.tls.keyFile }}
+              keyFile: {{ .Values.config.persistence.database.sql.tls.keyFile | quote }}
+              {{- end }}
+              enableHostVerification: {{ .Values.config.persistence.database.sql.tls.enableHostVerification | default true }}
+              {{- if .Values.config.persistence.database.sql.tls.requireClientAuth }}
+              requireClientAuth: {{ .Values.config.persistence.database.sql.tls.requireClientAuth }}
+              {{- end }}
+              {{- if .Values.config.persistence.database.sql.tls.serverName }}
+              serverName: {{ .Values.config.persistence.database.sql.tls.serverName | quote }}
               {{- end }}
             {{- end }}
           {{- end }}
         # Visibility datastore
-        {{- if .Values.config.persistence.visibilityStore }}
+        {{ if .Values.config.persistence.visibilityStore -}}
         visibility:
           {{- if eq .Values.config.persistence.database.driver "cassandra" }}
           nosql:
             pluginName: "cassandra"
             hosts: {{ .Values.config.persistence.database.cassandra.hosts | quote }}
+            {{- $port := .Values.config.persistence.database.cassandra.port | default 9042 | int }}
+            {{- if ne $port 9042 }}
+            port: {{ $port }}
+            {{- end }}
             keyspace: {{ .Values.config.persistence.database.cassandra.visibilityKeyspace | default "cadence_visibility" | quote }}
             {{- if .Values.config.persistence.database.cassandra.user }}
             user: {{ .Values.config.persistence.database.cassandra.user | quote }}
@@ -174,11 +237,50 @@ data:
             {{- if .Values.config.persistence.database.cassandra.region }}
             region: {{ .Values.config.persistence.database.cassandra.region | quote }}
             {{- end }}
+            {{- if .Values.config.persistence.database.cassandra.datacenter }}
+            datacenter: {{ .Values.config.persistence.database.cassandra.datacenter | quote }}
+            {{- end }}
+            {{- if .Values.config.persistence.database.cassandra.maxConns }}
+            maxConns: {{ .Values.config.persistence.database.cassandra.maxConns }}
+            {{- end }}
+            {{- if .Values.config.persistence.database.cassandra.connectTimeout }}
+            connectTimeout: {{ .Values.config.persistence.database.cassandra.connectTimeout | quote }}
+            {{- end }}
+            {{- if .Values.config.persistence.database.cassandra.timeout }}
+            timeout: {{ .Values.config.persistence.database.cassandra.timeout | quote }}
+            {{- end }}
+            {{- if .Values.config.persistence.database.cassandra.consistency }}
+            consistency: {{ .Values.config.persistence.database.cassandra.consistency | quote }}
+            {{- end }}
+            {{- if .Values.config.persistence.database.cassandra.serialConsistency }}
+            serialConsistency: {{ .Values.config.persistence.database.cassandra.serialConsistency | quote }}
+            {{- end }}
+            {{- if .Values.config.persistence.database.cassandra.hostSelectionPolicy }}
+            hostSelectionPolicy: {{ .Values.config.persistence.database.cassandra.hostSelectionPolicy | quote }}
+            {{- end }}
+            {{- if .Values.config.persistence.database.cassandra.allowedAuthenticators }}
+            allowedAuthenticators:
+            {{- range .Values.config.persistence.database.cassandra.allowedAuthenticators }}
+            - {{ . | quote }}
+            {{- end }}
+            {{- end }}
+            {{- if .Values.config.persistence.database.cassandra.connectAttributes }}
+            connectAttributes:
+            {{- range $key, $value := .Values.config.persistence.database.cassandra.connectAttributes }}
+              {{ $key }}: {{ $value | quote }}
+            {{- end }}
+            {{- end }}
             {{- if .Values.config.persistence.database.cassandra.tls.enabled }}
             tls:
               enabled: {{ .Values.config.persistence.database.cassandra.tls.enabled }}
               {{- if .Values.config.persistence.database.cassandra.tls.caFile }}
               caFile: {{ .Values.config.persistence.database.cassandra.tls.caFile | quote }}
+              {{- end }}
+              {{- if .Values.config.persistence.database.cassandra.tls.caFiles }}
+              caFiles:
+              {{- range .Values.config.persistence.database.cassandra.tls.caFiles }}
+              - {{ . | quote }}
+              {{- end }}
               {{- end }}
               {{- if .Values.config.persistence.database.cassandra.tls.certFile }}
               certFile: {{ .Values.config.persistence.database.cassandra.tls.certFile | quote }}
@@ -186,69 +288,94 @@ data:
               {{- if .Values.config.persistence.database.cassandra.tls.keyFile }}
               keyFile: {{ .Values.config.persistence.database.cassandra.tls.keyFile | quote }}
               {{- end }}
-              skipHostVerification: {{ .Values.config.persistence.database.cassandra.tls.skipHostVerification | default false }}
+              enableHostVerification: {{ .Values.config.persistence.database.cassandra.tls.enableHostVerification | default true }}
+              {{- if .Values.config.persistence.database.cassandra.tls.requireClientAuth }}
+              requireClientAuth: {{ .Values.config.persistence.database.cassandra.tls.requireClientAuth }}
+              {{- end }}
               {{- if .Values.config.persistence.database.cassandra.tls.serverName }}
               serverName: {{ .Values.config.persistence.database.cassandra.tls.serverName | quote }}
               {{- end }}
             {{- end }}
-          {{- else if eq .Values.config.persistence.database.driver "mysql" }}
+          {{ else -}}
+          {{/* SQL configuration for visibility store */}}
           sql:
+            {{- if eq .Values.config.persistence.database.driver "mysql" }}
             pluginName: "mysql"
-            connectAddr: {{ .Values.config.persistence.database.mysql.hosts | quote }}
-            connectProtocol: "tcp"
-            databaseName: {{ .Values.config.persistence.database.mysql.visibilityDbname | default "cadence_visibility" | quote }}
-            user: {{ .Values.config.persistence.database.mysql.user | default "cadence" | quote }}
-            {{- if .Values.config.persistence.database.mysql.password }}
-            password: {{ .Values.config.persistence.database.mysql.password | quote }}
-            {{- end }}
-            maxConns: {{ .Values.config.persistence.database.mysql.maxConns | default 20 }}
-            maxIdleConns: {{ .Values.config.persistence.database.mysql.maxIdleConns | default 20 }}
-            maxConnLifetime: {{ .Values.config.persistence.database.mysql.maxConnLifetime | default "1h" | quote }}
-            {{- if .Values.config.persistence.database.mysql.tls.enabled }}
-            tls:
-              enabled: {{ .Values.config.persistence.database.mysql.tls.enabled }}
-              {{- if .Values.config.persistence.database.mysql.tls.caFile }}
-              caFile: {{ .Values.config.persistence.database.mysql.tls.caFile | quote }}
-              {{- end }}
-              {{- if .Values.config.persistence.database.mysql.tls.certFile }}
-              certFile: {{ .Values.config.persistence.database.mysql.tls.certFile | quote }}
-              {{- end }}
-              {{- if .Values.config.persistence.database.mysql.tls.keyFile }}
-              keyFile: {{ .Values.config.persistence.database.mysql.tls.keyFile | quote }}
-              {{- end }}
-              skipHostVerification: {{ .Values.config.persistence.database.mysql.tls.skipHostVerification | default false }}
-              {{- if .Values.config.persistence.database.mysql.tls.serverName }}
-              serverName: {{ .Values.config.persistence.database.mysql.tls.serverName | quote }}
-              {{- end }}
-            {{- end }}
-          {{- else if eq .Values.config.persistence.database.driver "postgres" }}
-          sql:
+            {{- $port := .Values.config.persistence.database.mysql.port | default .Values.config.persistence.database.sql.port | default 3306 }}
+            connectAddr: "{{ .Values.config.persistence.database.sql.hosts }}:{{ $port }}"
+            {{- else if eq .Values.config.persistence.database.driver "postgres" }}
             pluginName: "postgres"
-            connectAddr: {{ .Values.config.persistence.database.postgres.hosts | quote }}
-            connectProtocol: "tcp"
-            databaseName: {{ .Values.config.persistence.database.postgres.visibilityDbname | default "cadence_visibility" | quote }}
-            user: {{ .Values.config.persistence.database.postgres.user | default "cadence" | quote }}
-            {{- if .Values.config.persistence.database.postgres.password }}
-            password: {{ .Values.config.persistence.database.postgres.password | quote }}
+            {{- $port := .Values.config.persistence.database.postgres.port | default .Values.config.persistence.database.sql.port | default 5432 }}
+            connectAddr: "{{ .Values.config.persistence.database.sql.hosts }}:{{ $port }}"
             {{- end }}
-            maxConns: {{ .Values.config.persistence.database.postgres.maxConns | default 20 }}
-            maxIdleConns: {{ .Values.config.persistence.database.postgres.maxIdleConns | default 20 }}
-            maxConnLifetime: {{ .Values.config.persistence.database.postgres.maxConnLifetime | default "1h" | quote }}
-            {{- if .Values.config.persistence.database.postgres.tls.enabled }}
+            connectProtocol: "tcp"
+            databaseName: {{ .Values.config.persistence.database.sql.visibilityDbname | default "cadence_visibility" | quote }}
+            user: {{ .Values.config.persistence.database.sql.user | default "cadence" | quote }}
+            {{- if .Values.config.persistence.database.sql.password }}
+            password: {{ .Values.config.persistence.database.sql.password | quote }}
+            {{- end }}
+            maxConns: {{ .Values.config.persistence.database.sql.maxConns | default 20 }}
+            maxIdleConns: {{ .Values.config.persistence.database.sql.maxIdleConns | default 20 }}
+            maxConnLifetime: {{ .Values.config.persistence.database.sql.maxConnLifetime | default "1h" | quote }}
+            {{- if ne (.Values.config.persistence.database.sql.numShards | default 1 | int ) 1 }}
+            nShards: {{ .Values.config.persistence.database.sql.numShards }}
+            {{- end }}
+            {{- if .Values.config.persistence.database.sql.encodingType }}
+            encodingType: {{ .Values.config.persistence.database.sql.encodingType | quote }}
+            {{- end }}
+            {{- if .Values.config.persistence.database.sql.decodingTypes }}
+            decodingTypes:
+            {{- range .Values.config.persistence.database.sql.decodingTypes }}
+            - {{ . | quote }}
+            {{- end }}
+            {{- end }}
+            {{- if .Values.config.persistence.database.sql.useMultipleDatabases }}
+            useMultipleDatabases: {{ .Values.config.persistence.database.sql.useMultipleDatabases }}
+            {{- end }}
+            {{- if .Values.config.persistence.database.sql.multipleDatabasesConfig }}
+            multipleDatabasesConfig:
+            {{- range .Values.config.persistence.database.sql.multipleDatabasesConfig }}
+            - {{ . | toYaml | nindent 14 }}
+            {{- end }}
+            {{- end }}
+            {{- if .Values.config.persistence.database.sql.connectAttributes }}
+            connectAttributes:
+            {{- range $key, $value := .Values.config.persistence.database.sql.connectAttributes }}
+              {{ $key }}: {{ $value | quote }}
+            {{- end }}
+            {{- end }}
+            {{- if eq .Values.config.persistence.database.driver "mysql" }}
+            {{- if .Values.config.persistence.database.mysql.txIsolationCompat }}
+            txIsolationCompat: {{ .Values.config.persistence.database.mysql.txIsolationCompat }}
+            {{- end }}
+            {{- end }}
+            {{- if .Values.config.persistence.database.sql.tls.enabled }}
             tls:
-              enabled: {{ .Values.config.persistence.database.postgres.tls.enabled }}
-              {{- if .Values.config.persistence.database.postgres.tls.caFile }}
-              caFile: {{ .Values.config.persistence.database.postgres.tls.caFile | quote }}
+              enabled: {{ .Values.config.persistence.database.sql.tls.enabled }}
+              {{- if .Values.config.persistence.database.sql.tls.sslMode }}
+              sslmode: {{ .Values.config.persistence.database.sql.tls.sslMode | quote }}
               {{- end }}
-              {{- if .Values.config.persistence.database.postgres.tls.certFile }}
-              certFile: {{ .Values.config.persistence.database.postgres.tls.certFile | quote }}
+              {{- if .Values.config.persistence.database.sql.tls.caFile }}
+              caFile: {{ .Values.config.persistence.database.sql.tls.caFile | quote }}
               {{- end }}
-              {{- if .Values.config.persistence.database.postgres.tls.keyFile }}
-              keyFile: {{ .Values.config.persistence.database.postgres.tls.keyFile | quote }}
+              {{- if .Values.config.persistence.database.sql.tls.caFiles }}
+              caFiles:
+              {{- range .Values.config.persistence.database.sql.tls.caFiles }}
+              - {{ . | quote }}
               {{- end }}
-              skipHostVerification: {{ .Values.config.persistence.database.postgres.tls.skipHostVerification | default false }}
-              {{- if .Values.config.persistence.database.postgres.tls.serverName }}
-              serverName: {{ .Values.config.persistence.database.postgres.tls.serverName | quote }}
+              {{- end }}
+              {{- if .Values.config.persistence.database.sql.tls.certFile }}
+              certFile: {{ .Values.config.persistence.database.sql.tls.certFile | quote }}
+              {{- end }}
+              {{- if .Values.config.persistence.database.sql.tls.keyFile }}
+              keyFile: {{ .Values.config.persistence.database.sql.tls.keyFile | quote }}
+              {{- end }}
+              enableHostVerification: {{ .Values.config.persistence.database.sql.tls.enableHostVerification | default true }}
+              {{- if .Values.config.persistence.database.sql.tls.requireClientAuth }}
+              requireClientAuth: {{ .Values.config.persistence.database.sql.tls.requireClientAuth }}
+              {{- end }}
+              {{- if .Values.config.persistence.database.sql.tls.serverName }}
+              serverName: {{ .Values.config.persistence.database.sql.tls.serverName | quote }}
               {{- end }}
             {{- end }}
           {{- end }}
@@ -260,7 +387,7 @@ data:
           elasticsearch:
             version: {{ .Values.config.persistence.elasticsearch.version | default "v7" | quote }}
             url:
-              scheme: "http"
+              scheme: {{ ternary "https" "http" .Values.config.persistence.elasticsearch.tls.enabled }}
               host: {{ .Values.config.persistence.elasticsearch.hosts | quote }}
               port: {{ .Values.config.persistence.elasticsearch.port | default 9200 }}
             indices:
@@ -283,13 +410,23 @@ data:
               {{- if .Values.config.persistence.elasticsearch.tls.caFile }}
               caFile: {{ .Values.config.persistence.elasticsearch.tls.caFile | quote }}
               {{- end }}
+              {{- if .Values.config.persistence.elasticsearch.tls.caFiles }}
+              caFiles:
+                {{- range .Values.config.persistence.elasticsearch.tls.caFiles }}
+                - {{ . | quote }}
+                {{- end }}
+              {{- end }}
               {{- if .Values.config.persistence.elasticsearch.tls.certFile }}
               certFile: {{ .Values.config.persistence.elasticsearch.tls.certFile | quote }}
               {{- end }}
               {{- if .Values.config.persistence.elasticsearch.tls.keyFile }}
               keyFile: {{ .Values.config.persistence.elasticsearch.tls.keyFile | quote }}
               {{- end }}
-              skipHostVerification: {{ .Values.config.persistence.elasticsearch.tls.skipHostVerification | default false }}
+              {{- if .Values.config.persistence.elasticsearch.tls.serverName }}
+              serverName: {{ .Values.config.persistence.elasticsearch.tls.serverName | quote }}
+              {{- end }}
+              enableHostVerification: {{ .Values.config.persistence.elasticsearch.tls.enableHostVerification | default true }}
+              requireClientAuth: {{ .Values.config.persistence.elasticsearch.tls.requireClientAuth | default false }}
             {{- end }}
         {{- end }}
 
@@ -421,7 +558,7 @@ data:
         {{- if .Values.config.services.pprof.enabled }}
         pprof:
           port: {{ .Values.config.services.pprof.ports.worker | default 6063 }}
-        {{- end }}
+        {{ end }}
 
     {{ if .Values.config.kafka.enabled -}}
     # Kafka configuration
@@ -431,13 +568,23 @@ data:
         {{- if .Values.config.kafka.tls.caFile }}
         caFile: {{ .Values.config.kafka.tls.caFile | quote }}
         {{- end }}
+        {{- if .Values.config.kafka.tls.caFiles }}
+        caFiles:
+          {{- range .Values.config.kafka.tls.caFiles }}
+          - {{ . | quote }}
+          {{- end }}
+        {{- end }}
         {{- if .Values.config.kafka.tls.certFile }}
         certFile: {{ .Values.config.kafka.tls.certFile | quote }}
         {{- end }}
         {{- if .Values.config.kafka.tls.keyFile }}
         keyFile: {{ .Values.config.kafka.tls.keyFile | quote }}
         {{- end }}
-        skipVerify: {{ .Values.config.kafka.tls.skipVerify | default false }}
+        {{- if .Values.config.kafka.tls.serverName }}
+        serverName: {{ .Values.config.kafka.tls.serverName | quote }}
+        {{- end }}
+        enableHostVerification: {{ .Values.config.kafka.tls.enableHostVerification | default true }}
+        requireClientAuth: {{ .Values.config.kafka.tls.requireClientAuth | default false }}
       sasl:
         enabled: {{ .Values.config.kafka.sasl.enabled | default false }}
         {{- if .Values.config.kafka.sasl.enabled }}
@@ -470,7 +617,7 @@ data:
         visibility:
           topic: {{ .Values.config.kafka.visibilityTopic | default "cadence-visibility" }}
           dlq-topic: {{ .Values.config.kafka.visibilityDLQTopic | default "cadence-visibility-dlq" }}
-    {{- end -}}
+    {{ end }}
 
     # Archival configuration
     archival:
