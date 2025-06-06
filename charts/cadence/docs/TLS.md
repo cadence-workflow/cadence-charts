@@ -59,26 +59,6 @@ global:
         readOnly: true
 ```
 
-#### Service-specific TLS Volume Configuration
-
-Individual services can also have their own TLS volume configurations:
-
-```yaml
-frontend:
-  tls:
-    volumes:
-      - name: frontend-specific-cert
-        secret:
-          secretName: frontend-tls-secret
-          items:
-            - key: frontend.crt
-              path: frontend.pem
-    volumeMounts:
-      - name: frontend-specific-cert
-        mountPath: /etc/cadence/ssl/frontend
-        readOnly: true
-```
-
 #### Database-specific Examples
 
 ```yaml
@@ -561,7 +541,7 @@ Test Kubernetes volume mounts:
 ```bash
 # Check if certificates are mounted correctly
 kubectl exec -it <pod-name> -- ls -la /etc/cadence/ssl/
-kubectl exec -it <pod-name> -- cat /etc/cadence/ssl/ca/ca.pem
+kubectl exec -it <pod-name> -- cat /etc/cadence/ssl/ca.pem
 
 # Verify Secret contents
 kubectl get secret <secret-name> -o yaml
@@ -615,4 +595,4 @@ ssl.keystore.location=/path/to/kafka.server.keystore.jks
 ssl.truststore.location=/path/to/kafka.server.truststore.jks
 ```
 
-This configuration provides a secure, production-ready TLS setup for all supported databases and services with proper certificate management through Kuber
+This configuration provides a secure, production-ready TLS setup for all supported databases and services with proper certificate management through Kubernetes.
