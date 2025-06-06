@@ -1,147 +1,1140 @@
+# -- Provide a name to override the name of the chart
+nameOverride: ~
+# -- Provide a name to override the full names of resources
+fullnameOverride: ~
 
-log:
-  stdout: true
-  level: "debug"
+# Global configuration
+global:
+  # -- Global image configuration (shared only by Cadence Server services [frontend, worker, matching and history])
+  image:
+    repository: "docker.io/ubercadence/server"
+    tag: "v1.2.16"
+    pullPolicy: IfNotPresent
+  
+  # -- Image pull secrets for private registries
+  imagePullSecrets: []
+  # - name: myregistrykey
 
-cassandra:
-  # -- External Cassandra endpoint to connect to. Required when cassandra.deployment.enabled is set to false
-  endpoint: ""
-  schema:
-    # -- Cassandra schema version of the Cadence keyspace to use. Latest value can be found at https://github.com/uber/cadence/blob/master/schema/cassandra/version.go
-    version: "0.40"
-    # -- Cassandra schema version of the Cadence visibility keyspace to use. Latest value can be found at https://github.com/uber/cadence/blob/master/schema/cassandra/version.go
-    visibility_version: "0.9"
-  deployment:
-    # -- When enabled, a single instance Cassandra will be deployed as part of the Helm chart
-    # -- When disabled, the Cassandra deployment is expected to be provided externally. For production use cases, it is recommended to use an external Cassandra deployment.
-    enabled: true
-    image:
-      repository: "cassandra"
-      tag: "4.1.1"
-    cpu:
-      limit: "500m"
-      request: "500m"
-    memory:
-      limit: "1Gi"
-      request: "1Gi"
+  # -- Global environment variables (shared only by Cadence Server services [frontend, worker, matching and history])
+  env: []
+  # - name: ENV_VAR
+  #   value: "value"
+  # Enable this variable if you are using Google Storage.
+  # - name: GOOGLE_APPLICATION_CREDENTIALS
+  #   value: "absolute/path/to/json/file"
 
+  # -- Global secret environment variables (shared only by Cadence Server services [frontend, worker, matching and history])
+  secretEnv: []
+  # - name: GLOBAL_SECRET_ENV_VAR
+  #   value: "value"
+  # Enable this variables if you are using S3.
+  # - name: AWS_ACCESS_KEY_ID
+  #   value: "value"
+  # - name: AWS_SECRET_ACCESS_KEY
+  #   value: "value"
+  
+  # -- Global pod security context
+  podSecurityContext: {}
+    # runAsNonRoot: true
+    # runAsUser: 1000
+    # runAsGroup: 1000
+    # fsGroup: 1000
+    # seccompProfile:
+    #   type: RuntimeDefault
+  
+  # -- Global container security context
+  containerSecurityContext: {}
+    # allowPrivilegeEscalation: false
+    # readOnlyRootFilesystem: true
+    # capabilities:
+    #   drop:
+    #     - ALL
+  
+  # -- Global affinity rules
+  affinity: {}
+  
+  # -- Global tolerations
+  tolerations: []
+  
+  # -- Global node selector
+  nodeSelector: {}
 
+  # -- Global TLS volumes configuration
+  tls:
+    # -- Additional volumes for TLS certificates
+    volumes: []
+    # - name: multiple-ca-certs
+    #   configMap:
+    #     name: cassandra-ca-bundle
+    #     items:
+    #       - key: root-ca.crt
+    #         path: root-ca.pem
+    #       - key: intermediate-ca.crt
+    #         path: intermediate-ca.pem
+    # - name: postgres-tls-certs
+    #   secret:
+    #     secretName: postgres-ssl-secret
+    #     items:
+    #       - key: root.crt
+    #         path: postgresql-ca.pem
+    #       - key: postgresql.crt
+    #         path: postgresql-client.pem
+    #       - key: postgresql.key
+    #         path: postgresql-client-key.pem
 
+    # -- Volume mounts for TLS certificates
+    volumeMounts: []
+    # - name: name-of-the-volume
+    #   mountPath: /etc/cadence/ssl/
+    #   readOnly: true
 
+  # -- Global logging configuration (shared only by Cadence Server services [frontend, worker, matching and history])
+  log:
+    # -- Enable stdout logging
+    stdout: true
+    # -- Logging level (debug, info, warn, error)
+    level: "info"
+
+  # -- Global priority class name for pod scheduling
+  priorityClassName: ""
+  
+  # -- Global topology spread constraints
+  topologySpreadConstraints: []
+  # - maxSkew: 1
+  #   topologyKey: topology.kubernetes.io/zone
+  #   whenUnsatisfiable: DoNotSchedule
+
+# Frontend service configuration
 frontend:
+  # -- Image configuration (inherits from global if not specified)
+  image: {}
+    # repository: "docker.io/ubercadence/server"
+    # tag: ""
+    # pullPolicy: IfNotPresent
+    # imagePullSecrets: []
+      # - name: myregistrykey
+
+  # -- Number of frontend replicas to deploy
+  replicas: 1
+  
   # -- Tchannel port of cadence frontend service. DO NOT CHANGE
   port: 7933
   # -- GRPC port of cadence frontend service. DO NOT CHANGE
   grpcPort: 7833
-  # -- Number of frontend replicas to deploy
-  replicas: 2
-  image:
-    # -- Docker image repository to use for the Cadence server
-    repository: "docker.io/ubercadence/server"
-    # -- Docker image tag to use for the Cadence server
-    tag: "v1.2.16-auto-setup"
-  cpu:
-    limit: "500m"
-    request: "500m"
-  memory:
-    limit: "1Gi"
-    request: "1Gi"
 
+  # -- Environment variables for frontend service
+  env: []
+  # - name: ENV_VAR
+  #   value: "value"
+
+  # -- Secret environment variables for frontend service
+  secretEnv: []
+  # - name: SECRET_ENV_VAR
+  #   value: "value"
+
+  # -- Deployment strategy for frontend service
+  strategy:
+    type: RollingUpdate
+    # rollingUpdate:
+    #   maxSurge: 25%
+    #   maxUnavailable: 25%
+  
+  # -- Resource limits and requests
+  resources:
+    limits:
+      cpu: "500m"
+      memory: "1Gi"
+    requests:
+      cpu: "500m"
+      memory: "1Gi"
+  
+  # -- Pod Disruption Budget
+  podDisruptionBudget:
+    enabled: false # Usually false for single replica services
+    minAvailable: 1
+    # maxUnavailable: 1
+  
+  # -- Pod security context (inherits from global if not specified)
+  podSecurityContext: {}
+  
+  # -- Container security context (inherits from global if not specified)
+  containerSecurityContext: {}
+  
+  # -- Affinity rules (inherits from global if not specified)
+  affinity: {}
+  
+  # -- Tolerations (inherits from global if not specified)
+  tolerations: []
+  
+  # -- Node selector (inherits from global if not specified)
+  nodeSelector: {}
+  
+  # -- Additional pod annotations
+  podAnnotations: {}
+  
+  # -- Additional pod labels
+  podLabels: {}
+  
+  # -- Logging configuration (inherits from global log if not specified)
+  log: {}
+    # -- Enable stdout logging
+    # stdout: true
+    # -- Logging level (debug, info, warn, error)
+    # level: "info"
+
+  # -- Priority class name for pod scheduling (inherits from global if not specified)
+  priorityClassName: ""
+  
+  # -- Topology spread constraints (inherits from global if not specified)
+  topologySpreadConstraints: []
+
+# Matching service configuration
 matching:
+  # -- Image configuration (inherits from global if not specified)
+  image: {}
+    # repository: "docker.io/ubercadence/server"
+    # tag: ""
+    # pullPolicy: IfNotPresent
+    # imagePullSecrets: []
+      # - name: myregistrykey
+
+  # -- Number of matching replicas to deploy
+  replicas: 1
+  
   # -- Tchannel port of cadence matching service. DO NOT CHANGE
   port: 7935
   # -- GRPC port of cadence matching service. DO NOT CHANGE
   grpcPort: 7835
-  # -- Number of matching replicas to deploy
-  replicas: 3
-  image:
-    # -- Docker image repository to use for the Cadence server
-    repository: "docker.io/ubercadence/server"
-    # -- Docker image tag to use for the Cadence server
-    tag: "v1.2.16-auto-setup"
-  cpu:
-    limit: "500m"
-    request: "500m"
-  memory:
-    limit: "1Gi"
-    request: "1Gi"
 
+  # -- Environment variables for matching service
+  env: []
+  # - name: ENV_VAR
+  #   value: "value"
+
+  # -- Secret environment variables for matching service
+  secretEnv: []
+  # - name: SECRET_ENV_VAR
+  #   value: "value"
+
+  # -- Deployment strategy for matching service
+  strategy:
+    type: RollingUpdate
+    # rollingUpdate:
+    #   maxSurge: 25%
+    #   maxUnavailable: 25%
+  
+  # -- Resource limits and requests
+  resources:
+    limits:
+      cpu: "500m"
+      memory: "1Gi"
+    requests:
+      cpu: "500m"
+      memory: "1Gi"
+  
+  # -- Pod Disruption Budget
+  podDisruptionBudget:
+    enabled: false # Recommended for multi-replica services
+    minAvailable: 2
+    # maxUnavailable: 1
+  
+  # -- Pod security context (inherits from global if not specified)
+  podSecurityContext: {}
+  
+  # -- Container security context (inherits from global if not specified)
+  containerSecurityContext: {}
+  
+  # -- Affinity rules (inherits from global if not specified)
+  affinity: {}
+  
+  # -- Tolerations (inherits from global if not specified)
+  tolerations: []
+  
+  # -- Node selector (inherits from global if not specified)
+  nodeSelector: {}
+  
+  # -- Additional pod annotations
+  podAnnotations: {}
+  
+  # -- Additional pod labels
+  podLabels: {}
+  
+  # -- Logging configuration (inherits from global log if not specified)
+  log: {}
+    # -- Enable stdout logging
+    # stdout: true
+    # -- Logging level (debug, info, warn, error)
+    # level: "info"
+
+  # -- Priority class name for pod scheduling (inherits from global if not specified)
+  priorityClassName: ""
+  
+  # -- Topology spread constraints (inherits from global if not specified)
+  topologySpreadConstraints: []
+
+# History service configuration
 history:
+  # -- Image configuration (inherits from global if not specified)
+  image: {}
+    # repository: "docker.io/ubercadence/server"
+    # tag: ""
+    # pullPolicy: IfNotPresent
+    # imagePullSecrets: []
+      # - name: myregistrykey
+
+  # -- Number of history replicas to deploy
+  replicas: 1
+  
   # -- Tchannel port of cadence history service. DO NOT CHANGE
   port: 7934
   # -- GRPC port of cadence history service. DO NOT CHANGE
   grpcPort: 7834
-  # -- Number of history replicas to deploy
-  replicas: 3
-  image:
-    # -- Docker image repository to use for the Cadence server
-    repository: "docker.io/ubercadence/server"
-    # -- Docker image tag to use for the Cadence server
-    tag: "v1.2.16-auto-setup"
-  cpu:
-    limit: "500m"
-    request: "500m"
-  memory:
-    limit: "1Gi"
-    request: "1Gi"
+  
+  # -- Environment variables for history service
+  env: []
+  # - name: ENV_VAR
+  #   value: "value"
 
+  # -- Secret environment variables for history service
+  secretEnv: []
+  # - name: SECRET_ENV_VAR
+  #   value: "value"
+
+  # -- Deployment strategy for history service
+  strategy:
+    type: RollingUpdate
+    # rollingUpdate:
+    #   maxSurge: 25%
+    #   maxUnavailable: 25%
+
+  # -- Resource limits and requests
+  resources:
+    limits:
+      cpu: "500m"
+      memory: "1Gi"
+    requests:
+      cpu: "500m"
+      memory: "1Gi"
+  
+  # -- Pod Disruption Budget
+  podDisruptionBudget:
+    enabled: false # Recommended for multi-replica services
+    minAvailable: 2
+    # maxUnavailable: 1
+  
+  # -- Pod security context (inherits from global if not specified)
+  podSecurityContext: {}
+  
+  # -- Container security context (inherits from global if not specified)
+  containerSecurityContext: {}
+  
+  # -- Affinity rules (inherits from global if not specified)
+  affinity: {}
+  
+  # -- Tolerations (inherits from global if not specified)
+  tolerations: []
+  
+  # -- Node selector (inherits from global if not specified)
+  nodeSelector: {}
+  
+  # -- Additional pod annotations
+  podAnnotations: {}
+  
+  # -- Additional pod labels
+  podLabels: {}
+  
+  # -- Logging configuration (inherits from global log if not specified)
+  log: {}
+    # -- Enable stdout logging
+    # stdout: true
+    # -- Logging level (debug, info, warn, error)
+    # level: "info"
+
+  # -- Priority class name for pod scheduling (inherits from global if not specified)
+  priorityClassName: ""
+  
+  # -- Topology spread constraints (inherits from global if not specified)
+  topologySpreadConstraints: []
+
+# Worker service configuration
 worker:
-  # -- Tchannel port of cadence worker service. DO NOT CHANGE
-  port: 7939
+  # -- Image configuration (inherits from global if not specified)
+  image: {}
+    # repository: "docker.io/ubercadence/server"
+    # tag: ""
+    # pullPolicy: IfNotPresent
+    # imagePullSecrets: []
+      # - name: myregistrykey
+
   # -- Number of worker replicas to deploy
   replicas: 1
-  image:
-    # -- Docker image repository to use for the Cadence server
-    repository: "docker.io/ubercadence/server"
-    # -- Docker image tag to use for the Cadence server
-    tag: "v1.2.16-auto-setup"
-  cpu:
-    limit: "500m"
-    request: "500m"
-  memory:
-    limit: "1Gi"
-    request: "1Gi"
+  
+  # -- Tchannel port of cadence worker service. DO NOT CHANGE
+  port: 7939
+  
+  # -- Environment variables for worker service
+  env: []
+  # - name: ENV_VAR
+  #   value: "value"
 
+  # -- Secret environment variables for worker service
+  secretEnv: []
+  # - name: SECRET_ENV_VAR
+  #   value: "value"
+
+  # -- Deployment strategy for worker service
+  strategy:
+    type: RollingUpdate
+    # rollingUpdate:
+    #   maxSurge: 25%
+    #   maxUnavailable: 25%
+
+  # -- Resource limits and requests
+  resources:
+    limits:
+      cpu: "500m"
+      memory: "1Gi"
+    requests:
+      cpu: "500m"
+      memory: "1Gi"
+  
+  # -- Pod Disruption Budget
+  podDisruptionBudget:
+    enabled: false  # Usually false for single replica services
+    minAvailable: 1
+    # maxUnavailable: 0
+  
+  # -- Pod security context (inherits from global if not specified)
+  podSecurityContext: {}
+  
+  # -- Container security context (inherits from global if not specified)
+  containerSecurityContext: {}
+  
+  # -- Affinity rules (inherits from global if not specified)
+  affinity: {}
+  
+  # -- Tolerations (inherits from global if not specified)
+  tolerations: []
+  
+  # -- Node selector (inherits from global if not specified)
+  nodeSelector: {}
+  
+  # -- Additional pod annotations
+  podAnnotations: {}
+  
+  # -- Additional pod labels
+  podLabels: {}
+  
+  # -- Logging configuration (inherits from global log if not specified)
+  log: {}
+    # -- Enable stdout logging
+    # stdout: true
+    # -- Logging level (debug, info, warn, error)
+    # level: "info"
+
+  # -- Priority class name for pod scheduling (inherits from global if not specified)
+  priorityClassName: ""
+  
+  # -- Topology spread constraints (inherits from global if not specified)
+  topologySpreadConstraints: []
+
+# Web UI configuration
 web:
-  replicas: 1
+  # -- Image configuration for Web UI
   image:
-    # -- Docker image repository to use for the Cadence Web UI
     repository: "docker.io/ubercadence/web"
-    # -- Docker image tag to use for the Cadence Web UI
     tag: "v4.0.3"
-  cpu:
-    limit: "500m"
-    request: "500m"
-  memory:
-    limit: "1Gi"
-    request: "1Gi"
+    pullPolicy: IfNotPresent
+    imagePullSecrets: []
+      # - name: myregistrykey
 
-# -- Dynamic config values to be set in the Cadence server. List of keys can be found at https://github.com/uber/cadence/blob/master/common/dynamicconfig/constants.go
+  # -- Number of web UI replicas to deploy
+  replicas: 1
+  
+  # -- Environment variables for web UI
+  env:
+  - name: CADENCE_WEB_PORT
+    value: "8088"
+
+  # -- Secret environment variables for web UI
+  secretEnv: []
+  # - name: SECRET_ENV_VAR
+  #   value: "value"
+
+  # -- Deployment strategy for web UI
+  strategy:
+    type: RollingUpdate
+    # rollingUpdate:
+    #   maxSurge: 25%
+    #   maxUnavailable: 25%
+
+  # -- Resource limits and requests
+  resources:
+    limits:
+      cpu: "500m"
+      memory: "1Gi"
+    requests:
+      cpu: "500m"
+      memory: "1Gi"
+  
+  # -- Pod Disruption Budget
+  podDisruptionBudget:
+    enabled: false # Usually false for single replica services
+    minAvailable: 1
+    # maxUnavailable: 0
+  
+  # -- Pod security context (inherits from global if not specified)
+  podSecurityContext: {}
+  
+  # -- Container security context (inherits from global if not specified)
+  containerSecurityContext: {}
+  
+  # -- Affinity rules (inherits from global if not specified)
+  affinity: {}
+  
+  # -- Tolerations (inherits from global if not specified)
+  tolerations: []
+  
+  # -- Node selector (inherits from global if not specified)
+  nodeSelector: {}
+  
+  # -- Additional pod annotations
+  podAnnotations: {}
+  
+  # -- Additional pod labels
+  podLabels: {}
+
+  # -- Priority class name for pod scheduling (inherits from global if not specified)
+  priorityClassName: ""
+  
+  # -- Topology spread constraints (inherits from global if not specified)
+  topologySpreadConstraints: []
+
+  # Service configuration
+  service:
+    # -- Service type (ClusterIP, NodePort, LoadBalancer)
+    type: ClusterIP
+    # -- Service port
+    port: 8088
+    # -- NodePort (only if type is NodePort)
+    nodePort: ~
+    # -- LoadBalancer IP (only if type is LoadBalancer)
+    loadBalancerIP: ~
+    # -- LoadBalancer source ranges (only if type is LoadBalancer)
+    loadBalancerSourceRanges: []
+    # -- Service annotations
+    annotations: {}
+      # service.beta.kubernetes.io/aws-load-balancer-type: nlb
+
+  # Cadence web ingress configuration (if needed)
+  ingress:
+    # -- Enable ingress
+    enabled: false
+    # -- Ingress class name
+    className: ""
+    # -- Ingress annotations
+    annotations: {}
+      # kubernetes.io/ingress.class: nginx
+      # kubernetes.io/tls-acme: "true"
+      # cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    # -- Ingress hosts configuration
+    hosts: []
+      # - host: cadence.example.com
+      #   paths:
+      #     - path: /
+      #       pathType: Prefix
+    # -- TLS configuration
+    tls: []
+      # - secretName: cadence-web-tls
+      #   hosts:
+      #     - cadence.example.com
+
+# Service Account configuration
+serviceAccount:
+  # -- Enable service account creation
+  create: true
+  # -- Service account name (generated if not set)
+  name: ""
+  # -- Annotations for service account
+  annotations: {}
+  # -- Automatically mount service account token
+  automountServiceAccountToken: true
+
+# RBAC configuration
+rbac:
+  # -- Enable RBAC creation
+  create: false
+
+# Network Policies
+networkPolicy:
+  # -- Enable network policies
+  enabled: false
+  # -- Ingress rules
+  ingress: []
+  # -- Egress rules
+  egress: []
+
+# Metrics configuration
+metrics:
+  # -- Enable metrics collection
+  enabled: true
+  # -- Metrics port
+  port: 9090
+  # -- Metrics port name
+  portName: metrics
+  
+  # ServiceMonitor for Prometheus Operator
+  serviceMonitor:
+    # -- Enable ServiceMonitor creation
+    enabled: false
+    # -- Additional labels for ServiceMonitor
+    additionalLabels: {}
+    # -- Annotations for ServiceMonitor
+    annotations: {}
+    # -- Namespace for ServiceMonitor (defaults to release namespace)
+    namespace: ""
+    # -- Joblabel for ServiceMonitor
+    jobLabel: ""
+    # -- Namespace selector for ServiceMonitor
+    namespaceSelector: []
+    # -- Scrape interval
+    scrapeInterval: 15s
+    # -- Honor labels from target (False if it's commented | True if it's uncomment)
+    # honorLabels: true
+    # -- Target labels to be added
+    targetLabels: []
+    # -- Relabeling configs
+    relabelings: []
+    # -- Metric relabeling configs
+    metricRelabelings: []
+
+# HorizontalPodAutoscaler configuration
+autoscaling:
+  # -- Enable HPA for frontend service
+  frontend:
+    enabled: false
+    minReplicas: 2
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 80
+    # behavior:
+    #   scaleDown:
+    #     stabilizationWindowSeconds: 300
+    #     policies:
+    #     - type: Percent
+    #       value: 50
+    #       periodSeconds: 60
+    #   scaleUp:
+    #     stabilizationWindowSeconds: 60
+    #     policies:
+    #     - type: Percent
+    #       value: 100
+    #       periodSeconds: 15
+
+  # -- Enable HPA for matching service
+  matching:
+    enabled: false
+    minReplicas: 3
+    maxReplicas: 15
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 80
+
+  # -- Enable HPA for history service
+  history:
+    enabled: false
+    minReplicas: 3
+    maxReplicas: 15
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 80
+
+  # -- Enable HPA for worker service
+  worker:
+    enabled: false
+    minReplicas: 3
+    maxReplicas: 15
+    targetCPUUtilizationPercentage: 70
+    targetMemoryUtilizationPercentage: 80
+
+
+#############################################
+########### CADENCE CONFIGURATION ###########
+#############################################
+
+config:
+  # Log configuration
+  log:
+    # -- Enable stdout logging (inherits from global.log if not specified)
+    stdout: ~
+    # -- Logging level: debug, info, warn, error (inherits from global.log if not specified)
+    level: ~
+    # -- Output file path for logging (if stdout is false)
+    outputFile: ""
+    # -- Log level key name (defaults to "level")
+    levelKey: level
+    # -- Log encoding format: json, console (defaults to "json")
+    encoding: json
+    # -- Allow using environment variables for log configuration. If enabled, it will use ENV variable of each server component.
+    useEnvVars: false
+  
+  # Ringpop configuration for service discovery
+  ringpop:
+    # -- Ringpop cluster name
+    name: "cadence"
+    # -- Bootstrap mode: dns, hosts, file
+    bootstrapMode: "dns"
+    # -- Maximum duration to wait for joining the ring
+    maxJoinDuration: "30s"
+  
+  # Persistence configuration
+  persistence:
+    # -- Number of history shards for partitioning (CANNOT BE CHANGED ONCE SET)
+    numHistoryShards: 4
+    # -- Name of the default datastore
+    defaultStore: "default"
+    # -- Name of the visibility datastore (basic visibility)
+    visibilityStore: "visibility"
+    # -- Name of the advanced visibility datastore (Elasticsearch)
+    advancedVisibilityStore: "es-visibility"
+    # -- Enable persistence latency histogram metrics
+    enablePersistenceLatencyHistogramMetrics: false
+
+    # Database configuration
+    database:
+      # -- Database driver: cassandra, mysql, postgres
+      driver: "cassandra"
+
+      # Common SQL configuration (applies to both MySQL and PostgreSQL)
+      sql:
+        # -- Database host. Can reference Kubernetes services
+        hosts: "mysql-service.mysql-namespace.svc.cluster.local"
+        # -- Database port (will use driver default if not specified)
+        port: null
+        # -- Database name for main data
+        dbname: "cadence"
+        # -- Database name for visibility data
+        visibilityDbname: "cadence_visibility"
+        # -- Database username
+        user: "cadence"
+        # -- Database password
+        password: ""
+        # -- Maximum number of connections
+        maxConns: 20
+        # -- Maximum number of idle connections
+        maxIdleConns: 20
+        # -- Maximum connection lifetime
+        maxConnLifetime: "1h"
+        # -- Number of database shards (default: 1)
+        numShards: 1
+        # -- Encoding type for SQL blobs
+        encodingType: "thriftrw"
+        # -- Decoding types for SQL blobs
+        decodingTypes: ["thriftrw"]
+        # -- Use multiple databases for sharding
+        useMultipleDatabases: false
+        # -- Multiple databases configuration (when useMultipleDatabases is true)
+        multipleDatabasesConfig: []
+        # -- Connection attributes (key-value pairs for connection string)
+        connectAttributes: {}
+        # TLS configuration for SQL databases
+        tls:
+          # -- Enable TLS
+          enabled: false
+          # -- SSL mode (for PostgreSQL: disable, allow, prefer, require, verify-ca, verify-full)
+          # -- For MySQL: false, true, skip-verify, preferred
+          sslMode: ""
+          # -- Path to CA certificate file
+          caFile: ""
+          # -- Multiple CA certificate files
+          caFiles: []
+          # -- Path to client certificate file
+          certFile: ""
+          # -- Path to client private key file
+          keyFile: ""
+          # -- Enable hostname verification (inverse of skipHostVerification)
+          enableHostVerification: true
+          # -- Require client authentication for mutual TLS
+          requireClientAuth: false
+          # -- Server name for certificate verification
+          serverName: ""
+
+      # MySQL-specific configuration
+      mysql:
+        # -- Default port for MySQL (overrides sql.port if specified)
+        port: 3306
+        # -- Enable transaction isolation compatibility mode
+        txIsolationCompat: false
+
+      # PostgreSQL-specific configuration
+      postgres:
+        # -- Default port for PostgreSQL (overrides sql.port if specified)
+        port: 5432
+
+      # Cassandra configuration
+      cassandra:
+        # -- Cassandra hosts. Can reference Kubernetes services
+        hosts: "cassandra-service.cassandra-namespace.svc.cluster.local"
+        # -- Cassandra port
+        port: 9042
+        # -- Cassandra keyspace for main data
+        keyspace: "cadence"
+        # -- Cassandra keyspace for visibility data
+        visibilityKeyspace: "cadence_visibility"
+        # -- Cassandra username (optional)
+        user: ""
+        # -- Cassandra password (optional)
+        password: ""
+        # -- Cassandra protocol version
+        protoVersion: 4
+        # -- AWS region filter for Cassandra (if using AWS Keyspaces)
+        region: ""
+        # -- Datacenter filter for Cassandra
+        datacenter: ""
+        # -- Maximum number of connections
+        maxConns: 10
+        # -- Connection timeout
+        connectTimeout: "10s"
+        # -- Query timeout
+        timeout: "1s"
+        # -- Default consistency level
+        consistency: "LOCAL_QUORUM"
+        # -- Serial consistency level
+        serialConsistency: "LOCAL_SERIAL"
+        # -- Host selection policy
+        hostSelectionPolicy: "tokenaware,roundrobin"
+        # -- Allowed authenticators for custom authentication
+        allowedAuthenticators: []
+        # -- Additional connection attributes
+        connectAttributes: {}
+        # TLS configuration for Cassandra
+        tls:
+          # -- Enable TLS
+          enabled: false
+          # -- CA certificate file to verify server certificates
+          caFile: ""
+          # -- Multiple CA certificate files (alternative to caFile)
+          caFiles: []
+          # -- Client certificate file for mutual TLS
+          certFile: ""
+          # -- Client private key file for mutual TLS
+          keyFile: ""
+          # -- Verify server hostname matches certificate
+          enableHostVerification: true
+          # -- Require client certificate authentication
+          requireClientAuth: false
+          # -- Override server name for certificate verification
+          serverName: ""
+
+    # Elasticsearch configuration for advanced visibility
+    elasticsearch:
+      # -- Enable Elasticsearch for advanced visibility
+      enabled: false
+      # -- Elasticsearch version (v6, v7, v8)
+      version: "v7"
+      # -- Elasticsearch username
+      user: ""
+      # -- Elasticsearch password
+      password: ""
+      # -- Elasticsearch hosts. Can reference Kubernetes services
+      hosts: ""
+      # -- Elasticsearch port
+      port: 9200
+      # -- Elasticsearch visibility index name
+      visibilityIndex: "cadence-visibility"
+      # -- Enable AWS signing (for AWS Elasticsearch)
+      awsSigning:
+        enabled: false
+        region: ""
+        service: "es"
+      # TLS configuration for ElasticSearch
+      tls:
+        # -- Enable TLS
+        enabled: false
+        # -- CA certificate file to verify server certificates
+        caFile: ""
+        # -- Multiple CA certificate files (alternative to caFile)
+        caFiles: []
+        # -- Client certificate file for mutual TLS
+        certFile: ""
+        # -- Client private key file for mutual TLS
+        keyFile: ""
+        # -- Verify server hostname matches certificate
+        enableHostVerification: true
+        # -- Require client certificate authentication
+        requireClientAuth: false
+        # -- Override server name for certificate verification
+        serverName: ""
+  
+  # Cluster configuration
+  cluster:
+    # -- Enable global domain support for multi-cluster deployments
+    enableGlobalDomain: true
+    # -- Version increment used during cluster failover operations
+    failoverVersionIncrement: 10
+    # -- Name of the primary cluster in a multi-cluster setup
+    primaryClusterName: "cluster0"
+    # -- Name of the current cluster
+    currentClusterName: "cluster0"
+    # -- Whether this cluster is not the primary cluster
+    isNotPrimary: false
+    # -- RPC transport protocol (grpc or tchannel)
+    rpcTransport: "grpc"
+    # -- Initial failover version for this cluster
+    initialFailoverVersion: 0
+    # -- Cluster group configuration with additional clusters
+    clusterGroup:
+      # Example of additional cluster configuration:
+      # cluster1:
+      #   enabled: true
+      #   initialFailoverVersion: 0
+      #   rpcAddress: "cadence-cluster1.example.com:7933"
+      #   rpcTransport: "grpc"
+    # -- Cluster redirection policy for cross-cluster operations
+    clusterRedirectionPolicy:
+      # -- Policy for handling cross-cluster requests (noop, selected-apis-forwarding, all-domain-apis-forwarding, selected-apis-forwarding-v2)
+      policy: "noop"
+  
+  # Services configuration
+  services:
+    # -- gRPC max message size
+    grpcMaxMsgSize: 4194304  # 4MB
+
+    # Metrics configuration
+    metrics:
+      # -- Metrics type: statsd, prometheus
+      type: "prometheus"
+      # StatsD configuration
+      statsd:
+        # -- StatsD endpoint. Can reference Kubernetes services
+        endpoint: ""
+        # -- Metric prefixes for each service
+        prefixes:
+          frontend: "cadence-frontend"
+          matching: "cadence-matching"
+          history: "cadence-history"
+          worker: "cadence-worker"
+      # Prometheus configuration
+      prometheus:
+        # -- Timer type: histogram, summary
+        timerType: "histogram"
+    
+    # Pprof configuration
+    pprof:
+      # -- Enable pprof endpoints
+      enabled: false
+      # -- Pprof ports for each service
+      ports:
+        frontend: 6060
+        matching: 6061
+        history: 6062
+        worker: 6063
+
+  # Kafka configuration for async workflows
+  kafka:
+    # -- Enable Kafka for async workflows
+    enabled: false
+    # -- Kafka broker service. Can reference Kubernetes services
+    brokers: "kafka-cluster.kafka.svc.cluster.local"
+    # -- Kafka port
+    port: 9092
+    # -- Kafka visibility topic name
+    visibilityTopic: "cadence-visibility"
+    # -- Kafka visibility DLQ topic name
+    visibilityDLQTopic: "cadence-visibility-dlq"
+    # -- Topic properties (optional)
+    topicProperties: {}
+    # TLS configuration for Kafka
+    tls:
+      # -- Enable TLS
+      enabled: false
+      # -- CA certificate file to verify server certificates
+      caFile: ""
+      # -- Multiple CA certificate files (alternative to caFile)
+      caFiles: []
+      # -- Client certificate file for mutual TLS
+      certFile: ""
+      # -- Client private key file for mutual TLS
+      keyFile: ""
+      # -- Verify server hostname matches certificate
+      enableHostVerification: true
+      # -- Require client certificate authentication
+      requireClientAuth: false
+      # -- Override server name for certificate verification
+      serverName: ""
+    # SASL configuration
+    sasl:
+      # -- Enable SASL authentication
+      enabled: false
+      # -- SASL mechanism: plain, sha512 or sha256
+      mechanism: "PLAIN"
+      # -- SASL username
+      username: ""
+      # -- SASL password
+      password: ""
+  
+  # Archival configuration
+  archival:
+    # History archival configuration
+    history:
+      # -- Archival status: enabled, disabled, paused
+      status: "disabled"
+      # -- Enable reading from archives
+      enableRead: false
+      # -- Archive providers configuration
+      provider:
+        # -- Storage type: filestore, s3, gcs
+        type: "filestore"
+        # Filestore archiver
+        filestore:
+          # -- File mode for archived files
+          fileMode: "0644"
+          # -- Directory mode for archive directories
+          dirMode: "0755"
+        # S3 archiver
+        # - Documentation for S3 here: https://github.com/cadence-workflow/cadence/blob/v1.3.0/common/archiver/s3store/README.md
+        s3store:
+          # -- AWS region
+          region: ""
+          # -- S3 endpoint (for S3-compatible storage)
+          endpoint: ""
+          # -- Force path style URLs
+          s3ForcePathStyle: false
+        # Google Cloud Storage archiver
+        # - Documentation for GStorage here: https://github.com/cadence-workflow/cadence/blob/v1.3.0/common/archiver/gcloud/README.md
+        gstorage:
+          # -- Path to service account key file
+          credentialsPath: ""
+    
+    # Visibility archival configuration
+    visibility:
+      # -- Archival status: enabled, disabled, paused
+      status: "disabled"
+      # -- Enable reading from archives
+      enableRead: false
+      # -- Archive providers configuration
+      provider:
+        # -- Storage type: filestore, s3, gcs
+        type: "filestore"
+        # Filestore archiver
+        filestore:
+          # -- File mode for archived files
+          fileMode: "0644"
+          # -- Directory mode for archive directories
+          dirMode: "0755"
+        # S3 archiver
+        # - Documentation for S3 here: https://github.com/cadence-workflow/cadence/blob/v1.3.0/common/archiver/s3store/README.md
+        s3store:
+          # -- AWS region
+          region: ""
+          # -- S3 endpoint (for S3-compatible storage)
+          endpoint: ""
+          # -- Force path style URLs
+          s3ForcePathStyle: false
+        # Google Cloud Storage archiver
+        # - Documentation for GStorage here: https://github.com/cadence-workflow/cadence/blob/v1.3.0/common/archiver/gcloud/README.md
+        gstorage:
+          # -- Path to service account key file
+          credentialsPath: ""
+
+  # Domain defaults configuration
+  domainDefaults:
+    # -- Default archival settings for new domains
+    # - Documentation for S3 here: https://github.com/cadence-workflow/cadence/blob/v1.3.0/common/archiver/s3store/README.md
+    # - Documentation for GStorage here: https://github.com/cadence-workflow/cadence/blob/v1.3.0/common/archiver/gcloud/README.md
+    archival:
+      history:
+        # -- Default history archival status: enabled, disabled
+        status: "disabled"
+        # -- Default history archival URI
+        URI: ""
+      visibility:
+        # -- Default visibility archival status: enabled, disabled
+        status: "disabled"
+        # -- Default visibility archival URI
+        URI: ""
+  
+  # Blobstore configuration
+  blobstore:
+    # Filestore blobstore
+    filestore:
+      # -- Output directory for blob storage
+      outputDirectory: "/etc/cadence/blobstore"
+  
+  # Public client configuration
+  publicClient:
+    # -- Frontend service address (defaults to current cluster's RPC address)
+    hostPort: ""
+    # -- Transport protocol: grpc, tchannel
+    transport: "grpc"
+    # -- DNS refresh interval
+    refreshInterval: "10s"
+  
+  # Dynamic configuration
+  dynamicConfig:
+    # -- Dynamic config client type: noop, file, configstore
+    client: "file"
+    # File-based dynamic config
+    filebased:
+      # -- Path to dynamic config file
+      filepath: "/etc/cadence/config/dynamicconfig/config.yaml"
+      # -- Poll interval for config changes
+      pollInterval: "60s"
+  
+  # Async workflow queues configuration
+  # This is not operative yet. It will be in next releases.
+  asyncWorkflowQueues:
+    # -- Enable async workflow queues
+    enabled: false
+    # -- Async workflow queue providers
+    default-queue:
+      # -- Queue type: kafka
+      type: "kafka"
+      # -- Queue configuration
+      config:
+        # -- Kafka topic for async workflows
+        topic: "cadence-async-wf"
+        # -- Kafka cluster reference
+        cluster: "default"
+
+# Dynamic configuration
 dynamicConfig:
+  # -- Dynamic config values to be set in the Cadence server
+  # List of keys can be found at https://pkg.go.dev/github.com/uber/cadence@v1.3.0/common/dynamicconfig/dynamicproperties
   values:
     history.workflowIDExternalRateLimitEnabled:
       - value: true
 
-metrics:
-  enabled: true
-  port: 9090
-  portName: metrics
 
-  serviceMonitor:
-    enabled: false
-    additionalLabels: {}
-    # -- Annotations to be added to the ServiceMonitor.
-    annotations: {}
-    ## The label to use to retrieve the job name from.
-    ## jobLabel: "app.kubernetes.io/name"
-    namespace: ""
-    namespaceSelector: {}
-    ## Default: scrape .Release.Namespace or namespaceOverride only
-    ## To scrape all, use the following:
-    ## namespaceSelector:
-    ##   any: true
-    scrapeInterval: 15s
-    # honorLabels: true
-    targetLabels: []
-    relabelings: []
-    metricRelabelings: []
+###############################################################
+################### DATABASE CONFIGURATION ####################
+# Use only if you want to deploy the database from this chart #
+###############################################################
+
+# Cassandra configuration
+cassandra:
+  # -- External Cassandra endpoint to connect to. Required when cassandra.deployment.enabled is set to false
+  endpoint: ""
+  
+  schema:
+    # -- Cassandra schema version of the Cadence keyspace to use
+    version: "0.40"
+    # -- Cassandra schema version of the Cadence visibility keyspace to use
+    visibility_version: "0.9"
+  
+  deployment:
+    # -- When enabled, a single instance Cassandra will be deployed as part of the Helm chart
+    # -- When disabled, the Cassandra deployment is expected to be provided externally
+    enabled: true
+    
+    image:
+      repository: "cassandra"
+      tag: "4.1.1"
+      pullPolicy: IfNotPresent
+    
+    # -- Resource limits and requests for Cassandra
+    resources:
+      limits:
+        cpu: 500m
+        memory: 1Gi
+      requests:
+        cpu: 500m
+        memory: 1Gi
