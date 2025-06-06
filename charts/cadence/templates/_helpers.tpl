@@ -100,19 +100,6 @@ Cadence GRPC Peers endpoint
 {{- end }}
 
 {{/*
-Generate Ringpop seeds for service discovery
-*/}}
-{{- define "cadence.ringpopSeeds" -}}
-{{- $seeds := list }}
-{{- $namespace := .Release.Namespace }}
-{{- $seeds = append $seeds (printf "cadence-frontend-headless.%s.svc.cluster.local:%d" $namespace (.Values.frontend.port | int)) }}
-{{- $seeds = append $seeds (printf "cadence-history-headless.%s.svc.cluster.local:%d" $namespace (.Values.history.port | int)) }}
-{{- $seeds = append $seeds (printf "cadence-matching-headless.%s.svc.cluster.local:%d" $namespace (.Values.matching.port | int)) }}
-{{- $seeds = append $seeds (printf "cadence-worker-headless.%s.svc.cluster.local:%d" $namespace (.Values.worker.port | int)) }}
-{{- join "," $seeds }}
-{{- end }}
-
-{{/*
 Get the Cassandra endpoint
 */}}
 {{- define "cassandra.endpoint" -}}
