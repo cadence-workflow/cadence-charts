@@ -6,6 +6,8 @@ Please create/upvote an [issue]([url](https://github.com/uber/cadence-charts/iss
 
 **What is included:**
 - Cadence backend services as separate deployments: frontend, history, matching, worker.
+- Metrics integration with Prometheus all with the help of Service Monitor
+- Grafana setup to render the metrics collected in above line
 - Customizable replica counts and resource limitations.
 - Customizable dynamic config as a configmap.
 - A single instance ephemeral Cassandra container. This is included so that no external dependency is required to get started. Ideally you should have your own external (hosted or managed) DB instance that you can specify in values.yaml.
@@ -16,7 +18,6 @@ What is missing:
 - Support for advanced visibility stores like Elasticsearch or Pinot.
 - Support for persistent plugins configurations besides Cassandra.
 - Support for fully customizable service config via values.yaml.
-- Metrics integration with Prometheus (and more out of the box prometheus dashboards)
 - Custom annotations/lables/tolerations etc.
 - Support for ingress
 
@@ -35,12 +36,40 @@ If you had already added this repo earlier, run `helm repo update` to retrieve
 the latest versions of the packages.  You can then run `helm search repo
 cadence` to see the charts.
 
-To install the cadence chart:
+To create namespace:
+    kubectl create namespace <namepspace>
 
-    helm install my-cadence cadence/cadence
+To install the cadence chart:
+    helm install my-cadence cadence/cadence -n <namepspace> 
 
 To uninstall the chart:
 
-    helm delete my-cadence
+    helm delete my-cadence -n <namespace if any>
+
+To upgrade the chart to a newer changes/version:
+
+    helm upgrade my-cadence cadence/cadence -n <namespace>
+
+To add repo for Prometheus and Grafana:
+    helm repo add prometheus-community https://prometheus-community.github.io/helm-charts -n <namespace>
+
+To install the prometheus and grafana thats added in previous setup:
+
+    helm install my-prometheus -n <namespace> prometheus-community/kube-prometheus-stack -n <namespace if any>        
+
+To install the cadence chart Grafana/Prometheus along with ServiceMonitor:
+    helm install my-cadence cadence/cadence -n <namepspace>  -f <path to custom_values.yaml>
+
+To access admin password needed to access the Grafana dashboard locally after port forwarding:
+
+    kubectl get secret --namespace <namespace>  my-prometheus-grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
+
+    Now port forward your Prometheus pod to see the metrics thats scraped
+
+To view the status of the release:
+
+    helm status my-cadence -n <namespace>
+    helm status my-prometheus -n <namespace>
+
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for instructions on how to contribute, run samples etc.
