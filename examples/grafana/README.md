@@ -12,8 +12,9 @@ helm repo add cadence https://cadence-workflow.github.io/cadence-charts
 helm install my-cadence cadence/cadence -n <namespace> -f <path to custom values .yaml>
 
 example:
- helm install my-cadence cadence/cadence -n vishwa-test -f /Users/vpatil16/Downloads/custom-values.yaml 
+ helm install my-cadence cadence/cadence -n vishwa-test -f <your/local/path/to/custom-values.yaml>
 ```
+
 3. Upgrade the Cadence Chart (when new changes/versions are available)
 ```
 helm upgrade my-cadence cadence/cadence -n <namespace>
@@ -23,7 +24,6 @@ helm upgrade my-cadence cadence/cadence -n <namespace>
 ```
 helm delete my-cadence -n <namespace>
 ```
-
 
 5. Check the Status of the Cadence Release
 ```
@@ -53,8 +53,6 @@ kubectl get secret --namespace <namespace> my-prometheus-grafana -o jsonpath="{.
 ```
 
 
-
-
 ## 📥 Download and Customize Cadence Grafana Dashboard JSON
 1. Download the Cadence Grafana Dashboard JSON
 
@@ -62,6 +60,15 @@ kubectl get secret --namespace <namespace> my-prometheus-grafana -o jsonpath="{.
 curl https://raw.githubusercontent.com/cadence-workflow/cadence/refs/heads/master/docker/grafana/provisioning/dashboards/cadence-server.json -o cadence-server.json
 ```
 ✅ This fetches the cadence-server.json dashboard from the Cadence GitHub repository.
+
+Other dashboards:
+```
+- https://raw.githubusercontent.com/cadence-workflow/cadence/refs/heads/master/docker/grafana/provisioning/dashboards/cadence-frontend.json
+- https://raw.githubusercontent.com/cadence-workflow/cadence/refs/heads/master/docker/grafana/provisioning/dashboards/cadence-client-overall.json
+- https://raw.githubusercontent.com/cadence-workflow/cadence/refs/heads/master/docker/grafana/provisioning/dashboards/cadence-matching.json
+- https://raw.githubusercontent.com/cadence-workflow/cadence/refs/heads/master/docker/grafana/provisioning/dashboards/cadence-persistence.json
+```
+
 
 2. Add a Comma Before "version" Key (JSON Format Fix)
 ```
