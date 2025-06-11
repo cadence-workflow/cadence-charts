@@ -1,0 +1,26 @@
+# Define this spec locally and pass it to below command (Step 2 in README.md)
+# helm install my-cadence cadence/cadence -n <namepspace> -f <path to custom_values.yaml>
+
+metrics:
+  enabled: true
+  port: 9090
+  portName: metrics
+
+  serviceMonitor:
+    enabled: true
+    # Replace with the namespace where Prometheus is deployed
+    namespace: <namespace>
+    namespaceSelector:
+       # Ensure this matches Prometheus's namespace
+      matchNames:
+        - <namespace where prometheus is deployed>
+    scrapeInterval: 10s
+    additionalLabels:
+       # Ensure this matches Prometheus's Helm release name
+      release: <prometheus-release-name>
+    annotations: {}
+    jobLabel: "app.kubernetes.io/name"
+    targetLabels:
+      - app.kubernetes.io/name
+    relabelings: []
+    metricRelabelings: []
