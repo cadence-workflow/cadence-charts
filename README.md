@@ -44,4 +44,3 @@ To uninstall the chart:
     helm delete my-cadence
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for instructions on how to contribute, run samples etc.
-
