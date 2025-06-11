@@ -31,7 +31,8 @@ kubectl port-forward svc/cadence-frontend 7833:7833 -n cadencetest
 
 4. Register a domain:
 ```
-cadence --address localhost:7833 \
+cadence --env development \
+    --address localhost:7833 \
     --transport grpc \
     --domain samples-domain \
     domain register \
