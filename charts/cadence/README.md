@@ -58,7 +58,7 @@ This chart deploys Uber Cadence server components and web UI.
 | fullnameOverride | string | `nil` | Provide a name to override the full names of resources |
 | global.affinity | object | `{}` | Global affinity rules |
 | global.containerSecurityContext | object | `{}` | Global container security context |
-| global.env | list | `[{"name":"ENABLE_ES","value":"false"},{"name":"SKIP_SCHEMA_SETUP","value":"true"},{"name":"RINGPOP_BOOTSTRAP_MODE","value":"dns"}]` | Global environment variables (shared only by Cadence Server services [frontend, worker, matching and history]) |
+| global.env | list | `[{"name":"ENABLE_ES","value":"false"},{"name":"SKIP_SCHEMA_SETUP","value":"true"},{"name":"RINGPOP_BOOTSTRAP_MODE","value":"dns"},{"name":"BIND_ON_IP","value":"0.0.0.0"}]` | Global environment variables (shared only by Cadence Server services [frontend, worker, matching and history]) |
 | global.image | object | `{"pullPolicy":"IfNotPresent","repository":"docker.io/ubercadence/server","tag":"v1.2.16-auto-setup"}` | Global image configuration (shared only by Cadence Server services [frontend, worker, matching and history]) |
 | global.imagePullSecrets | list | `[]` | Image pull secrets for private registries |
 | global.log | object | `{"level":"info","stdout":true}` | Global logging configuration (shared only by Cadence Server services [frontend, worker, matching and history]) |
