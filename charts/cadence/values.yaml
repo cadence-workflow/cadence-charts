@@ -1098,7 +1098,7 @@ config:
 # Dynamic configuration
 dynamicConfig:
   # -- Dynamic config values to be set in the Cadence server
-  # List of keys can be found at https://pkg.go.dev/github.com/uber/cadence@v1.3.0/common/dynamicconfig/dynamicproperties
+  # List of keys can be found at https://pkg.go.dev/github.com/uber/cadence/common/dynamicconfig/dynamicproperties
   values:
     history.workflowIDExternalRateLimitEnabled:
       - value: true
