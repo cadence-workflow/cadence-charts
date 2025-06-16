@@ -1,9 +1,15 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: cadence-configmap
+  name: {{ include "cadence.fullname" . }}-configmap
   labels:
-    {{- include "cadence.commonlabels" . | nindent 4 }}
+    {{- include "cadence.labels" . | nindent 4 }}
+    app.kubernetes.io/component: config
 data:
   dynamic_config.yaml: |-
-    {{- toYaml .Values.dynamicConfig.values | nindent 12 }}
+    {{- if .Values.dynamicConfig.values }}
+    {{- toYaml .Values.dynamicConfig.values | nindent 4 }}
+    {{- else }}
+    # Default dynamic configuration - empty config is valid
+    {}
+    {{- end }}

@@ -1,106 +1,178 @@
-{{- $dot := . }}
-{{- range $service := (list "frontend" "history" "matching" "worker") }}
-{{- $serviceCfg := index $.Values $service -}}
+{{- range $serviceName := (list "frontend" "history" "matching" "worker") }}
+{{- $service := index $.Values $serviceName }}
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: cadence-{{ $service }}
+  name: {{ include "cadence.fullname" $ }}-{{ $serviceName }}
   labels:
-    app: cadence
-    component: {{ $service }}
-    {{- include "cadence.commonlabels" $dot | nindent 4 }}
+    {{- include "cadence.labels" $ | nindent 4 }}
+    app.kubernetes.io/component: {{ $serviceName }}
 spec:
-  replicas: {{ $serviceCfg.replicas }}
+  replicas: {{ $service.replicas }}
+  {{- with $service.strategy }}
+  strategy:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   selector:
     matchLabels:
-      app: cadence
-      component: {{ $service }}
+      {{- include "cadence.serviceLabels" (dict "serviceName" $serviceName "Values" $.Values "Chart" $.Chart "Release" $.Release) | indent 6 }}
   template:
     metadata:
+      {{- $servicePodAnnotations := $service.podAnnotations | default dict }}
+      {{- if $servicePodAnnotations }}
+      annotations:
+        {{- toYaml $servicePodAnnotations | nindent 8 }}
+      {{- end }}
       labels:
-        app: cadence
-        component: {{ $service }}
+        {{- include "cadence.labels" $ | nindent 8 }}
+        {{- with $service.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+        app.kubernetes.io/component: {{ $serviceName }}
     spec:
+      {{- if $.Values.serviceAccount.create }}
+      serviceAccountName: {{ include "cadence.serviceAccountName" $ }}
+      {{- end }}
+      {{- $globalImagePullSecrets := $.Values.global.imagePullSecrets | default list }}
+      {{- $serviceImagePullSecrets := $service.image.imagePullSecrets | default list }}
+      {{- $mergedImagePullSecrets := concat $globalImagePullSecrets $serviceImagePullSecrets }}
+      {{- if $mergedImagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml $mergedImagePullSecrets | nindent 8 }}
+      {{- end }}
+      {{- $globalPriorityClassName := $.Values.global.priorityClassName | default "" }}
+      {{- $servicePriorityClassName := $service.priorityClassName | default $globalPriorityClassName }}
+      {{- if $servicePriorityClassName }}
+      priorityClassName: {{ $servicePriorityClassName }}
+      {{- end }}
+      {{- $globalPodSecurityContext := $.Values.global.podSecurityContext | default dict }}
+      {{- $servicePodSecurityContext := $service.podSecurityContext | default $globalPodSecurityContext }}
+      {{- if $servicePodSecurityContext }}
+      securityContext:
+        {{- toYaml $servicePodSecurityContext | nindent 8 }}
+      {{- end }}
+      {{- $globalNodeSelector := $.Values.global.nodeSelector | default dict }}
+      {{- $serviceNodeSelector := $service.nodeSelector | default $globalNodeSelector }}
+      {{- if $serviceNodeSelector }}
+      nodeSelector:
+        {{- toYaml $serviceNodeSelector | nindent 8 }}
+      {{- end }}
+      {{- $globalAffinity := $.Values.global.affinity | default dict }}
+      {{- $serviceAffinity := $service.affinity | default $globalAffinity }}
+      {{- if $serviceAffinity }}
+      affinity:
+        {{- toYaml $serviceAffinity | nindent 8 }}
+      {{- end }}
+      {{- $globalTolerations := $.Values.global.tolerations | default list }}
+      {{- $serviceTolerations := $service.tolerations | default $globalTolerations }}
+      {{- if $serviceTolerations }}
+      tolerations:
+        {{- toYaml $serviceTolerations | nindent 8 }}
+      {{- end }}
+      {{- $globalTopologySpreadConstraints := $.Values.global.topologySpreadConstraints | default list }}
+      {{- $serviceTopologySpreadConstraints := $service.topologySpreadConstraints | default $globalTopologySpreadConstraints }}
+      {{- if $serviceTopologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- toYaml $serviceTopologySpreadConstraints | nindent 8 }}
+      {{- end }}
       initContainers:
         - name: wait-for-schema
-          image: {{ $serviceCfg.image.repository }}:{{ $serviceCfg.image.tag }}
-          imagePullPolicy: Always
+          {{- $globalImage := $.Values.global.image | default dict }}
+          {{- $serviceImage := $service.image | default dict }}
+          {{- $repository := $serviceImage.repository | default $globalImage.repository }}
+          {{- $tag := $serviceImage.tag | default $globalImage.tag }}
+          image: {{ $repository }}:{{ $tag }}
+          {{- $pullPolicy := $serviceImage.pullPolicy | default $globalImage.pullPolicy | default "IfNotPresent" }}
+          imagePullPolicy: {{ $pullPolicy }}
           command: ["sh", "-c", "
-      until cqlsh $CASSANDRA_ENDPOINT 9042 -e \"
-        USE cadence;
-        SELECT curr_version FROM schema_version WHERE keyspace_name = 'cadence';\" | grep -q {{ $.Values.cassandra.schema.version }} &&
-      cqlsh  $CASSANDRA_ENDPOINT 9042 -e \"
-        USE cadence_visibility;
-        SELECT curr_version FROM schema_version WHERE keyspace_name = 'cadence_visibility';\" | grep -q {{ $.Values.cassandra.schema.visibility_version }};
-      do
-        echo waiting for both cadence and cadence_visibility schema setup;
-        sleep 10;
-      done"]
+            until cqlsh $CASSANDRA_ENDPOINT 9042 -e \"
+              USE cadence;
+              SELECT curr_version FROM schema_version WHERE keyspace_name = 'cadence';\" | grep -q {{ $.Values.cassandra.schema.version }} &&
+            cqlsh $CASSANDRA_ENDPOINT 9042 -e \"
+              USE cadence_visibility;
+              SELECT curr_version FROM schema_version WHERE keyspace_name = 'cadence_visibility';\" | grep -q {{ $.Values.cassandra.schema.visibility_version }};
+            do
+              echo waiting for both cadence and cadence_visibility schema setup;
+              sleep 10;
+            done"]
           env:
             - name: CASSANDRA_ENDPOINT
-              value: {{ include "cassandra.endpoint" $dot }}
+              value: {{ include "cassandra.endpoint" $ }}
       containers:
-        - name: cadence-{{ $service }}
-          image: {{ $serviceCfg.image.repository }}:{{ $serviceCfg.image.tag }}
-          imagePullPolicy: Always
-          ports:
-            - name: rpc
-              containerPort: {{ $serviceCfg.port }}
-              protocol: TCP
-            {{- if $dot.Values.metrics.enabled }}
-            - name: {{ $dot.Values.metrics.portName }}
-              containerPort: {{ $dot.Values.metrics.port }}
-              protocol: TCP
-            {{- end }}
-             {{- if ne $service "worker" }}
-            - name: grpc
-              containerPort: {{ $serviceCfg.grpcPort }}
-              protocol: TCP
-            {{- end}}
-          volumeMounts:
-            - name: config
-              mountPath: /etc/cadence/config/dynamicconfig/config.yaml
-              subPath: dynamic_config.yaml
-          env:
-            - name: SERVICES
-              value: {{ $service }}
-            - name: BIND_ON_IP
-              value: 0.0.0.0
-            - name: BROADCAST_ADDRESS
-              valueFrom:
-                fieldRef:
-                  fieldPath: status.podIP
-            - name: CASSANDRA_SEEDS
-              value:  {{ include "cassandra.endpoint" $dot }}
-            - name: PROMETHEUS_ENDPOINT
-              value: :9090
-            - name: DYNAMIC_CONFIG_FILE_PATH
-              value: config/dynamicconfig/development.yaml
-            - name: PRIMARY_FRONTEND_SERVICE
-              value: cadence-frontend.{{ $.Release.Namespace }}.svc.cluster.local
-            - name: LOG_LEVEL
-              value: {{ $.Values.log.level }}
-            - name: LOG_STDOUT
-              value: {{ $.Values.log.stdout | quote }}
-            - name: ENABLE_ES
-              value: "false"
-            - name: SKIP_SCHEMA_SETUP
-              value: "true"
-            - name: RINGPOP_BOOTSTRAP_MODE
-              value: dns
-            - name: RINGPOP_SEEDS
-              value: cadence-frontend-headless.{{ $.Release.Namespace }}.svc.cluster.local:{{ $.Values.frontend.port }},cadence-history-headless.{{ $.Release.Namespace }}.svc.cluster.local:{{ $.Values.history.port }},cadence-matching-headless.{{ $.Release.Namespace }}.svc.cluster.local:{{ $.Values.matching.port }},cadence-worker-headless.{{ $.Release.Namespace }}.svc.cluster.local:{{ $.Values.worker.port }}
-
-          resources:
-            limits:
-              cpu: {{ $serviceCfg.cpu.limit }}
-              memory: {{ $serviceCfg.memory.limit }}
-            requests:
-              cpu: {{ $serviceCfg.cpu.request }}
-              memory: {{ $serviceCfg.memory.request }}
-      volumes:
+      - name: cadence-{{ $serviceName }}
+        {{- $globalImage := $.Values.global.image | default dict }}
+        {{- $serviceImage := $service.image | default dict }}
+        {{- $repository := $serviceImage.repository | default $globalImage.repository }}
+        {{- $tag := $serviceImage.tag | default $globalImage.tag }}
+        image: {{ $repository }}:{{ $tag }}
+        {{- $pullPolicy := $serviceImage.pullPolicy | default $globalImage.pullPolicy | default "IfNotPresent" }}
+        imagePullPolicy: {{ $pullPolicy }}
+        {{- $globalContainerSecurityContext := $.Values.global.containerSecurityContext | default dict }}
+        {{- $serviceContainerSecurityContext := $service.containerSecurityContext | default $globalContainerSecurityContext }}
+        {{- if $serviceContainerSecurityContext }}
+        securityContext:
+          {{- toYaml $serviceContainerSecurityContext | nindent 10 }}
+        {{- end }}
+        ports:
+        - name: rpc
+          containerPort: {{ $service.port }}
+          protocol: TCP
+        {{- if ne $serviceName "worker" }}
+        - name: grpc
+          containerPort: {{ $service.grpcPort }}
+          protocol: TCP
+        {{- end }}
+        {{- if $.Values.metrics.enabled }}
+        - name: {{ $.Values.metrics.portName | default "metrics" }}
+          containerPort: {{ $.Values.metrics.port | default 9090 }}
+          protocol: TCP
+        {{- end }}
+        volumeMounts:
         - name: config
-          configMap:
-            name: cadence-configmap
----
+          mountPath: /etc/cadence/config/dynamicconfig/config.yaml
+          subPath: dynamic_config.yaml
+        env:
+        - name: SERVICES
+          value: {{ $serviceName }}
+        - name: DYNAMIC_CONFIG_FILE_PATH
+          value: "/etc/cadence/config/dynamicconfig/config.yaml"
+        - name: PRIMARY_FRONTEND_SERVICE
+          value: {{ include "cadence.fullname" $ }}-frontend.{{ $.Release.Namespace }}.svc.cluster.local
+        - name: BROADCAST_ADDRESS
+          valueFrom:
+            fieldRef:
+              fieldPath: status.podIP
+        - name: CASSANDRA_SEEDS
+          value: {{ include "cassandra.endpoint" $ }}
+        {{- $globalLog := $.Values.global.log | default dict }}
+        {{- $serviceLog := $service.log | default $globalLog }}
+        - name: LOG_LEVEL
+          value: {{ $serviceLog.level | default "info" | quote }}
+        - name: LOG_STDOUT
+          value: {{ $serviceLog.stdout | default true | quote }}
+        - name: RINGPOP_SEEDS
+          value: {{ include "cadence.ringpopSeeds" $ }}
+        {{- $globalEnv := $.Values.global.env | default list }}
+        {{- $serviceEnv := $service.env | default list }}
+        {{- $mergedEnv := concat $globalEnv $serviceEnv }}
+        {{- if $mergedEnv }}
+        {{- toYaml $mergedEnv | nindent 8 }}
+        {{- end }}
+        {{- $globalSecrets := $.Values.global.secretEnv | default list }}
+        {{- $serviceSecrets := $service.secretEnv | default list }}
+        {{- $mergedSecrets := concat $globalSecrets $serviceSecrets }}
+        {{- if $mergedSecrets }}
+        envFrom:
+        - secretRef:
+            name: {{ include "cadence.fullname" $ }}-{{ $serviceName }}-secrets
+        {{- end }}
+        {{- with $service.resources }}
+        resources:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+      volumes:
+      - name: config
+        configMap:
+          name: {{ include "cadence.fullname" $ }}-configmap
 {{- end }}

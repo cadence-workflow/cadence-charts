@@ -4,7 +4,7 @@ kind: Deployment
 metadata:
   name: cassandra-deployment
   labels:
-    {{- include "cadence.commonlabels" . | nindent 4 }}
+    {{- include "cadence.labels" . | nindent 4 }}
 spec:
   replicas: 1
   selector:
@@ -27,11 +27,11 @@ spec:
           value: "256M"
         resources:
           limits:
-            cpu: {{ .Values.cassandra.deployment.cpu.limit }}
-            memory: {{ .Values.cassandra.deployment.memory.limit }}
+            cpu: {{ .Values.cassandra.deployment.resources.limits.cpu }}
+            memory: {{ .Values.cassandra.deployment.resources.limits.memory }}
           requests:
-            cpu: {{ .Values.cassandra.deployment.cpu.request }}
-            memory: {{ .Values.cassandra.deployment.memory.request }}
+            cpu: {{ .Values.cassandra.deployment.resources.requests.cpu }}
+            memory: {{ .Values.cassandra.deployment.resources.requests.memory }}
         readinessProbe:
           exec:
             command: ["sh", "-c", "cqlsh $(hostname -i) -u cassandra -p cassandra -e 'describe keyspaces'"]
