@@ -2,6 +2,24 @@
 
 This guide explains how to build, deploy, and use the Cadence samples container for testing workflows.
 
+## Prerequisites: Domain Registration
+
+Before running any samples, you must first register the domain in Cadence. Execute this command in the cadence-frontend pod:
+
+```bash
+# Access the cadence-frontend pod
+kubectl exec -it <cadence-frontend-pod-name> -n cadence -- /bin/bash
+
+# Register the default domain
+cadence --address $(hostname -i):7833 \
+    --transport grpc \
+    --domain default \
+    domain register \
+    --retention 1
+```
+
+**Note**: Replace `<cadence-frontend-pod-name>` with your actual cadence-frontend pod name and adjust the namespace if needed.
+
 ## Building the Docker Image
 
 Build the samples image with your Cadence host configuration:
