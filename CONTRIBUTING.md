@@ -4,7 +4,7 @@
 
 ```
 helm package ./charts/cadence
-helm template cadence-release cadence-0.1.5.tgz > template_out.yaml
+helm template cadence-release cadence-0.1.8.tgz > template_out.yaml
 ```
 
 ## Build and deploy to a k8s cluster
@@ -12,26 +12,26 @@ helm template cadence-release cadence-0.1.5.tgz > template_out.yaml
 1. Build helm package and deploy to a k8s cluster
 ```
 helm package ./charts/cadence
-helm upgrade --install cadence-release cadence-0.1.5.tgz \
+helm upgrade --install cadence-release cadence-0.1.8.tgz \
     -n cadencetest \
     --create-namespace
 ```
 
 2. Port forward to check the UI
 ```
-kubectl port-forward svc/cadence-web-service 8088:8088 -n cadencetest
+kubectl port-forward svc/cadence-release-web 8088:8088 -n cadencetest
 ```
 
 Visit localhost:8088 and validate it is accessible.
 
 3. Port forward frontend service to run CLI commands
 ```
-kubectl port-forward svc/cadence-frontend 7833:7833 -n cadencetest
+kubectl port-forward svc/cadence-release-frontend 7833:7833 -n cadencetest
 ```
 
-4. Register a domain:
+4. (optional) Register a domain:
 ```
-cadence --env development \
+cadence \
     --address localhost:7833 \
     --transport grpc \
     --domain samples-domain \
@@ -41,11 +41,6 @@ cadence --env development \
 
 5. Run samples:
 - Clone https://github.com/uber-common/cadence-samples
-
-- Change host in config/development.yaml
-```
-host: "localhost:7833"
-```
 
 - Run sample worker (run at samples repo root)
 ```
