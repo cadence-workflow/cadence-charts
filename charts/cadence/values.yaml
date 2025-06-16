@@ -23,6 +23,8 @@ global:
       value: "true"
     - name: RINGPOP_BOOTSTRAP_MODE
       value: "dns"
+    - name: BIND_ON_IP
+      value: 0.0.0.0
 
   # -- Global secret environment variables (shared only by Cadence Server services [frontend, worker, matching and history])
   secretEnv: []
