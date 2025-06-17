@@ -10,7 +10,7 @@ global:
     repository: "docker.io/ubercadence/server"
     tag: "v1.3.1"
     pullPolicy: IfNotPresent
-  
+
   # -- Image pull secrets for private registries
   imagePullSecrets: []
   # - name: myregistrykey
@@ -52,10 +52,10 @@ global:
 
   # -- Global affinity rules
   affinity: {}
-  
+
   # -- Global tolerations
   tolerations: []
-  
+
   # -- Global node selector
   nodeSelector: {}
 
@@ -97,7 +97,7 @@ global:
 
   # -- Global priority class name for pod scheduling
   priorityClassName: ""
-  
+
   # -- Global topology spread constraints
   topologySpreadConstraints: []
   # - maxSkew: 1
