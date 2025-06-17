@@ -146,10 +146,6 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: status.podIP
-        - name: PRIMARY_FRONTEND_SERVICE
-          value: {{ include "cadence.fullname" $ }}-frontend.{{ $.Release.Namespace }}.svc.cluster.local
-        - name: CASSANDRA_SEEDS
-          value: {{ include "cassandra.endpoint" $ }}
         {{- $globalLog := $.Values.global.log | default dict }}
         {{- $serviceLog := $service.log | default $globalLog }}
         - name: LOG_LEVEL
