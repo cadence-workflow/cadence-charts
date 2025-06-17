@@ -8,7 +8,7 @@ global:
   # -- Global image configuration (shared only by Cadence Server services [frontend, worker, matching and history])
   image:
     repository: "docker.io/ubercadence/server"
-    tag: "v1.2.16"
+    tag: "v1.3.1"
     pullPolicy: IfNotPresent
   
   # -- Image pull secrets for private registries
@@ -32,7 +32,7 @@ global:
   #   value: "value"
   # - name: AWS_SECRET_ACCESS_KEY
   #   value: "value"
-  
+ 
   # -- Global pod security context
   podSecurityContext: {}
     # runAsNonRoot: true
@@ -41,7 +41,7 @@ global:
     # fsGroup: 1000
     # seccompProfile:
     #   type: RuntimeDefault
-  
+
   # -- Global container security context
   containerSecurityContext: {}
     # allowPrivilegeEscalation: false
@@ -49,7 +49,7 @@ global:
     # capabilities:
     #   drop:
     #     - ALL
-  
+
   # -- Global affinity rules
   affinity: {}
   
@@ -116,7 +116,7 @@ frontend:
 
   # -- Number of frontend replicas to deploy
   replicas: 1
-  
+
   # -- Tchannel port of cadence frontend service. DO NOT CHANGE
   port: 7933
   # -- GRPC port of cadence frontend service. DO NOT CHANGE
@@ -138,43 +138,43 @@ frontend:
     # rollingUpdate:
     #   maxSurge: 25%
     #   maxUnavailable: 25%
-  
+
   # -- Resource limits and requests
-  resources:
-    limits:
-      cpu: "500m"
-      memory: "1Gi"
-    requests:
-      cpu: "500m"
-      memory: "1Gi"
-  
+  resources: {}
+    # limits:
+    #   cpu: "500m"
+    #   memory: "1Gi"
+    # requests:
+    #   cpu: "500m"
+    #   memory: "1Gi"
+
   # -- Pod Disruption Budget
   podDisruptionBudget:
     enabled: false # Usually false for single replica services
     minAvailable: 1
     # maxUnavailable: 1
-  
+
   # -- Pod security context (inherits from global if not specified)
   podSecurityContext: {}
-  
+
   # -- Container security context (inherits from global if not specified)
   containerSecurityContext: {}
-  
+
   # -- Affinity rules (inherits from global if not specified)
   affinity: {}
-  
+
   # -- Tolerations (inherits from global if not specified)
   tolerations: []
-  
+
   # -- Node selector (inherits from global if not specified)
   nodeSelector: {}
-  
+
   # -- Additional pod annotations
   podAnnotations: {}
-  
+
   # -- Additional pod labels
   podLabels: {}
-  
+
   # -- Logging configuration (inherits from global log if not specified)
   log: {}
     # -- Enable stdout logging
@@ -184,7 +184,7 @@ frontend:
 
   # -- Priority class name for pod scheduling (inherits from global if not specified)
   priorityClassName: ""
-  
+
   # -- Topology spread constraints (inherits from global if not specified)
   topologySpreadConstraints: []
 
@@ -200,7 +200,7 @@ matching:
 
   # -- Number of matching replicas to deploy
   replicas: 1
-  
+
   # -- Tchannel port of cadence matching service. DO NOT CHANGE
   port: 7935
   # -- GRPC port of cadence matching service. DO NOT CHANGE
@@ -222,43 +222,43 @@ matching:
     # rollingUpdate:
     #   maxSurge: 25%
     #   maxUnavailable: 25%
-  
+
   # -- Resource limits and requests
-  resources:
-    limits:
-      cpu: "500m"
-      memory: "1Gi"
-    requests:
-      cpu: "500m"
-      memory: "1Gi"
-  
+  resources: {}
+    # limits:
+    #   cpu: "500m"
+    #   memory: "1Gi"
+    # requests:
+    #   cpu: "500m"
+    #   memory: "1Gi"
+
   # -- Pod Disruption Budget
   podDisruptionBudget:
     enabled: false # Recommended for multi-replica services
     minAvailable: 2
     # maxUnavailable: 1
-  
+
   # -- Pod security context (inherits from global if not specified)
   podSecurityContext: {}
-  
+
   # -- Container security context (inherits from global if not specified)
   containerSecurityContext: {}
-  
+
   # -- Affinity rules (inherits from global if not specified)
   affinity: {}
-  
+
   # -- Tolerations (inherits from global if not specified)
   tolerations: []
-  
+
   # -- Node selector (inherits from global if not specified)
   nodeSelector: {}
-  
+
   # -- Additional pod annotations
   podAnnotations: {}
-  
+
   # -- Additional pod labels
   podLabels: {}
-  
+
   # -- Logging configuration (inherits from global log if not specified)
   log: {}
     # -- Enable stdout logging
@@ -268,7 +268,7 @@ matching:
 
   # -- Priority class name for pod scheduling (inherits from global if not specified)
   priorityClassName: ""
-  
+
   # -- Topology spread constraints (inherits from global if not specified)
   topologySpreadConstraints: []
 
@@ -284,12 +284,12 @@ history:
 
   # -- Number of history replicas to deploy
   replicas: 1
-  
+
   # -- Tchannel port of cadence history service. DO NOT CHANGE
   port: 7934
   # -- GRPC port of cadence history service. DO NOT CHANGE
   grpcPort: 7834
-  
+
   # -- Environment variables for history service
   env: []
   # - name: ENV_VAR
@@ -308,41 +308,41 @@ history:
     #   maxUnavailable: 25%
 
   # -- Resource limits and requests
-  resources:
-    limits:
-      cpu: "500m"
-      memory: "1Gi"
-    requests:
-      cpu: "500m"
-      memory: "1Gi"
-  
+  resources: {}
+    # limits:
+    #   cpu: "500m"
+    #   memory: "1Gi"
+    # requests:
+    #   cpu: "500m"
+    #   memory: "1Gi"
+
   # -- Pod Disruption Budget
   podDisruptionBudget:
     enabled: false # Recommended for multi-replica services
     minAvailable: 2
     # maxUnavailable: 1
-  
+
   # -- Pod security context (inherits from global if not specified)
   podSecurityContext: {}
-  
+
   # -- Container security context (inherits from global if not specified)
   containerSecurityContext: {}
-  
+
   # -- Affinity rules (inherits from global if not specified)
   affinity: {}
-  
+
   # -- Tolerations (inherits from global if not specified)
   tolerations: []
-  
+
   # -- Node selector (inherits from global if not specified)
   nodeSelector: {}
-  
+
   # -- Additional pod annotations
   podAnnotations: {}
-  
+
   # -- Additional pod labels
   podLabels: {}
-  
+
   # -- Logging configuration (inherits from global log if not specified)
   log: {}
     # -- Enable stdout logging
@@ -352,7 +352,7 @@ history:
 
   # -- Priority class name for pod scheduling (inherits from global if not specified)
   priorityClassName: ""
-  
+
   # -- Topology spread constraints (inherits from global if not specified)
   topologySpreadConstraints: []
 
@@ -368,10 +368,10 @@ worker:
 
   # -- Number of worker replicas to deploy
   replicas: 1
-  
+
   # -- Tchannel port of cadence worker service. DO NOT CHANGE
   port: 7939
-  
+
   # -- Environment variables for worker service
   env: []
   # - name: ENV_VAR
@@ -390,41 +390,41 @@ worker:
     #   maxUnavailable: 25%
 
   # -- Resource limits and requests
-  resources:
-    limits:
-      cpu: "500m"
-      memory: "1Gi"
-    requests:
-      cpu: "500m"
-      memory: "1Gi"
-  
+  resources: {}
+    # limits:
+    #   cpu: "500m"
+    #   memory: "1Gi"
+    # requests:
+    #   cpu: "500m"
+    #   memory: "1Gi"
+
   # -- Pod Disruption Budget
   podDisruptionBudget:
     enabled: false  # Usually false for single replica services
     minAvailable: 1
     # maxUnavailable: 0
-  
+
   # -- Pod security context (inherits from global if not specified)
   podSecurityContext: {}
-  
+
   # -- Container security context (inherits from global if not specified)
   containerSecurityContext: {}
-  
+
   # -- Affinity rules (inherits from global if not specified)
   affinity: {}
-  
+
   # -- Tolerations (inherits from global if not specified)
   tolerations: []
-  
+
   # -- Node selector (inherits from global if not specified)
   nodeSelector: {}
-  
+
   # -- Additional pod annotations
   podAnnotations: {}
-  
+
   # -- Additional pod labels
   podLabels: {}
-  
+
   # -- Logging configuration (inherits from global log if not specified)
   log: {}
     # -- Enable stdout logging
@@ -434,7 +434,7 @@ worker:
 
   # -- Priority class name for pod scheduling (inherits from global if not specified)
   priorityClassName: ""
-  
+
   # -- Topology spread constraints (inherits from global if not specified)
   topologySpreadConstraints: []
 
@@ -450,7 +450,7 @@ web:
 
   # -- Number of web UI replicas to deploy
   replicas: 1
-  
+
   # -- Environment variables for web UI
   env:
   - name: CADENCE_WEB_PORT
@@ -469,44 +469,44 @@ web:
     #   maxUnavailable: 25%
 
   # -- Resource limits and requests
-  resources:
-    limits:
-      cpu: "500m"
-      memory: "1Gi"
-    requests:
-      cpu: "500m"
-      memory: "1Gi"
-  
+  resources: {}
+    # limits:
+    #   cpu: "500m"
+    #   memory: "1Gi"
+    # requests:
+    #   cpu: "500m"
+    #   memory: "1Gi"
+
   # -- Pod Disruption Budget
   podDisruptionBudget:
     enabled: false # Usually false for single replica services
     minAvailable: 1
     # maxUnavailable: 0
-  
+
   # -- Pod security context (inherits from global if not specified)
   podSecurityContext: {}
-  
+
   # -- Container security context (inherits from global if not specified)
   containerSecurityContext: {}
-  
+
   # -- Affinity rules (inherits from global if not specified)
   affinity: {}
-  
+
   # -- Tolerations (inherits from global if not specified)
   tolerations: []
-  
+
   # -- Node selector (inherits from global if not specified)
   nodeSelector: {}
-  
+
   # -- Additional pod annotations
   podAnnotations: {}
-  
+
   # -- Additional pod labels
   podLabels: {}
 
   # -- Priority class name for pod scheduling (inherits from global if not specified)
   priorityClassName: ""
-  
+
   # -- Topology spread constraints (inherits from global if not specified)
   topologySpreadConstraints: []
 
@@ -582,7 +582,7 @@ metrics:
   port: 9090
   # -- Metrics port name
   portName: metrics
-  
+
   # ServiceMonitor for Prometheus Operator
   serviceMonitor:
     # -- Enable ServiceMonitor creation
@@ -654,7 +654,6 @@ autoscaling:
     maxReplicas: 15
     targetCPUUtilizationPercentage: 70
     targetMemoryUtilizationPercentage: 80
-
 
 #############################################
 ########### CADENCE CONFIGURATION ###########
@@ -1113,28 +1112,28 @@ dynamicConfig:
 cassandra:
   # -- External Cassandra endpoint to connect to. Required when cassandra.deployment.enabled is set to false
   endpoint: ""
-  
+
   schema:
     # -- Cassandra schema version of the Cadence keyspace to use
     version: "0.40"
     # -- Cassandra schema version of the Cadence visibility keyspace to use
     visibility_version: "0.9"
-  
+
   deployment:
     # -- When enabled, a single instance Cassandra will be deployed as part of the Helm chart
     # -- When disabled, the Cassandra deployment is expected to be provided externally
     enabled: true
-    
+
     image:
       repository: "cassandra"
       tag: "4.1.1"
       pullPolicy: IfNotPresent
-    
+
     # -- Resource limits and requests for Cassandra
     resources:
       limits:
-        cpu: 500m
-        memory: 1Gi
+        cpu: 1
+        memory: 2Gi
       requests:
         cpu: 500m
         memory: 1Gi
