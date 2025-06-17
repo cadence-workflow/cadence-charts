@@ -80,7 +80,6 @@ Create HPA name for a service
 {{- end }}
 
 {{/*
-
 Check if HPA is enabled for a specific service
 */}}
 {{- define "cadence.isHpaEnabled" -}}
