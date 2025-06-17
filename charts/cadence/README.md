@@ -1,6 +1,6 @@
 # cadence
 
-![Version: 0.1.8](https://img.shields.io/badge/Version-0.1.8-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.2.16](https://img.shields.io/badge/AppVersion-1.2.16-informational?style=flat-square)
+![Version: 0.1.9](https://img.shields.io/badge/Version-0.1.9-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.3.1](https://img.shields.io/badge/AppVersion-1.3.1-informational?style=flat-square)
 
 Cadence is a distributed, scalable, durable, and highly available orchestration engine
 to execute asynchronous long-running business logic in a scalable and resilient way.
@@ -59,7 +59,7 @@ This chart deploys Uber Cadence server components and web UI.
 | global.affinity | object | `{}` | Global affinity rules |
 | global.containerSecurityContext | object | `{}` | Global container security context |
 | global.env | list | `[{"name":"ENABLE_ES","value":"false"},{"name":"SKIP_SCHEMA_SETUP","value":"true"},{"name":"RINGPOP_BOOTSTRAP_MODE","value":"dns"},{"name":"BIND_ON_IP","value":"0.0.0.0"}]` | Global environment variables (shared only by Cadence Server services [frontend, worker, matching and history]) |
-| global.image | object | `{"pullPolicy":"IfNotPresent","repository":"docker.io/ubercadence/server","tag":"v1.2.16-auto-setup"}` | Global image configuration (shared only by Cadence Server services [frontend, worker, matching and history]) |
+| global.image | object | `{"pullPolicy":"IfNotPresent","repository":"docker.io/ubercadence/server","tag":"v1.3.1-auto-setup"}` | Global image configuration (shared only by Cadence Server services [frontend, worker, matching and history]) |
 | global.imagePullSecrets | list | `[]` | Image pull secrets for private registries |
 | global.log | object | `{"level":"info","stdout":true}` | Global logging configuration (shared only by Cadence Server services [frontend, worker, matching and history]) |
 | global.log.level | string | `"info"` | Logging level (debug, info, warn, error) |
