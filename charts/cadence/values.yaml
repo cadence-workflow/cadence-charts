@@ -780,10 +780,10 @@ config:
         keyspace: "cadence"
         # -- Cassandra keyspace for visibility data
         visibilityKeyspace: "cadence_visibility"
-        # -- Cassandra username (optional)
-        user: ""
-        # -- Cassandra password (optional)
-        password: ""
+        # -- Cassandra username
+        user: "cassandra"
+        # -- Cassandra password
+        password: "cassandra"
         # -- Cassandra protocol version
         protoVersion: 4
         # -- AWS region filter for Cassandra (if using AWS Keyspaces)
