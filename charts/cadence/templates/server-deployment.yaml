@@ -76,29 +76,29 @@ spec:
       topologySpreadConstraints:
         {{- toYaml $serviceTopologySpreadConstraints | nindent 8 }}
       {{- end }}
-      initContainers:
-        - name: wait-for-schema
-          {{- $globalImage := $.Values.global.image | default dict }}
-          {{- $serviceImage := $service.image | default dict }}
-          {{- $repository := $serviceImage.repository | default $globalImage.repository }}
-          {{- $tag := $serviceImage.tag | default $globalImage.tag }}
-          image: {{ $repository }}:{{ $tag }}
-          {{- $pullPolicy := $serviceImage.pullPolicy | default $globalImage.pullPolicy | default "IfNotPresent" }}
-          imagePullPolicy: {{ $pullPolicy }}
-          command: ["sh", "-c", "
-            until cqlsh $CASSANDRA_ENDPOINT 9042 -e \"
-              USE cadence;
-              SELECT curr_version FROM schema_version WHERE keyspace_name = 'cadence';\" | grep -q {{ $.Values.cassandra.schema.version }} &&
-            cqlsh $CASSANDRA_ENDPOINT 9042 -e \"
-              USE cadence_visibility;
-              SELECT curr_version FROM schema_version WHERE keyspace_name = 'cadence_visibility';\" | grep -q {{ $.Values.cassandra.schema.visibility_version }};
-            do
-              echo waiting for both cadence and cadence_visibility schema setup;
-              sleep 10;
-            done"]
-          env:
-            - name: CASSANDRA_ENDPOINT
-              value: {{ include "cassandra.endpoint" $ }}
+      # initContainers:
+      #   - name: wait-for-schema
+      #     {{- $globalImage := $.Values.global.image | default dict }}
+      #     {{- $serviceImage := $service.image | default dict }}
+      #     {{- $repository := $serviceImage.repository | default $globalImage.repository }}
+      #     {{- $tag := $serviceImage.tag | default $globalImage.tag }}
+      #     image: {{ $repository }}:{{ $tag }}
+      #     {{- $pullPolicy := $serviceImage.pullPolicy | default $globalImage.pullPolicy | default "IfNotPresent" }}
+      #     imagePullPolicy: {{ $pullPolicy }}
+      #     command: ["sh", "-c", "
+      #       until cqlsh $CASSANDRA_ENDPOINT 9042 -e \"
+      #         USE cadence;
+      #         SELECT curr_version FROM schema_version WHERE keyspace_name = 'cadence';\" | grep -q {{ $.Values.cassandra.schema.version }} &&
+      #       cqlsh $CASSANDRA_ENDPOINT 9042 -e \"
+      #         USE cadence_visibility;
+      #         SELECT curr_version FROM schema_version WHERE keyspace_name = 'cadence_visibility';\" | grep -q {{ $.Values.cassandra.schema.visibility_version }};
+      #       do
+      #         echo waiting for both cadence and cadence_visibility schema setup;
+      #         sleep 10;
+      #       done"]
+      #     env:
+      #       - name: CASSANDRA_ENDPOINT
+      #         value: {{ include "cassandra.endpoint" $ }}
       containers:
       - name: cadence-{{ $serviceName }}
         {{- $globalImage := $.Values.global.image | default dict }}
