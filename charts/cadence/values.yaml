@@ -1104,6 +1104,16 @@ dynamicConfig:
     history.workflowIDExternalRateLimitEnabled:
       - value: true
 
+###############################################################
+#################### SCHEMA CONFIGURATION #####################
+###############################################################
+schema:
+  # create:
+  #   enabled: false
+  setup:
+    enabled: true
+  # update:
+  #   enabled: false
 
 ###############################################################
 ################### DATABASE CONFIGURATION ####################
@@ -1114,12 +1124,6 @@ dynamicConfig:
 cassandra:
   # -- External Cassandra endpoint to connect to. Required when cassandra.deployment.enabled is set to false
   endpoint: ""
-
-  schema:
-    # -- Cassandra schema version of the Cadence keyspace to use
-    version: "0.42"
-    # -- Cassandra schema version of the Cadence visibility keyspace to use
-    visibility_version: "0.9"
 
   deployment:
     # -- When enabled, a single instance Cassandra will be deployed as part of the Helm chart

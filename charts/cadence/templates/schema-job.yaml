@@ -1,3 +1,4 @@
+{{- if .Values.schema.setup.enabled -}}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -67,3 +68,4 @@ spec:
             cadence-cassandra-tool --ep $CASSANDRA_SEEDS -k $VISIBILITY_KEYSPACE setup-schema -v 0.0;
             cadence-cassandra-tool --ep $CASSANDRA_SEEDS -k $VISIBILITY_KEYSPACE update-schema -d $VISIBILITY_SCHEMA_DIR;
           ']
+{{- end }}
