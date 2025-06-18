@@ -8,7 +8,7 @@ global:
   # -- Global image configuration (shared only by Cadence Server services [frontend, worker, matching and history])
   image:
     repository: "docker.io/ubercadence/server"
-    tag: "v1.3.1"
+    tag: "v1.3.1-auto-setup"
     pullPolicy: IfNotPresent
 
   # -- Image pull secrets for private registries
@@ -16,7 +16,9 @@ global:
   # - name: myregistrykey
 
   # -- Global environment variables (shared only by Cadence Server services [frontend, worker, matching and history])
-  env: []
+  env:
+  - name: SKIP_SCHEMA_SETUP
+    value: "false"
   # - name: ENV_VAR
   #   value: "value"
   # Enable this variable if you are using Google Storage.
