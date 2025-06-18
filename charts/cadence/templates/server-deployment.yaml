@@ -87,23 +87,26 @@ spec:
         imagePullPolicy: {{ $pullPolicy }}
         {{- $dbDriver := $.Values.config.persistence.database.driver }}
         {{- if eq $dbDriver "cassandra" }}
-        command: ["sh", "-c", "
-          # Extract schema version.
-          file="/etc/cadence/schema/cassandra/version.go"
-          version=$(grep 'const Version' "$file" | awk -F'"' '{print $2}')
-          visibility_version=$(grep 'const VisibilityVersion' "$file" | awk -F'"' '{print $2}')
+        command:
+          - sh
+          - -c
+          - |
+            # Extract schema version.
+            file="/etc/cadence/schema/cassandra/version.go"
+            version=$(grep 'const Version' "$file" | awk -F'"' '{print $2}')
+            visibility_version=$(grep 'const VisibilityVersion' "$file" | awk -F'"' '{print $2}')
 
-          # Check schema version in database.
-          until cqlsh $DB_HOST $DB_PORT -e \"
-            USE cadence;
-            SELECT curr_version FROM schema_version WHERE keyspace_name = 'cadence';\" | grep -q {{ $.Values.cassandra.schema.version | default "1.0" }} &&
-          cqlsh $DB_HOST $DB_PORT -e \"
-            USE cadence_visibility;
-            SELECT curr_version FROM schema_version WHERE keyspace_name = 'cadence_visibility';\" | grep -q {{ $.Values.cassandra.schema.visibility_version | default "1.0" }};
-          do
-            echo 'Waiting for Cassandra schema setup...';
-            sleep 10;
-          done"]
+            # Compare database version with cadence schema version,
+            until cqlsh $DB_HOST $DB_PORT -u $DB_USER -p $CASSANDRA_PASSWORD -e "
+              USE $DB_NAME;
+              SELECT curr_version FROM schema_version WHERE keyspace_name = '$DB_NAME';" | grep -q "$version" &&
+              cqlsh $DB_HOST $DB_PORT -u $DB_USER -p $CASSANDRA_PASSWORD -e "
+              USE $DB_VISIBILITY_NAME;
+              SELECT curr_version FROM schema_version WHERE keyspace_name = '$DB_VISIBILITY_NAME';" | grep -q "$visibility_version"
+            do
+              echo 'Waiting for Cassandra schema to be ready...'
+              sleep 10
+            done
         env:
         - name: DB_HOST
           value: {{ $.Values.config.persistence.database.cassandra.hosts | quote }}
@@ -116,7 +119,10 @@ spec:
         - name: DB_VISIBILITY_NAME
           value: {{ $.Values.config.persistence.database.cassandra.visibilityKeyspace | quote }}
         {{- else if eq $dbDriver "postgres" }}
-        command: ["sh", "-c", "
+        command:
+        - sh
+        - -c
+        - |
           # Extract schema version.
           file="/etc/cadence/schema/postgres/version.go"
           version=$(grep 'const Version' "$file" | awk -F'"' '{print $2}')
@@ -147,7 +153,10 @@ spec:
         - name: DB_VISIBILITY_NAME
           value: {{ $.Values.config.persistence.database.sql.visibilityDbname | quote }}
         {{- else if eq $dbDriver "mysql" }}
-        command: ["sh", "-c", "
+        command:
+        - sh
+        - -c
+        - |
           # Extract schema version.
           file="/etc/cadence/schema/mysql/version.go"
           version=$(grep 'const Version' "$file" | awk -F'"' '{print $2}')
@@ -180,13 +189,14 @@ spec:
         {{- end }}
         {{- $globalSecrets := $.Values.global.secretEnv | default list }}
         {{- $serviceSecrets := $service.secretEnv | default list }}
-        {{- $mergedSecrets := concat $globalSecrets $serviceSecrets }}
+        {{- $userSecrets := concat $globalSecrets $serviceSecrets -}}
+        {{- include "cadence.databaseSecrets" $ -}}
+        {{- $databaseSecrets := $.databaseSecrets | default list -}}
+        {{- $mergedSecrets := concat $userSecrets $databaseSecrets -}}
         {{- if $mergedSecrets }}
         envFrom:
         - secretRef:
             name: {{ include "cadence.fullname" $ }}-{{ $serviceName }}-secrets
-        {{- end }}
-        {{- end }}
         {{- end }}
         volumeMounts:
         {{- with $.Values.global.tls.volumeMounts }}
@@ -252,7 +262,10 @@ spec:
         {{- end }}
         {{- $globalSecrets := $.Values.global.secretEnv | default list }}
         {{- $serviceSecrets := $service.secretEnv | default list }}
-        {{- $mergedSecrets := concat $globalSecrets $serviceSecrets }}
+        {{- $userSecrets := concat $globalSecrets $serviceSecrets -}}
+        {{- include "cadence.databaseSecrets" $ -}}
+        {{- $databaseSecrets := $.databaseSecrets | default list -}}
+        {{- $mergedSecrets := concat $userSecrets $databaseSecrets -}}
         {{- if $mergedSecrets }}
         envFrom:
         - secretRef:
