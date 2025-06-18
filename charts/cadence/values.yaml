@@ -1115,7 +1115,7 @@ cassandra:
 
   schema:
     # -- Cassandra schema version of the Cadence keyspace to use
-    version: "0.40"
+    version: "0.42"
     # -- Cassandra schema version of the Cadence visibility keyspace to use
     visibility_version: "0.9"
 
