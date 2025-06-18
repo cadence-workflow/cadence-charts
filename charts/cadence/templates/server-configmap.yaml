@@ -67,7 +67,7 @@ data:
             user: {{ .Values.config.persistence.database.cassandra.user | quote }}
             {{- end }}
             {{- if .Values.config.persistence.database.cassandra.password }}
-            password: {{ .Values.config.persistence.database.cassandra.password | quote }}
+            password: {{ `{{ .Env.CASSANDRA_PASSWORD }}` }}
             {{- end }}
             protoVersion: {{ .Values.config.persistence.database.cassandra.protoVersion | default 4 }}
             {{- if .Values.config.persistence.database.cassandra.region }}
@@ -148,7 +148,11 @@ data:
             databaseName: {{ .Values.config.persistence.database.sql.dbname | default "cadence" | quote }}
             user: {{ .Values.config.persistence.database.sql.user | default "cadence" | quote }}
             {{- if .Values.config.persistence.database.sql.password }}
-            password: {{ .Values.config.persistence.database.sql.password | quote }}
+            {{- if eq .Values.config.persistence.database.driver "mysql" }}
+            password: {{ `{{ .Env.MYSQL_PWD }}` }}
+            {{- else if eq .Values.config.persistence.database.driver "postgres" }}
+            password: {{ `{{ .Env.POSTGRES_PWD }}` }}
+            {{- end }}
             {{- end }}
             maxConns: {{ .Values.config.persistence.database.sql.maxConns | default 20 }}
             maxIdleConns: {{ .Values.config.persistence.database.sql.maxIdleConns | default 20 }}
@@ -231,7 +235,7 @@ data:
             user: {{ .Values.config.persistence.database.cassandra.user | quote }}
             {{- end }}
             {{- if .Values.config.persistence.database.cassandra.password }}
-            password: {{ .Values.config.persistence.database.cassandra.password | quote }}
+            password: {{ `{{ .Env.CASSANDRA_PASSWORD }}` }}
             {{- end }}
             protoVersion: {{ .Values.config.persistence.database.cassandra.protoVersion | default 4 }}
             {{- if .Values.config.persistence.database.cassandra.region }}
@@ -312,7 +316,11 @@ data:
             databaseName: {{ .Values.config.persistence.database.sql.visibilityDbname | default "cadence_visibility" | quote }}
             user: {{ .Values.config.persistence.database.sql.user | default "cadence" | quote }}
             {{- if .Values.config.persistence.database.sql.password }}
-            password: {{ .Values.config.persistence.database.sql.password | quote }}
+            {{- if eq .Values.config.persistence.database.driver "mysql" }}
+            password: {{ `{{ .Env.MYSQL_PWD }}` }}
+            {{- else if eq .Values.config.persistence.database.driver "postgres" }}
+            password: {{ `{{ .Env.POSTGRES_PWD }}` }}
+            {{- end }}
             {{- end }}
             maxConns: {{ .Values.config.persistence.database.sql.maxConns | default 20 }}
             maxIdleConns: {{ .Values.config.persistence.database.sql.maxIdleConns | default 20 }}
@@ -396,7 +404,7 @@ data:
             username: {{ .Values.config.persistence.elasticsearch.user | quote }}
             {{- end }}
             {{- if .Values.config.persistence.elasticsearch.password }}
-            password: {{ .Values.config.persistence.elasticsearch.password | quote }}
+            password: {{ `{{ .Env.ES_PWD }}` }}
             {{- end }}
             {{- if .Values.config.persistence.elasticsearch.awsSigning.enabled }}
             awsConfig:
@@ -593,7 +601,7 @@ data:
         username: {{ .Values.config.kafka.sasl.username | quote }}
         {{- end }}
         {{- if .Values.config.kafka.sasl.password }}
-        password: {{ .Values.config.kafka.sasl.password | quote }}
+        password: {{ `{{ .Env.SASL_PASSWORD }}` }}
         {{- end }}
         {{- end }}
       clusters:

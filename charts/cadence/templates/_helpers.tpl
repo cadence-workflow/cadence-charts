@@ -92,6 +92,40 @@ Check if HPA is enabled for a specific service
 {{- end }}
 {{- end }}
 
+{{/*
+Helper to generate database and service secrets based on configuration
+*/}}
+{{- define "cadence.databaseSecrets" -}}
+{{- $secrets := list -}}
+
+{{- /* Cassandra password */ -}}
+{{- if and (eq .Values.config.persistence.database.driver "cassandra") .Values.config.persistence.database.cassandra.password -}}
+{{- $secrets = append $secrets (dict "name" "CASSANDRA_PASSWORD" "value" .Values.config.persistence.database.cassandra.password) -}}
+{{- end -}}
+
+{{- /* MySQL password */ -}}
+{{- if and (eq .Values.config.persistence.database.driver "mysql") .Values.config.persistence.database.sql.password -}}
+{{- $secrets = append $secrets (dict "name" "MYSQL_PWD" "value" .Values.config.persistence.database.sql.password) -}}
+{{- end -}}
+
+{{- /* PostgreSQL password */ -}}
+{{- if and (eq .Values.config.persistence.database.driver "postgres") .Values.config.persistence.database.sql.password -}}
+{{- $secrets = append $secrets (dict "name" "POSTGRES_PWD" "value" .Values.config.persistence.database.sql.password) -}}
+{{- end -}}
+
+{{- /* Elasticsearch password */ -}}
+{{- if and .Values.config.persistence.elasticsearch.enabled .Values.config.persistence.elasticsearch.password -}}
+{{- $secrets = append $secrets (dict "name" "ES_PWD" "value" .Values.config.persistence.elasticsearch.password) -}}
+{{- end -}}
+
+{{- /* Kafka SASL password */ -}}
+{{- if and .Values.config.kafka.enabled .Values.config.kafka.sasl.enabled .Values.config.kafka.sasl.password -}}
+{{- $secrets = append $secrets (dict "name" "SASL_PASSWORD" "value" .Values.config.kafka.sasl.password) -}}
+{{- end -}}
+
+{{- $secrets | toYaml -}}
+{{- end -}}
+
 {/*
 Cadence GRPC Peers endpoint
 */}}
