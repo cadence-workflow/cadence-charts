@@ -392,6 +392,7 @@ spec:
         envFrom:
         - secretRef:
             name: {{ include "cadence.fullname" $ }}-{{ $serviceName }}-secrets
+        {{- end }}
         {{- with $service.resources }}
         resources:
           {{- toYaml . | nindent 10 }}
