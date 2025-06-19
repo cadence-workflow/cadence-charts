@@ -16,9 +16,7 @@ global:
   # - name: myregistrykey
 
   # -- Global environment variables (shared only by Cadence Server services [frontend, worker, matching and history])
-  env:
-  - name: SKIP_SCHEMA_SETUP
-    value: "true"
+  env: []
   # - name: ENV_VAR
   #   value: "value"
   # Enable this variable if you are using Google Storage.
