@@ -379,7 +379,7 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: status.podIP
-        {{- if .Values.config.log.useEnvVars }}
+        {{- if $.Values.config.log.useEnvVars }}
         {{- $globalLog := $.Values.global.log | default dict }}
         {{- $serviceLog := $service.log | default $globalLog }}
         - name: LOG_LEVEL
