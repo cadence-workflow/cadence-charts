@@ -865,8 +865,6 @@ config:
   
   # Cluster configuration
   cluster:
-    # -- Enable global domain support for multi-cluster deployments
-    enableGlobalDomain: true
     # -- Version increment used during cluster failover operations
     failoverVersionIncrement: 10
     # -- Name of the primary cluster in a multi-cluster setup

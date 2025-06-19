@@ -451,7 +451,6 @@ data:
 
     # Cluster configuration
     clusterGroupMetadata:
-      enableGlobalDomain: {{ .Values.config.cluster.enableGlobalDomain | default false }}
       failoverVersionIncrement: {{ .Values.config.cluster.failoverVersionIncrement | default 10 }}
       primaryClusterName: {{ .Values.config.cluster.primaryClusterName | default "cluster0" }}
       currentClusterName: {{ .Values.config.cluster.currentClusterName | default "cluster0" }}
@@ -703,7 +702,7 @@ data:
 
     # Dynamic configuration
     {{- if .Values.config.dynamicConfig }}
-    dynamicConfig:
+    dynamicconfig:
       client: {{ .Values.config.dynamicConfig.client | default "file" | quote }}
       {{- if eq .Values.config.dynamicConfig.client "file" }}
       filebased:
