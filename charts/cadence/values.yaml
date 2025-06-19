@@ -1109,6 +1109,7 @@ schema:
     visibility: "0.9"
   # createJob:
   #   enabled: false
+  # No support for mysql & postgresql yet.
   setupJob:
     enabled: true
   # updateJob:
