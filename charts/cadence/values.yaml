@@ -8,7 +8,7 @@ global:
   # -- Global image configuration (shared only by Cadence Server services [frontend, worker, matching and history])
   image:
     repository: "docker.io/ubercadence/server"
-    tag: "v1.3.1"
+    tag: "v1.2.16"
     pullPolicy: IfNotPresent
 
   # -- Image pull secrets for private registries
@@ -443,7 +443,7 @@ web:
   # -- Image configuration for Web UI
   image:
     repository: "docker.io/ubercadence/web"
-    tag: "v4.0.3"
+    tag: "v4.0.5"
     pullPolicy: IfNotPresent
     imagePullSecrets: []
       # - name: myregistrykey
@@ -1105,7 +1105,7 @@ dynamicConfig:
 ###############################################################
 schema:
   version:
-    default: "0.42"
+    default: "0.40"
     visibility: "0.9"
   # createJob:
   #   enabled: false
