@@ -236,6 +236,8 @@ spec:
         {{- toYaml . | nindent 2 }}
         {{- end }}
         {{- else if eq $dbDriver "postgres" }}
+        image: {{ $.Values.schema.checkSchema.postgres.image.repository }}:{{ $.Values.schema.checkSchema.postgres.image.tag }}
+        imagePullPolicy: {{ $.Values.schema.checkSchema.postgres.image.pullPolicy }}
         command:
         - sh
         - -c
@@ -259,6 +261,11 @@ spec:
             sleep 10;
           done"]
         env:
+        # Schema version parameters
+        - name: DEFAULT_VERSION
+          value: {{ $.Values.schema.version.default | quote }}
+        - name: VISIBILITY_VERSION
+          value: {{ $.Values.schema.version.visibility | quote }}
         - name: DB_HOST
           value: {{ $.Values.config.persistence.database.sql.hosts | quote }}
         - name: DB_PORT
@@ -270,6 +277,8 @@ spec:
         - name: DB_VISIBILITY_NAME
           value: {{ $.Values.config.persistence.database.sql.visibilityDbname | quote }}
         {{- else if eq $dbDriver "mysql" }}
+        image: {{ $.Values.schema.checkSchema.mysql.image.repository }}:{{ $.Values.schema.checkSchema.mysql.image.tag }}
+        imagePullPolicy: {{ $.Values.schema.checkSchema.mysql.image.pullPolicy }}
         command:
         - sh
         - -c
@@ -293,6 +302,11 @@ spec:
             sleep 10;
           done"]
         env:
+        # Schema version parameters
+        - name: DEFAULT_VERSION
+          value: {{ $.Values.schema.version.default | quote }}
+        - name: VISIBILITY_VERSION
+          value: {{ $.Values.schema.version.visibility | quote }}
         - name: DB_HOST
           value: {{ $.Values.config.persistence.database.sql.hosts | quote }}
         - name: DB_PORT
