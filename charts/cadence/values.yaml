@@ -692,8 +692,8 @@ config:
     defaultStore: "default"
     # -- Name of the visibility datastore (basic visibility)
     visibilityStore: "visibility"
-    # -- Name of the advanced visibility datastore (Elasticsearch)
-    advancedVisibilityStore: "es-visibility"
+    # -- Name of the advanced visibility datastore [Uncomment only if you have Kafka and ElasticSearch]
+    # advancedVisibilityStore: "es-visibility"
     # -- Enable persistence latency histogram metrics
     enablePersistenceLatencyHistogramMetrics: false
 
