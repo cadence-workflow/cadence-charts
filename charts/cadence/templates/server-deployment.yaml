@@ -318,17 +318,6 @@ spec:
         - name: DB_VISIBILITY_NAME
           value: {{ $.Values.config.persistence.database.sql.visibilityDbname | quote }}
         {{- end }}
-        {{- $globalSecrets := $.Values.global.secretEnv | default list }}
-        {{- $serviceSecrets := $service.secretEnv | default list }}
-        {{- $userSecrets := concat $globalSecrets $serviceSecrets -}}
-        {{- include "cadence.databaseSecrets" $ -}}
-        {{- $databaseSecrets := $.databaseSecrets | default list -}}
-        {{- $mergedSecrets := concat $userSecrets $databaseSecrets -}}
-        {{- if $mergedSecrets }}
-        envFrom:
-        - secretRef:
-            name: {{ include "cadence.fullname" $ }}-{{ $serviceName }}-secrets
-        {{- end }}
         volumeMounts:
         {{- with $.Values.global.tls.volumeMounts }}
         {{- toYaml . | nindent 10 }}
@@ -393,6 +382,16 @@ spec:
         {{- if $mergedEnv }}
         {{- toYaml $mergedEnv | nindent 8 }}
         {{- end }}
+        {{- $globalSecrets := $.Values.global.secretEnv | default list }}
+        {{- $serviceSecrets := $service.secretEnv | default list }}
+        {{- $userSecrets := concat $globalSecrets $serviceSecrets -}}
+        {{- include "cadence.databaseSecrets" $ -}}
+        {{- $databaseSecrets := $.databaseSecrets | default list -}}
+        {{- $mergedSecrets := concat $userSecrets $databaseSecrets -}}
+        {{- if $mergedSecrets }}
+        envFrom:
+        - secretRef:
+            name: {{ include "cadence.fullname" $ }}-{{ $serviceName }}-secrets
         {{- with $service.resources }}
         resources:
           {{- toYaml . | nindent 10 }}
