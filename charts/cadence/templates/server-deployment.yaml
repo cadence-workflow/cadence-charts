@@ -78,46 +78,163 @@ spec:
       {{- end }}
       initContainers:
       - name: wait-for-schema
-        {{- $globalImage := $.Values.global.image | default dict }}
-        {{- $serviceImage := $service.image | default dict }}
-        {{- $repository := $serviceImage.repository | default $globalImage.repository }}
-        {{- $tag := $serviceImage.tag | default $globalImage.tag }}
-        image: {{ $repository }}:{{ $tag }}
-        {{- $pullPolicy := $serviceImage.pullPolicy | default $globalImage.pullPolicy | default "IfNotPresent" }}
-        imagePullPolicy: {{ $pullPolicy }}
         {{- $dbDriver := $.Values.config.persistence.database.driver }}
         {{- if eq $dbDriver "cassandra" }}
+        image: {{ $.Values.schema.checkSchema.cassandra.image.repository }}:{{ $.Values.schema.checkSchema.cassandra.image.tag }}
+        imagePullPolicy: {{ $.Values.schema.checkSchema.cassandra.image.pullPolicy }}
         command:
           - sh
           - -c
           - |
-            # Extract schema version.
-            file="/etc/cadence/schema/cassandra/version.go"
-            version=$(grep 'const Version' "$file" | awk -F'"' '{print $2}')
-            visibility_version=$(grep 'const VisibilityVersion' "$file" | awk -F'"' '{print $2}')
+            # Create .cassandra directory for cqlshrc if it doesn't exist
+            mkdir -p ~/.cassandra
 
-            # Compare database version with cadence schema version,
-            until cqlsh $DB_HOST $DB_PORT -u $DB_USER -p $CASSANDRA_PASSWORD -e "
+            # Build cqlshrc configuration file
+            cat > ~/.cassandra/cqlshrc << EOF
+            [connection]
+            hostname = $DB_HOST
+            port = $DB_PORT
+
+            EOF
+
+            # Add authentication section if user is provided
+            if [ -n "$DB_USER" ] && [ "$DB_USER" != "" ]; then
+              cat >> ~/.cassandra/cqlshrc << EOF
+            [authentication]
+            username = $DB_USER
+            EOF
+              # Add password if provided
+              if [ -n "$CASSANDRA_PASSWORD" ] && [ "$CASSANDRA_PASSWORD" != "" ]; then
+                cat >> ~/.cassandra/cqlshrc << EOF
+            password = $CASSANDRA_PASSWORD
+            EOF
+                  fi
+                fi
+
+            # Add SSL configuration if enabled
+            if [ "$TLS_ENABLED" = "true" ]; then
+              cat >> ~/.cassandra/cqlshrc << EOF
+
+            [ssl]
+            EOF
+              # Add certificate file if specified (CA certificate)
+              if [ -n "$SSL_CERTFILE" ] && [ "$SSL_CERTFILE" != "" ]; then
+                cat >> ~/.cassandra/cqlshrc << EOF
+            certfile = $SSL_CERTFILE
+            EOF
+              fi
+              
+              # Add client certificate for mutual TLS
+              if [ -n "$SSL_CLIENT_CERT" ] && [ "$SSL_CLIENT_CERT" != "" ]; then
+                cat >> ~/.cassandra/cqlshrc << EOF
+            usercert = $SSL_CLIENT_CERT
+            EOF
+              fi
+              
+              # Add client private key for mutual TLS
+              if [ -n "$SSL_CLIENT_KEY" ] && [ "$SSL_CLIENT_KEY" != "" ]; then
+                cat >> ~/.cassandra/cqlshrc << EOF
+            userkey = $SSL_CLIENT_KEY
+            EOF
+              fi
+              
+              # Add validate setting
+              if [ -n "$SSL_VALIDATE" ] && [ "$SSL_VALIDATE" != "" ]; then
+                cat >> ~/.cassandra/cqlshrc << EOF
+            validate = $SSL_VALIDATE
+            EOF
+              else
+                cat >> ~/.cassandra/cqlshrc << EOF
+            validate = true
+            EOF
+              fi
+            fi
+
+            # Debug: Show generated cqlshrc (remove in production)
+            echo "Generated cqlshrc:"
+            cat ~/.cassandra/cqlshrc
+            echo "---"
+
+            # Build cqlsh command
+            build_cqlsh_cmd() {
+              local cmd="cqlsh"
+              
+              # Add SSL option if enabled
+              if [ "$TLS_ENABLED" = "true" ]; then
+                cmd="$cmd --ssl"
+              fi
+              
+              echo "$cmd"
+            }
+
+            # Compare database version with cadence schema version
+            until $(build_cqlsh_cmd) -e "
               USE $DB_NAME;
-              SELECT curr_version FROM schema_version WHERE keyspace_name = '$DB_NAME';" | grep -q "$version" &&
-              cqlsh $DB_HOST $DB_PORT -u $DB_USER -p $CASSANDRA_PASSWORD -e "
-              USE $DB_VISIBILITY_NAME;
-              SELECT curr_version FROM schema_version WHERE keyspace_name = '$DB_VISIBILITY_NAME';" | grep -q "$visibility_version"
+              SELECT curr_version FROM schema_version WHERE keyspace_name = '$DB_NAME';" | grep -q "$DEFAULT_VERSION" &&
+              $(build_cqlsh_cmd) -e "
+              USE $DB_VISIBILITY_NAME;  
+              SELECT curr_version FROM schema_version WHERE keyspace_name = '$DB_VISIBILITY_NAME';" | grep -q "$VISIBILITY_VERSION"
             do
               echo 'Waiting for Cassandra schema to be ready...'
               sleep 10
             done
         env:
+        # Schema version parameters
+        - name: DEFAULT_VERSION
+          value: {{ $.Values.schema.version.default | quote }}
+        - name: VISIBILITY_VERSION
+          value: {{ $.Values.schema.version.visibility | quote }}
+        # Basic connection parameters
         - name: DB_HOST
           value: {{ $.Values.config.persistence.database.cassandra.hosts | quote }}
         - name: DB_PORT
           value: {{ $.Values.config.persistence.database.cassandra.port | quote }}
-        - name: DB_USER
-          value: {{ $.Values.config.persistence.database.cassandra.user | quote }}
         - name: DB_NAME
           value: {{ $.Values.config.persistence.database.cassandra.keyspace | quote }}
         - name: DB_VISIBILITY_NAME
           value: {{ $.Values.config.persistence.database.cassandra.visibilityKeyspace | quote }}
+        # Authentication parameters (conditional)
+        {{- if $.Values.config.persistence.database.cassandra.user }}
+        - name: DB_USER
+          value: {{ $.Values.config.persistence.database.cassandra.user | quote }}
+        {{- end }}
+        {{- if $.Values.config.persistence.database.cassandra.password }}
+        - name: CASSANDRA_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "cadence.fullname" $ }}-{{ $serviceName }}-secrets
+              key: CASSANDRA_PASSWORD
+        {{- end }}
+        # TLS Configuration
+        - name: TLS_ENABLED
+          value: {{ $.Values.config.persistence.database.cassandra.tls.enabled | quote }}
+        {{- if $.Values.config.persistence.database.cassandra.tls.enabled }}
+        # SSL_CERTFILE environment variable (CA certificate)
+        {{- if $.Values.config.persistence.database.cassandra.tls.caFile }}
+        - name: SSL_CERTFILE
+          value: {{ $.Values.config.persistence.database.cassandra.tls.caFile | quote }}
+        {{- else if $.Values.config.persistence.database.cassandra.tls.caFiles }}
+        - name: SSL_CERTFILE
+          value: {{ index $.Values.config.persistence.database.cassandra.tls.caFiles 0 | quote }}
+        {{- end }}
+        # Client certificate for mutual TLS
+        {{- if $.Values.config.persistence.database.cassandra.tls.certFile }}
+        - name: SSL_CLIENT_CERT
+          value: {{ $.Values.config.persistence.database.cassandra.tls.certFile | quote }}
+        {{- end }}
+        # Client private key for mutual TLS
+        {{- if $.Values.config.persistence.database.cassandra.tls.keyFile }}
+        - name: SSL_CLIENT_KEY
+          value: {{ $.Values.config.persistence.database.cassandra.tls.keyFile | quote }}
+        {{- end }}
+        # SSL_VALIDATE environment variable
+        - name: SSL_VALIDATE
+          value: {{ $.Values.config.persistence.database.cassandra.tls.enableHostVerification | quote }}
+        {{- end }}
+        volumeMounts:
+        {{- with $.Values.global.tls.volumeMounts }}
+        {{- toYaml . | nindent 2 }}
+        {{- end }}
         {{- else if eq $dbDriver "postgres" }}
         command:
         - sh
@@ -259,17 +376,6 @@ spec:
         {{- $mergedEnv := concat $globalEnv $serviceEnv }}
         {{- if $mergedEnv }}
         {{- toYaml $mergedEnv | nindent 8 }}
-        {{- end }}
-        {{- $globalSecrets := $.Values.global.secretEnv | default list }}
-        {{- $serviceSecrets := $service.secretEnv | default list }}
-        {{- $userSecrets := concat $globalSecrets $serviceSecrets -}}
-        {{- include "cadence.databaseSecrets" $ -}}
-        {{- $databaseSecrets := $.databaseSecrets | default list -}}
-        {{- $mergedSecrets := concat $userSecrets $databaseSecrets -}}
-        {{- if $mergedSecrets }}
-        envFrom:
-        - secretRef:
-            name: {{ include "cadence.fullname" $ }}-{{ $serviceName }}-secrets
         {{- end }}
         {{- with $service.resources }}
         resources:

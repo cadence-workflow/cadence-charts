@@ -1,4 +1,4 @@
-{{- if .Values.schema.setup.enabled -}}
+{{- if .Values.schema.setupJob.enabled -}}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -25,12 +25,8 @@ spec:
           ']
         # Check Cassandra readiness using cqlsh
         - name: check-cassandra-ready
-          {{- $globalImage := $.Values.global.image | default dict }}
-          {{- $serviceImage := $.Values.history.image | default dict }}
-          {{- $repository := $serviceImage.repository | default $globalImage.repository }}
-          {{- $tag := $serviceImage.tag | default $globalImage.tag }}
-          image: {{ $repository }}:{{ $tag }}
-          imagePullPolicy: Always
+          image: {{ $.Values.schema.checkSchema.cassandra.image.repository }}:{{ $.Values.schema.checkSchema.cassandra.image.tag }}
+          imagePullPolicy: {{ $.Values.schema.checkSchema.cassandra.image.pullPolicy }}
           command: ['sh', '-c', '
             until cqlsh {{ include "cassandra.endpoint" . }} 9042 -e "SHOW VERSION"; do
               echo "Waiting for Cassandra to start...";

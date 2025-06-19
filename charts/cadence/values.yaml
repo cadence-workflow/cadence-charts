@@ -8,7 +8,7 @@ global:
   # -- Global image configuration (shared only by Cadence Server services [frontend, worker, matching and history])
   image:
     repository: "docker.io/ubercadence/server"
-    tag: "v1.3.1-auto-setup"
+    tag: "v1.3.1"
     pullPolicy: IfNotPresent
 
   # -- Image pull secrets for private registries
@@ -1108,12 +1108,31 @@ dynamicConfig:
 #################### SCHEMA CONFIGURATION #####################
 ###############################################################
 schema:
-  # create:
+  version:
+    default: "0.42"
+    visibility: "0.9"
+  # createJob:
   #   enabled: false
-  setup:
+  setupJob:
     enabled: true
-  # update:
+  # updateJob:
   #   enabled: false
+  checkSchema:
+    cassandra:
+      image:
+        repository: "cassandra"
+        tag: "4.0"
+        pullPolicy: IfNotPresent
+    mysql:
+      image:
+        repository: "docker.io/ubercadence/web"
+        tag: "v4.0.3"
+        pullPolicy: IfNotPresent
+    postgres:
+      image:
+        repository: "docker.io/ubercadence/web"
+        tag: "v4.0.3"
+        pullPolicy: IfNotPresent
 
 ###############################################################
 ################### DATABASE CONFIGURATION ####################
