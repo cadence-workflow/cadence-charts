@@ -379,12 +379,14 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: status.podIP
+        {{- if .Values.config.log.useEnvVars }}
         {{- $globalLog := $.Values.global.log | default dict }}
         {{- $serviceLog := $service.log | default $globalLog }}
         - name: LOG_LEVEL
           value: {{ $serviceLog.level | default "info" | quote }}
         - name: LOG_STDOUT
           value: {{ $serviceLog.stdout | default true | quote }}
+        {{- end }}
         {{- $globalEnv := $.Values.global.env | default list }}
         {{- $serviceEnv := $service.env | default list }}
         {{- $mergedEnv := concat $globalEnv $serviceEnv }}
