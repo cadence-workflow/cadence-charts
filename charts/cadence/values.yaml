@@ -8,7 +8,7 @@ global:
   # -- Global image configuration (shared only by Cadence Server services [frontend, worker, matching and history])
   image:
     repository: "docker.io/ubercadence/server"
-    tag: "v1.2.16"
+    tag: "v1.3.1"
     pullPolicy: IfNotPresent
 
   # -- Image pull secrets for private registries
@@ -1067,8 +1067,8 @@ config:
   
   # Dynamic configuration
   dynamicConfig:
-    # -- Dynamic config client type: noop, file, configstore
-    client: "file"
+    # -- Dynamic config client type: noop, filebased, configstore
+    client: "filebased"
     # File-based dynamic config
     filebased:
       # -- Path to dynamic config file
@@ -1097,15 +1097,22 @@ dynamicConfig:
   # -- Dynamic config values to be set in the Cadence server
   # List of keys can be found at https://pkg.go.dev/github.com/uber/cadence/common/dynamicconfig/dynamicproperties
   values:
-    history.workflowIDExternalRateLimitEnabled:
-      - value: true
+    system.minRetentionDays:
+    - value: 0
+      constraints: {}
+    # Visibility write have to be set in funtion of advanced visibility or not. See https://pkg.go.dev/github.com/uber/cadence/common/dynamicconfig/dynamicproperties#WriteVisibilityStoreName for more information.
+    system.writeVisibilityStoreName:
+      - value: "db"
+    # Visibility read have to be set in funtion of advanced visibility or not. See https://pkg.go.dev/github.com/uber/cadence/common/dynamicconfig/dynamicproperties#ReadVisibilityStoreName for more information.
+    system.readVisibilityStoreName:
+      - value: "db"
 
 ###############################################################
 #################### SCHEMA CONFIGURATION #####################
 ###############################################################
 schema:
   version:
-    default: "0.40"
+    default: "0.42"
     visibility: "0.9"
   # createJob:
   #   enabled: false
