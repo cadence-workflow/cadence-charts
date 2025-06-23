@@ -356,47 +356,135 @@ spec:
         image: {{ $.Values.schema.checkSchema.mysql.image.repository }}:{{ $.Values.schema.checkSchema.mysql.image.tag }}
         imagePullPolicy: {{ $.Values.schema.checkSchema.mysql.image.pullPolicy }}
         command:
-        - sh
-        - -c
-        - |
-          # Extract schema version.
-          file="/etc/cadence/schema/mysql/version.go"
-          version=$(grep 'const Version' "$file" | awk -F'"' '{print $2}')
-          visibility_version=$(grep 'const VisibilityVersion' "$file" | awk -F'"' '{print $2}')
+          - sh
+          - -c
+          - |
+            # Build connection string based on TLS configuration
+            build_mysql_cmd() {
+              local cmd="mariadb -h $DB_HOST -P $DB_PORT -u $DB_USER"
+              
+              # Add SSL parameters if TLS is enabled
+              if [ "$TLS_ENABLED" = "true" ]; then
+                # SSL Mode mapping for MySQL
+                case "$SSL_MODE" in
+                  "disable"|"false")
+                    cmd="$cmd --ssl-mode=DISABLED"
+                    ;;
+                  "preferred")
+                    cmd="$cmd --ssl-mode=PREFERRED"
+                    ;;
+                  "required"|"true")
+                    cmd="$cmd --ssl-mode=REQUIRED"
+                    ;;
+                  "verify-ca")
+                    cmd="$cmd --ssl-mode=VERIFY_CA"
+                    ;;
+                  "verify-identity")
+                    cmd="$cmd --ssl-mode=VERIFY_IDENTITY"
+                    ;;
+                  *)
+                    cmd="$cmd --ssl-mode=REQUIRED"
+                    ;;
+                esac
+                
+                # Add SSL certificate parameters if provided
+                if [ -n "$SSL_CERTFILE" ]; then
+                  cmd="$cmd --ssl-ca=$SSL_CERTFILE"
+                fi
+                
+                if [ -n "$SSL_CLIENT_CERT" ]; then
+                  cmd="$cmd --ssl-cert=$SSL_CLIENT_CERT"
+                fi
+                
+                if [ -n "$SSL_CLIENT_KEY" ]; then
+                  cmd="$cmd --ssl-key=$SSL_CLIENT_KEY"
+                fi
+              fi
+              
+              echo "$cmd"
+            }
 
-          # Check schema version in database.
-          until mysqladmin ping -h$DB_HOST -P$DB_PORT -u$DB_USER -p$DB_PASSWORD --silent; do
-            echo 'Waiting for MySQL to be ready...';
-            sleep 5;
-          done;
-          until mysql -h$DB_HOST -P$DB_PORT -u$DB_USER -p$DB_PASSWORD $DB_NAME -e \"
-            SELECT version FROM schema_version WHERE db_name = 'cadence' ORDER BY version DESC LIMIT 1;\" &&
-          mysql -h$DB_HOST -P$DB_PORT -u$DB_USER -p$DB_PASSWORD $DB_VISIBILITY_NAME -e \"
-            SELECT version FROM schema_version WHERE db_name = 'cadence_visibility' ORDER BY version DESC LIMIT 1;\";
-          do
-            echo 'Waiting for MySQL schema setup...';
-            sleep 10;
-          done"]
+            # Wait for MySQL to be ready
+            echo "Waiting for MySQL to be ready..."
+            until mariadb-admin ping -h $DB_HOST -P $DB_PORT -u $DB_USER --password=$MYSQL_PWD --skip-ssl --silent; do
+              echo 'MySQL is not ready yet...'
+              sleep 5
+            done
+            echo "MySQL is ready!"
+
+            # Check schema versions in both databases
+            echo "Checking schema versions..."
+            until 
+              # Check main database schema version
+              $(build_mysql_cmd) -D $DB_NAME -e "
+                SELECT curr_version FROM schema_version WHERE db_name = '$DB_NAME';" | grep -q "$DEFAULT_VERSION" &&
+              
+              # Check visibility database schema version (only if ES is not enabled)
+              {
+                if [ "$ES_ENABLED" = "false" ]; then
+                  $(build_mysql_cmd) -D $DB_VISIBILITY_NAME -e "
+                    SELECT curr_version FROM schema_version WHERE db_name = '$DB_VISIBILITY_NAME';" | grep -q "$VISIBILITY_VERSION"
+                else
+                  true
+                fi
+              }
+            do
+              echo 'Waiting for MySQL schema to be ready...'
+              sleep 10
+            done
+            
+            echo "MySQL schema is ready!"
         env:
         # Schema version parameters
         - name: DEFAULT_VERSION
           value: {{ $.Values.schema.version.default | quote }}
         - name: VISIBILITY_VERSION
           value: {{ $.Values.schema.version.visibility | quote }}
+        - name: ES_ENABLED
+          value: {{ $.Values.config.persistence.elasticsearch.enabled | quote }}
+        # Basic connection parameters
         - name: DB_HOST
           value: {{ $.Values.config.persistence.database.sql.hosts | quote }}
         - name: DB_PORT
-          value: {{ $.Values.config.persistence.database.mysql.port | default $.Values.config.persistence.database.sql.port | default 3306 }}
-        - name: DB_USER
-          value: {{ $.Values.config.persistence.database.sql.user | quote }}
+          value: {{ $.Values.config.persistence.database.mysql.port | default $.Values.config.persistence.database.sql.port | default 3306 | quote }}
         - name: DB_NAME
           value: {{ $.Values.config.persistence.database.sql.dbname | quote }}
         - name: DB_VISIBILITY_NAME
           value: {{ $.Values.config.persistence.database.sql.visibilityDbname | quote }}
+        - name: DB_USER
+          value: {{ $.Values.config.persistence.database.sql.user | quote }}
+        # Authentication parameters
+        - name: MYSQL_PWD
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "cadence.fullname" $ }}-{{ $serviceName }}-secrets
+              key: MYSQL_PWD
+        # TLS Configuration
+        - name: TLS_ENABLED
+          value: {{ $.Values.config.persistence.database.sql.tls.enabled | quote }}
+        {{- if $.Values.config.persistence.database.sql.tls.enabled }}
+        # SSL Mode
+        - name: SSL_MODE
+          value: {{ $.Values.config.persistence.database.sql.tls.sslMode | default "require" | quote }}
+        # SSL_CERTFILE environment variable (CA certificate)
+        {{- if $.Values.config.persistence.database.sql.tls.caFile }}
+        - name: SSL_CERTFILE
+          value: {{ $.Values.config.persistence.database.sql.tls.caFile | quote }}
+        {{- else if $.Values.config.persistence.database.sql.tls.caFiles }}
+        - name: SSL_CERTFILE
+          value: {{ index $.Values.config.persistence.database.sql.tls.caFiles 0 | quote }}
         {{- end }}
-        volumeMounts:
-        {{- with $.Values.global.tls.volumeMounts }}
-        {{- toYaml . | nindent 10 }}
+        # Client certificate for mutual TLS
+        {{- if $.Values.config.persistence.database.sql.tls.certFile }}
+        - name: SSL_CLIENT_CERT
+          value: {{ $.Values.config.persistence.database.sql.tls.certFile | quote }}
+        {{- end }}
+        # Client private key for mutual TLS
+        {{- if $.Values.config.persistence.database.sql.tls.keyFile }}
+        - name: SSL_CLIENT_KEY
+          value: {{ $.Values.config.persistence.database.sql.tls.keyFile | quote }}
+        {{- end }}
+        {{- end }}
         {{- end }}
         volumeMounts:
         {{- with $.Values.global.tls.volumeMounts }}
