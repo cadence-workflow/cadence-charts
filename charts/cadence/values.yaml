@@ -1131,13 +1131,13 @@ schema:
         pullPolicy: IfNotPresent
     mysql:
       image:
-        repository: "docker.io/ubercadence/web"
-        tag: "v4.0.3"
+        repository: "alpine/mysql"
+        tag: "latest"
         pullPolicy: IfNotPresent
     postgres:
       image:
         repository: "alpine/psql"
-        tag: "17.4"
+        tag: "latest"
         pullPolicy: IfNotPresent
 
 ###############################################################
