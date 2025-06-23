@@ -365,25 +365,23 @@ spec:
               
               # Add SSL parameters if TLS is enabled
               if [ "$TLS_ENABLED" = "true" ]; then
-                # SSL Mode mapping for MySQL
                 case "$SSL_MODE" in
                   "disable"|"false")
-                    cmd="$cmd --ssl-mode=DISABLED"
+                    cmd="$cmd --skip-ssl"
                     ;;
                   "preferred")
-                    cmd="$cmd --ssl-mode=PREFERRED"
                     ;;
-                  "required"|"true")
-                    cmd="$cmd --ssl-mode=REQUIRED"
+                  "required"|"true"|"skip-verify")
+                    cmd="$cmd --ssl --ssl-verify-server-cert=false"
                     ;;
                   "verify-ca")
-                    cmd="$cmd --ssl-mode=VERIFY_CA"
+                    cmd="$cmd --ssl --ssl-verify-server-cert"
                     ;;
                   "verify-identity")
-                    cmd="$cmd --ssl-mode=VERIFY_IDENTITY"
+                    cmd="$cmd --ssl --ssl-verify-server-cert"
                     ;;
                   *)
-                    cmd="$cmd --ssl-mode=REQUIRED"
+                    cmd="$cmd --ssl"
                     ;;
                 esac
                 
