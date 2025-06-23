@@ -171,9 +171,15 @@ spec:
             until $(build_cqlsh_cmd) -e "
               USE $DB_NAME;
               SELECT curr_version FROM schema_version WHERE keyspace_name = '$DB_NAME';" | grep -q "$DEFAULT_VERSION" &&
-              $(build_cqlsh_cmd) -e "
-              USE $DB_VISIBILITY_NAME;  
-              SELECT curr_version FROM schema_version WHERE keyspace_name = '$DB_VISIBILITY_NAME';" | grep -q "$VISIBILITY_VERSION"
+              {
+                if [ "$ES_ENABLED" = "false" ]; then
+                  $(build_cqlsh_cmd) -e "
+                    USE $DB_VISIBILITY_NAME;  
+                    SELECT curr_version FROM schema_version WHERE keyspace_name = '$DB_VISIBILITY_NAME';" | grep -q "$VISIBILITY_VERSION"
+                else
+                  true
+                fi
+              }
             do
               echo 'Waiting for Cassandra schema to be ready...'
               sleep 10
@@ -184,6 +190,8 @@ spec:
           value: {{ $.Values.schema.version.default | quote }}
         - name: VISIBILITY_VERSION
           value: {{ $.Values.schema.version.visibility | quote }}
+        - name: ES_ENABLED
+          value: {{ $.Values.config.persistence.elasticsearch.enabled | quote }}
         # Basic connection parameters
         - name: DB_HOST
           value: {{ $.Values.config.persistence.database.cassandra.hosts | quote }}
