@@ -239,51 +239,119 @@ spec:
         - name: SSL_VALIDATE
           value: {{ $.Values.config.persistence.database.cassandra.tls.enableHostVerification | quote }}
         {{- end }}
-        volumeMounts:
-        {{- with $.Values.global.tls.volumeMounts }}
-        {{- toYaml . | nindent 8 }}
-        {{- end }}
         {{- else if eq $dbDriver "postgres" }}
         image: {{ $.Values.schema.checkSchema.postgres.image.repository }}:{{ $.Values.schema.checkSchema.postgres.image.tag }}
         imagePullPolicy: {{ $.Values.schema.checkSchema.postgres.image.pullPolicy }}
         command:
-        - sh
-        - -c
-        - |
-          # Extract schema version.
-          file="/etc/cadence/schema/postgres/version.go"
-          version=$(grep 'const Version' "$file" | awk -F'"' '{print $2}')
-          visibility_version=$(grep 'const VisibilityVersion' "$file" | awk -F'"' '{print $2}')
+          - sh
+          - -c
+          - |
+            # Build connection string based on TLS configuration
+            build_psql_cmd() {
+              local cmd="psql -h $DB_HOST -p $DB_PORT -U $DB_USER"
+              
+              # Add SSL mode if TLS is enabled
+              if [ "$TLS_ENABLED" = "true" ] && [ -n "$SSL_MODE" ]; then
+                cmd="$cmd --set=sslmode=$SSL_MODE"
+                
+                # Add SSL certificate parameters if provided
+                if [ -n "$SSL_CERTFILE" ]; then
+                  cmd="$cmd --set=sslrootcert=$SSL_CERTFILE"
+                fi
+                
+                if [ -n "$SSL_CLIENT_CERT" ]; then
+                  cmd="$cmd --set=sslcert=$SSL_CLIENT_CERT"
+                fi
+                
+                if [ -n "$SSL_CLIENT_KEY" ]; then
+                  cmd="$cmd --set=sslkey=$SSL_CLIENT_KEY"
+                fi
+              fi
+              
+              echo "$cmd"
+            }
 
-          # Check schema version in database.
-          until pg_isready -h $DB_HOST -p $DB_PORT -U $DB_USER -d $DB_NAME; do
-            echo 'Waiting for PostgreSQL to be ready...';
-            sleep 5;
-          done;
-          until PGPASSWORD=$DB_PASSWORD psql -h $DB_HOST -p $DB_PORT -U $DB_USER -d $DB_NAME -c \"
-            SELECT version FROM schema_version WHERE db_name = 'cadence' ORDER BY version DESC LIMIT 1;\" &&
-          PGPASSWORD=$DB_PASSWORD psql -h $DB_HOST -p $DB_PORT -U $DB_USER -d $DB_VISIBILITY_NAME -c \"
-            SELECT version FROM schema_version WHERE db_name = 'cadence_visibility' ORDER BY version DESC LIMIT 1;\";
-          do
-            echo 'Waiting for PostgreSQL schema setup...';
-            sleep 10;
-          done"]
+            # Wait for PostgreSQL to be ready
+            echo "Waiting for PostgreSQL to be ready..."
+            until pg_isready -h $DB_HOST -p $DB_PORT -U $DB_USER; do
+              echo 'PostgreSQL is not ready yet...'
+              sleep 5
+            done
+            echo "PostgreSQL is ready!"
+
+            # Check schema versions in both databases
+            echo "Checking schema versions..."
+            until 
+              # Check main database schema version
+              PGPASSWORD=$POSTGRES_PWD $(build_psql_cmd) -d $DB_NAME -t -c "
+                SELECT curr_version FROM schema_version WHERE db_name = '$DB_NAME';" | grep -q "$DEFAULT_VERSION" &&
+              
+              # Check visibility database schema version (only if ES is not enabled)
+              {
+                if [ "$ES_ENABLED" = "false" ]; then
+                  PGPASSWORD=$POSTGRES_PWD $(build_psql_cmd) -d $DB_VISIBILITY_NAME -t -c "
+                    SELECT curr_version FROM schema_version WHERE db_name = '$DB_VISIBILITY_NAME';" | grep -q "$VISIBILITY_VERSION"
+                else
+                  true
+                fi
+              }
+            do
+              echo 'Waiting for PostgreSQL schema to be ready...'
+              sleep 10
+            done
+            
+            echo "PostgreSQL schema is ready!"
         env:
         # Schema version parameters
         - name: DEFAULT_VERSION
           value: {{ $.Values.schema.version.default | quote }}
         - name: VISIBILITY_VERSION
           value: {{ $.Values.schema.version.visibility | quote }}
+        - name: ES_ENABLED
+          value: {{ $.Values.config.persistence.elasticsearch.enabled | quote }}
+        # Basic connection parameters
         - name: DB_HOST
           value: {{ $.Values.config.persistence.database.sql.hosts | quote }}
         - name: DB_PORT
-          value: {{ $.Values.config.persistence.database.postgres.port | default $.Values.config.persistence.database.sql.port | default 5432 }}
-        - name: DB_USER
-          value: {{ $.Values.config.persistence.database.sql.user | quote }}
+          value: {{ $.Values.config.persistence.database.postgres.port | default $.Values.config.persistence.database.sql.port | default 5432 | quote }}
         - name: DB_NAME
           value: {{ $.Values.config.persistence.database.sql.dbname | quote }}
         - name: DB_VISIBILITY_NAME
           value: {{ $.Values.config.persistence.database.sql.visibilityDbname | quote }}
+        - name: DB_USER
+          value: {{ $.Values.config.persistence.database.sql.user | quote }}
+        # Authentication parameters
+        - name: POSTGRES_PWD
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "cadence.fullname" $ }}-{{ $serviceName }}-secrets
+              key: POSTGRES_PWD
+        # TLS Configuration
+        - name: TLS_ENABLED
+          value: {{ $.Values.config.persistence.database.sql.tls.enabled | quote }}
+        {{- if $.Values.config.persistence.database.sql.tls.enabled }}
+        # SSL Mode
+        - name: SSL_MODE
+          value: {{ $.Values.config.persistence.database.sql.tls.sslMode | default "require" | quote }}
+        # SSL_CERTFILE environment variable (CA certificate)
+        {{- if $.Values.config.persistence.database.sql.tls.caFile }}
+        - name: SSL_CERTFILE
+          value: {{ $.Values.config.persistence.database.sql.tls.caFile | quote }}
+        {{- else if $.Values.config.persistence.database.sql.tls.caFiles }}
+        - name: SSL_CERTFILE
+          value: {{ index $.Values.config.persistence.database.sql.tls.caFiles 0 | quote }}
+        {{- end }}
+        # Client certificate for mutual TLS
+        {{- if $.Values.config.persistence.database.sql.tls.certFile }}
+        - name: SSL_CLIENT_CERT
+          value: {{ $.Values.config.persistence.database.sql.tls.certFile | quote }}
+        {{- end }}
+        # Client private key for mutual TLS
+        {{- if $.Values.config.persistence.database.sql.tls.keyFile }}
+        - name: SSL_CLIENT_KEY
+          value: {{ $.Values.config.persistence.database.sql.tls.keyFile | quote }}
+        {{- end }}
+        {{- end }}
         {{- else if eq $dbDriver "mysql" }}
         image: {{ $.Values.schema.checkSchema.mysql.image.repository }}:{{ $.Values.schema.checkSchema.mysql.image.tag }}
         imagePullPolicy: {{ $.Values.schema.checkSchema.mysql.image.pullPolicy }}
@@ -329,6 +397,10 @@ spec:
         volumeMounts:
         {{- with $.Values.global.tls.volumeMounts }}
         {{- toYaml . | nindent 10 }}
+        {{- end }}
+        volumeMounts:
+        {{- with $.Values.global.tls.volumeMounts }}
+        {{- toYaml . | nindent 8 }}
         {{- end }}
       containers:
       - name: cadence-{{ $serviceName }}

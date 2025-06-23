@@ -1133,8 +1133,8 @@ schema:
         pullPolicy: IfNotPresent
     postgres:
       image:
-        repository: "docker.io/ubercadence/web"
-        tag: "v4.0.3"
+        repository: "alpine/psql"
+        tag: "17.4"
         pullPolicy: IfNotPresent
 
 ###############################################################
