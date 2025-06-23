@@ -61,7 +61,7 @@ global:
 
   # -- Global TLS volumes configuration
   tls:
-    # -- Additional volumes for TLS certificates
+    # -- Additional volumes for TLS certificates (The mode is important to have the minimum permissions)
     volumes: []
     # - name: multiple-ca-certs
     #   configMap:
@@ -71,20 +71,23 @@ global:
     #         path: root-ca.pem
     #       - key: intermediate-ca.crt
     #         path: intermediate-ca.pem
-    # - name: postgres-tls-certs
+    # - name: example-tls-certs
     #   secret:
-    #     secretName: postgres-ssl-secret
+    #     secretName: example-crt-secret
     #     items:
-    #       - key: root.crt
-    #         path: postgresql-ca.pem
-    #       - key: postgresql.crt
-    #         path: postgresql-client.pem
-    #       - key: postgresql.key
-    #         path: postgresql-client-key.pem
+    #       - key: ca.crt
+    #         path: ca.pem
+    #         mode: 0644 
+    #       - key: tls.crt
+    #         path: client.pem
+    #         mode: 0644 
+    #       - key: tls.key
+    #         path: client-key.pem
+    #         mode: 0600 
 
     # -- Volume mounts for TLS certificates
     volumeMounts: []
-    # - name: name-of-the-volume
+    # - name: example-tls-certs
     #   mountPath: /etc/cadence/ssl/
     #   readOnly: true
 
