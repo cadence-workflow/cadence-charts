@@ -543,8 +543,8 @@ spec:
                 fi
                 
                 # Add authentication if user/password provided
-                if [ -n "$ES_USER" ] && [ -n "$ES_PASSWORD" ]; then
-                    CURL_OPTS="$CURL_OPTS -u $ES_USER:$ES_PASSWORD"
+                if [ -n "$ES_USER" ] && [ -n "$ES_PWD" ]; then
+                    CURL_OPTS="$CURL_OPTS -u $ES_USER:$ES_PWD"
                 fi
                 
                 # Set global variables
