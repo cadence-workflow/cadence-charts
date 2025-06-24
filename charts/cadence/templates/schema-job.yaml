@@ -1,7 +1,8 @@
+{{- if .Values.schema.setupJob.enabled -}}
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: cadence-schema-setup-v{{ .Values.cassandra.schema.version | replace "." "-" }}
+  name: cadence-schema-setup
   labels:
     {{- include "cadence.labels" . | nindent 4 }}
 spec:
@@ -24,12 +25,8 @@ spec:
           ']
         # Check Cassandra readiness using cqlsh
         - name: check-cassandra-ready
-          {{- $globalImage := $.Values.global.image | default dict }}
-          {{- $serviceImage := $.Values.history.image | default dict }}
-          {{- $repository := $serviceImage.repository | default $globalImage.repository }}
-          {{- $tag := $serviceImage.tag | default $globalImage.tag }}
-          image: {{ $repository }}:{{ $tag }}
-          imagePullPolicy: Always
+          image: {{ $.Values.schema.checkSchema.cassandra.image.repository }}:{{ $.Values.schema.checkSchema.cassandra.image.tag }}
+          imagePullPolicy: {{ $.Values.schema.checkSchema.cassandra.image.pullPolicy }}
           command: ['sh', '-c', '
             until cqlsh {{ include "cassandra.endpoint" . }} 9042 -e "SHOW VERSION"; do
               echo "Waiting for Cassandra to start...";
@@ -67,3 +64,4 @@ spec:
             cadence-cassandra-tool --ep $CASSANDRA_SEEDS -k $VISIBILITY_KEYSPACE setup-schema -v 0.0;
             cadence-cassandra-tool --ep $CASSANDRA_SEEDS -k $VISIBILITY_KEYSPACE update-schema -d $VISIBILITY_SCHEMA_DIR;
           ']
+{{- end }}
