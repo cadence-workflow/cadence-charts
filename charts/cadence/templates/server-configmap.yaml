@@ -396,9 +396,16 @@ data:
         # Elasticsearch for advanced visibility
         es-visibility:
           elasticsearch:
+            disableSniff: {{ .Values.config.persistence.elasticsearch.disableSniff | default true }}
             version: {{ .Values.config.persistence.elasticsearch.version | default "v7" | quote }}
             url:
-              scheme: {{ ternary "https" "http" .Values.config.persistence.elasticsearch.tls.enabled }}
+              {{- if .Values.config.persistence.elasticsearch.protocol }}
+              scheme: {{ .Values.config.persistence.elasticsearch.protocol | default "http" }}
+              {{- else if and .Values.config.persistence.elasticsearch.tls.enabled (not .Values.config.persistence.elasticsearch.protocol) }}
+              scheme: "https"
+              {{- else }}
+              scheme: "http"
+              {{- end }}
               host: {{ .Values.config.persistence.elasticsearch.hosts }}:{{ .Values.config.persistence.elasticsearch.port | default 9200 }}
             indices:
               visibility: {{ .Values.config.persistence.elasticsearch.visibilityIndex | default "cadence-visibility" | quote }}
