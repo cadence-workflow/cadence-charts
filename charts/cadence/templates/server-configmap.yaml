@@ -53,7 +53,7 @@ data:
       # DataStores configuration
       datastores:
         # Default datastore
-        default:
+        {{ .Values.config.persistence.defaultStore | default "default" }}:
           {{- if eq .Values.config.persistence.database.driver "cassandra" }}
           nosql:
             pluginName: "cassandra"
@@ -222,7 +222,7 @@ data:
         {{- if ne .Values.config.persistence.elasticsearch.enabled true }}
         # Visibility datastore
         {{ if .Values.config.persistence.visibilityStore -}}
-        visibility:
+        {{ .Values.config.persistence.visibilityStore | default "visibility" }}:
           {{- if eq .Values.config.persistence.database.driver "cassandra" }}
           nosql:
             pluginName: "cassandra"
