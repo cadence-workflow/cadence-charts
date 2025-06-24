@@ -36,6 +36,7 @@ global:
           items:
             - key: ca.crt
               path: ca.pem
+              mode: 0644
       
       # Client certificate and key from Secret
       - name: database-client-cert
@@ -44,8 +45,10 @@ global:
           items:
             - key: tls.crt
               path: client.pem
+              mode: 0644
             - key: tls.key
               path: client-key.pem
+              mode: 0600  # Restricted permissions for private key
     
     volumeMounts:
       # Mount CA certificate
@@ -58,6 +61,24 @@ global:
         mountPath: /etc/cadence/ssl/client
         readOnly: true
 ```
+
+#### File Permissions and Security
+
+The `mode` field in Kubernetes volume items controls the file permissions of mounted certificates:
+
+- **`mode: 0644`**: Read-write for owner, read-only for group and others
+  - Use for: CA certificates, client certificates (public parts)
+  - Security level: Standard - suitable for non-sensitive certificate files
+  
+- **`mode: 0600`**: Read-write for owner only, no access for group or others
+  - Use for: Private keys, sensitive certificate files
+  - Security level: Restrictive - required for private key security
+  
+- **`mode: 0400`**: Read-only for owner, no access for group or others
+  - Use for: Extra security on private keys in read-only scenarios
+  - Security level: Maximum restriction
+
+**⚠️ Security Best Practice**: Always use `mode: 0600` or `mode: 0400` for private key files to prevent unauthorized access.
 
 #### Database-specific Examples
 
@@ -72,10 +93,13 @@ global:
           items:
             - key: root.crt
               path: postgresql-ca.pem
+              mode: 0644
             - key: postgresql.crt
               path: postgresql-client.pem
+              mode: 0644
             - key: postgresql.key
               path: postgresql-client-key.pem
+              mode: 0600  # Private key - restricted access
       
       # MySQL TLS certificates
       - name: mysql-tls-certs
@@ -84,10 +108,13 @@ global:
           items:
             - key: ca.pem
               path: mysql-ca.pem
+              mode: 0644
             - key: client-cert.pem
               path: mysql-client-cert.pem
+              mode: 0644
             - key: client-key.pem
               path: mysql-client-key.pem
+              mode: 0600  # Private key - restricted access
       
       # Elasticsearch TLS certificates
       - name: elasticsearch-tls-certs
@@ -96,10 +123,13 @@ global:
           items:
             - key: ca.crt
               path: elasticsearch-ca.pem
+              mode: 0644
             - key: client.crt
               path: elasticsearch-client.pem
+              mode: 0644
             - key: client.key
               path: elasticsearch-client-key.pem
+              mode: 0600  # Private key - restricted access
       
       # Kafka TLS certificates
       - name: kafka-tls-certs
@@ -108,10 +138,13 @@ global:
           items:
             - key: ca.crt
               path: kafka-ca.pem
+              mode: 0644
             - key: client.crt
               path: kafka-client.pem
+              mode: 0644
             - key: client.key
               path: kafka-client-key.pem
+              mode: 0600  # Private key - restricted access
     
     volumeMounts:
       - name: postgres-tls-certs
@@ -140,8 +173,10 @@ global:
           items:
             - key: root-ca.crt
               path: root-ca.pem
+              mode: 0644
             - key: intermediate-ca.crt
               path: intermediate-ca.pem
+              mode: 0644
     volumeMounts:
       - name: multiple-ca-certs
         mountPath: /etc/cadence/ssl/ca-bundle
@@ -173,6 +208,7 @@ global:
 - **Usage**: Required to verify server certificates and establish trust
 - **Example with volumes**: `"/etc/cadence/ssl/ca/ca.pem"`
 - **Direct path**: `"/etc/ssl/certs/ca-certificates.crt"`
+- **File permissions**: Recommended `mode: 0644`
 
 ### `caFiles`
 - **Type**: `array`
@@ -182,6 +218,7 @@ global:
 - **Usage**: Alternative to `caFile` when multiple CA certificates are needed
 - **Note**: Can be used together with `caFile` - all certificates are combined
 - **Example with volumes**: `["/etc/cadence/ssl/ca-bundle/root-ca.pem", "/etc/cadence/ssl/ca-bundle/intermediate-ca.pem"]`
+- **File permissions**: Recommended `mode: 0644`
 
 ### `certFile`
 - **Type**: `string`
@@ -191,6 +228,7 @@ global:
 - **Usage**: Required for mutual TLS (mTLS) authentication
 - **Dependencies**: Must be used together with `keyFile`
 - **Example with volumes**: `"/etc/cadence/ssl/client/client.pem"`
+- **File permissions**: Recommended `mode: 0644`
 
 ### `keyFile`
 - **Type**: `string`
@@ -199,8 +237,9 @@ global:
 - **Format**: PEM format (RSA or ECDSA)
 - **Usage**: Required for mutual TLS (mTLS) authentication
 - **Dependencies**: Must be used together with `certFile`
-- **Security**: Should have restricted file permissions (600)
+- **Security**: Should have restricted file permissions
 - **Example with volumes**: `"/etc/cadence/ssl/client/client-key.pem"`
+- **File permissions**: **Required** `mode: 0600` or `mode: 0400`
 
 ### `enableHostVerification`
 - **Type**: `boolean`
@@ -249,10 +288,13 @@ global:
           items:
             - key: root.crt
               path: postgresql-ca.pem
+              mode: 0644
             - key: postgresql.crt
               path: postgresql-client.pem
+              mode: 0644
             - key: postgresql.key
               path: postgresql-client-key.pem
+              mode: 0600  # Critical: Private key security
     volumeMounts:
       - name: postgres-tls-certs
         mountPath: /etc/cadence/ssl/postgres
@@ -283,10 +325,13 @@ global:
           items:
             - key: ca.pem
               path: mysql-ca.pem
+              mode: 0644
             - key: client-cert.pem
               path: mysql-client-cert.pem
+              mode: 0644
             - key: client-key.pem
               path: mysql-client-key.pem
+              mode: 0600  # Critical: Private key security
     volumeMounts:
       - name: mysql-tls-certs
         mountPath: /etc/cadence/ssl/mysql
@@ -317,10 +362,13 @@ global:
           items:
             - key: ca.crt
               path: cassandra-ca.pem
+              mode: 0644
             - key: client.crt
               path: cassandra-client.pem
+              mode: 0644
             - key: client.key
               path: cassandra-client-key.pem
+              mode: 0600  # Critical: Private key security
     volumeMounts:
       - name: cassandra-tls-certs
         mountPath: /etc/cadence/ssl/cassandra
@@ -350,10 +398,13 @@ global:
           items:
             - key: ca.crt
               path: elasticsearch-ca.pem
+              mode: 0644
             - key: client.crt
               path: elasticsearch-client.pem
+              mode: 0644
             - key: client.key
               path: elasticsearch-client-key.pem
+              mode: 0600  # Critical: Private key security
     volumeMounts:
       - name: elasticsearch-tls-certs
         mountPath: /etc/cadence/ssl/elasticsearch
@@ -381,10 +432,13 @@ global:
           items:
             - key: ca.crt
               path: kafka-ca.pem
+              mode: 0644
             - key: client.crt
               path: kafka-client.pem
+              mode: 0644
             - key: client.key
               path: kafka-client-key.pem
+              mode: 0600  # Critical: Private key security
     volumeMounts:
       - name: kafka-tls-certs
         mountPath: /etc/cadence/ssl/kafka
@@ -412,10 +466,13 @@ global:
           items:
             - key: ca-bundle.crt
               path: ca-bundle.pem
+              mode: 0644
             - key: client.crt
               path: client.pem
+              mode: 0644
             - key: client.key
               path: client-key.pem
+              mode: 0600  # Critical: Private key security
     volumeMounts:
       - name: shared-tls-bundle
         mountPath: /etc/cadence/ssl/shared
@@ -451,9 +508,30 @@ kafka:
 
 ```yaml
 # For any database/service with self-signed certificates
+global:
+  tls:
+    volumes:
+      - name: dev-tls-certs
+        secret:
+          secretName: dev-ssl-secret
+          items:
+            - key: self-signed-ca.crt
+              path: self-signed-ca.pem
+              mode: 0644
+            - key: client.crt
+              path: client.pem
+              mode: 0644
+            - key: client.key
+              path: client-key.pem
+              mode: 0600  # Even in dev, protect private keys
+    volumeMounts:
+      - name: dev-tls-certs
+        mountPath: /etc/cadence/ssl/dev
+        readOnly: true
+
 tls:
   enabled: true
-  caFile: "/path/to/self-signed-ca.pem"
+  caFile: "/etc/cadence/ssl/dev/self-signed-ca.pem"
   enableHostVerification: false  # Only if hostname doesn't match
   serverName: "service.local"     # If needed for verification
 ```
@@ -470,6 +548,13 @@ tls:
 - Use mutual TLS for high-security requirements
 - Mount certificates as read-only volumes
 - Use appropriate `sslMode` for SQL databases
+- **Always set `mode: 0600` for private key files**
+
+### File Permission Guidelines
+- **CA Certificates**: `mode: 0644` (readable by all)
+- **Client Certificates**: `mode: 0644` (readable by all)
+- **Private Keys**: `mode: 0600` (owner access only) or `mode: 0400` (read-only)
+- **Never use**: `mode: 0777` or overly permissive settings for any certificate files
 
 ### Database-specific Security
 - **PostgreSQL**: Use `sslMode: "verify-full"` for maximum security
@@ -484,6 +569,7 @@ tls:
 - Consider using cert-manager for automated certificate lifecycle management
 - Implement certificate rotation strategies
 - Use different certificates for different environments
+- **Ensure proper file permissions on mounted volumes**
 
 ### Certificate Management
 - Monitor certificate expiration dates
@@ -491,6 +577,7 @@ tls:
 - Keep CA certificates up to date
 - Use separate certificates for different services when possible
 - Consider using Kubernetes cert-manager for automation
+- **Audit file permissions regularly**
 
 ## Troubleshooting
 
@@ -511,8 +598,14 @@ tls:
    - Verify Secret/ConfigMap exists in the correct namespace
    - Check that the secret keys match the volume configuration
    - Ensure proper RBAC permissions for accessing secrets
+   - **Verify file permissions with `mode` settings**
 
-4. **Service-specific connection issues**
+4. **Permission denied errors**
+   - Check if `mode` is set correctly for private key files
+   - Ensure private keys have `mode: 0600` or more restrictive
+   - Verify the pod's security context allows access to the files
+
+5. **Service-specific connection issues**
    - **Cassandra**: Verify TLS port (usually 9142) is used
    - **PostgreSQL**: Check `sslmode` parameter in connection string
    - **MySQL**: Verify SSL parameters are correctly set
@@ -537,15 +630,32 @@ openssl s_client -connect elasticsearch-host:9200 -CAfile /path/to/ca.pem
 openssl s_client -connect kafka-host:9093 -CAfile /path/to/ca.pem
 ```
 
-Test Kubernetes volume mounts:
+Test Kubernetes volume mounts and permissions:
 ```bash
 # Check if certificates are mounted correctly
 kubectl exec -it <pod-name> -- ls -la /etc/cadence/ssl/
 kubectl exec -it <pod-name> -- cat /etc/cadence/ssl/ca.pem
 
+# Verify file permissions specifically
+kubectl exec -it <pod-name> -- ls -la /etc/cadence/ssl/client/
+kubectl exec -it <pod-name> -- stat /etc/cadence/ssl/client/client-key.pem
+
 # Verify Secret contents
 kubectl get secret <secret-name> -o yaml
 kubectl describe secret <secret-name>
+
+# Test file access
+kubectl exec -it <pod-name> -- head -n 5 /etc/cadence/ssl/client/client-key.pem
+```
+
+Expected file permissions output:
+```bash
+# CA and client certificates (should be 644)
+-rw-r--r-- 1 root root 1234 Jan 01 12:00 ca.pem
+-rw-r--r-- 1 root root 1234 Jan 01 12:00 client.pem
+
+# Private key (should be 600)
+-rw------- 1 root root 1234 Jan 01 12:00 client-key.pem
 ```
 
 ## Service-specific Integration Notes
@@ -595,4 +705,4 @@ ssl.keystore.location=/path/to/kafka.server.keystore.jks
 ssl.truststore.location=/path/to/kafka.server.truststore.jks
 ```
 
-This configuration provides a secure, production-ready TLS setup for all supported databases and services with proper certificate management through Kubernetes.
+This configuration provides a secure, production-ready TLS setup for all supported databases and services with proper certificate management through Kubernetes, including secure file permission handling.
