@@ -685,7 +685,7 @@ config:
     bootstrapMode: "dns"
     # -- Maximum duration to wait for joining the ring
     maxJoinDuration: "30s"
-  
+
   # Persistence configuration
   persistence:
     # -- Number of history shards for partitioning (CANNOT BE CHANGED ONCE SET)
@@ -694,8 +694,8 @@ config:
     defaultStore: "default"
     # -- Name of the visibility datastore (basic visibility)
     visibilityStore: "visibility"
-    # -- Name of the advanced visibility datastore [Uncomment only if you have Kafka and ElasticSearch]
-    # advancedVisibilityStore: "es-visibility"
+    # -- Name of the advanced visibility datastore
+    advancedVisibilityStore: "es-visibility"
     # -- Enable persistence latency histogram metrics
     enablePersistenceLatencyHistogramMetrics: false
 
@@ -829,14 +829,16 @@ config:
     elasticsearch:
       # -- Enable Elasticsearch for advanced visibility
       enabled: false
-      # -- Elasticsearch version (v6, v7, v8)
+      # -- Elasticsearch version (v6, use v7 for v7 or higher)
       version: "v7"
       # -- Elasticsearch username
       user: ""
       # -- Elasticsearch password
       password: ""
-      # -- Elasticsearch hosts. Can reference Kubernetes services
-      hosts: ""
+      # -- Protocol to use (http/https). If not specified, auto-detected based on TLS settings
+      protocol: ""
+      # -- Elasticsearch host.
+      hosts: "elasticsearch.elastic-namespace.svc.cluster.local"
       # -- Elasticsearch port
       port: 9200
       # -- Elasticsearch visibility index name
@@ -1137,6 +1139,11 @@ schema:
     postgres:
       image:
         repository: "alpine/psql"
+        tag: "latest"
+        pullPolicy: IfNotPresent
+    elasticsearch:
+      image:
+        repository: alpine/curl
         tag: "latest"
         pullPolicy: IfNotPresent
 
