@@ -42,10 +42,10 @@ data:
     persistence:
       numHistoryShards: {{ .Values.config.persistence.numHistoryShards | default 4 }}
       defaultStore: {{ .Values.config.persistence.defaultStore | default "default" | quote }}
-      {{- if .Values.config.persistence.visibilityStore }}
+      {{- if and .Values.config.persistence.visibilityStore (not .Values.config.persistence.elasticsearch.enabled) }}
       visibilityStore: {{ .Values.config.persistence.visibilityStore | quote }}
       {{- end }}
-      {{- if .Values.config.persistence.advancedVisibilityStore }}
+      {{- if and .Values.config.persistence.advancedVisibilityStore .Values.config.persistence.elasticsearch.enabled }}
       advancedVisibilityStore: {{ .Values.config.persistence.advancedVisibilityStore | quote }}
       {{- end }}
       enablePersistenceLatencyHistogramMetrics: {{ .Values.config.persistence.enablePersistenceLatencyHistogramMetrics | default false }}
@@ -219,6 +219,7 @@ data:
               {{- end }}
             {{- end }}
           {{- end }}
+        {{- if ne .Values.config.persistence.elasticsearch.enabled true }}
         # Visibility datastore
         {{ if .Values.config.persistence.visibilityStore -}}
         visibility:
@@ -388,16 +389,17 @@ data:
             {{- end }}
           {{- end }}
         {{- end }}
+        {{- end }}
 
         {{- if .Values.config.persistence.elasticsearch.enabled }}
+        {{- if eq .Values.config.persistence.advancedVisibilityStore "es-visibility" }}
         # Elasticsearch for advanced visibility
         es-visibility:
           elasticsearch:
             version: {{ .Values.config.persistence.elasticsearch.version | default "v7" | quote }}
             url:
               scheme: {{ ternary "https" "http" .Values.config.persistence.elasticsearch.tls.enabled }}
-              host: {{ .Values.config.persistence.elasticsearch.hosts | quote }}
-              port: {{ .Values.config.persistence.elasticsearch.port | default 9200 }}
+              host: {{ .Values.config.persistence.elasticsearch.hosts }}:{{ .Values.config.persistence.elasticsearch.port | default 9200 }}
             indices:
               visibility: {{ .Values.config.persistence.elasticsearch.visibilityIndex | default "cadence-visibility" | quote }}
             {{- if .Values.config.persistence.elasticsearch.user }}
@@ -436,6 +438,7 @@ data:
               enableHostVerification: {{ .Values.config.persistence.elasticsearch.tls.enableHostVerification | default true }}
               requireClientAuth: {{ .Values.config.persistence.elasticsearch.tls.requireClientAuth | default false }}
             {{- end }}
+        {{- end }}
         {{- end }}
 
     # Ringpop configuration
