@@ -1,6 +1,6 @@
 # cadence
 
-![Version: 0.1.9](https://img.shields.io/badge/Version-0.1.9-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.3.1](https://img.shields.io/badge/AppVersion-1.3.1-informational?style=flat-square)
+![Version: 0.2.0](https://img.shields.io/badge/Version-0.2.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.3.1](https://img.shields.io/badge/AppVersion-1.3.1-informational?style=flat-square)
 
 Cadence is a distributed, scalable, durable, and highly available orchestration engine
 to execute asynchronous long-running business logic in a scalable and resilient way.
@@ -33,9 +33,163 @@ This chart deploys Uber Cadence server components and web UI.
 | cassandra.deployment.image.tag | string | `"4.1.1"` |  |
 | cassandra.deployment.resources | object | `{"limits":{"cpu":1,"memory":"2Gi"},"requests":{"cpu":"500m","memory":"1Gi"}}` | Resource limits and requests for Cassandra |
 | cassandra.endpoint | string | `""` | External Cassandra endpoint to connect to. Required when cassandra.deployment.enabled is set to false |
-| cassandra.schema.version | string | `"0.40"` | Cassandra schema version of the Cadence keyspace to use |
-| cassandra.schema.visibility_version | string | `"0.9"` | Cassandra schema version of the Cadence visibility keyspace to use |
-| dynamicConfig.values | object | `{"history.workflowIDExternalRateLimitEnabled":[{"value":true}]}` | Dynamic config values to be set in the Cadence server List of keys can be found at https://pkg.go.dev/github.com/uber/cadence@v1.3.0/common/dynamicconfig/dynamicproperties |
+| config.archival.history.enableRead | bool | `false` | Enable reading from archives |
+| config.archival.history.provider | object | `{"filestore":{"dirMode":"0755","fileMode":"0644"},"gstorage":{"credentialsPath":""},"s3store":{"endpoint":"","region":"","s3ForcePathStyle":false},"type":"filestore"}` | Archive providers configuration |
+| config.archival.history.provider.filestore.dirMode | string | `"0755"` | Directory mode for archive directories |
+| config.archival.history.provider.filestore.fileMode | string | `"0644"` | File mode for archived files |
+| config.archival.history.provider.gstorage.credentialsPath | string | `""` | Path to service account key file |
+| config.archival.history.provider.s3store.endpoint | string | `""` | S3 endpoint (for S3-compatible storage) |
+| config.archival.history.provider.s3store.region | string | `""` | AWS region |
+| config.archival.history.provider.s3store.s3ForcePathStyle | bool | `false` | Force path style URLs |
+| config.archival.history.provider.type | string | `"filestore"` | Storage type: filestore, s3, gcs |
+| config.archival.history.status | string | `"disabled"` | Archival status: enabled, disabled, paused |
+| config.archival.visibility.enableRead | bool | `false` | Enable reading from archives |
+| config.archival.visibility.provider | object | `{"filestore":{"dirMode":"0755","fileMode":"0644"},"gstorage":{"credentialsPath":""},"s3store":{"endpoint":"","region":"","s3ForcePathStyle":false},"type":"filestore"}` | Archive providers configuration |
+| config.archival.visibility.provider.filestore.dirMode | string | `"0755"` | Directory mode for archive directories |
+| config.archival.visibility.provider.filestore.fileMode | string | `"0644"` | File mode for archived files |
+| config.archival.visibility.provider.gstorage.credentialsPath | string | `""` | Path to service account key file |
+| config.archival.visibility.provider.s3store.endpoint | string | `""` | S3 endpoint (for S3-compatible storage) |
+| config.archival.visibility.provider.s3store.region | string | `""` | AWS region |
+| config.archival.visibility.provider.s3store.s3ForcePathStyle | bool | `false` | Force path style URLs |
+| config.archival.visibility.provider.type | string | `"filestore"` | Storage type: filestore, s3, gcs |
+| config.archival.visibility.status | string | `"disabled"` | Archival status: enabled, disabled, paused |
+| config.asyncWorkflowQueues.default-queue | object | `{"config":{"cluster":"default","topic":"cadence-async-wf"},"type":"kafka"}` | Async workflow queue providers |
+| config.asyncWorkflowQueues.default-queue.config | object | `{"cluster":"default","topic":"cadence-async-wf"}` | Queue configuration |
+| config.asyncWorkflowQueues.default-queue.config.cluster | string | `"default"` | Kafka cluster reference |
+| config.asyncWorkflowQueues.default-queue.config.topic | string | `"cadence-async-wf"` | Kafka topic for async workflows |
+| config.asyncWorkflowQueues.default-queue.type | string | `"kafka"` | Queue type: kafka |
+| config.asyncWorkflowQueues.enabled | bool | `false` | Enable async workflow queues |
+| config.blobstore.filestore.outputDirectory | string | `"/etc/cadence/blobstore"` | Output directory for blob storage |
+| config.cluster.clusterGroup | string | `nil` | Cluster group configuration with additional clusters |
+| config.cluster.clusterRedirectionPolicy | object | `{"policy":"noop"}` | Cluster redirection policy for cross-cluster operations |
+| config.cluster.clusterRedirectionPolicy.policy | string | `"noop"` | Policy for handling cross-cluster requests (noop, selected-apis-forwarding, all-domain-apis-forwarding, selected-apis-forwarding-v2) |
+| config.cluster.currentClusterName | string | `"cluster0"` | Name of the current cluster |
+| config.cluster.failoverVersionIncrement | int | `10` | Version increment used during cluster failover operations |
+| config.cluster.initialFailoverVersion | int | `0` | Initial failover version for this cluster |
+| config.cluster.isNotPrimary | bool | `false` | Whether this cluster is not the primary cluster |
+| config.cluster.primaryClusterName | string | `"cluster0"` | Name of the primary cluster in a multi-cluster setup |
+| config.cluster.rpcTransport | string | `"grpc"` | RPC transport protocol (grpc or tchannel) |
+| config.domainDefaults.archival | object | `{"history":{"URI":"","status":"disabled"},"visibility":{"URI":"","status":"disabled"}}` | Default archival settings for new domains - Documentation for S3 here: https://github.com/cadence-workflow/cadence/blob/v1.3.0/common/archiver/s3store/README.md - Documentation for GStorage here: https://github.com/cadence-workflow/cadence/blob/v1.3.0/common/archiver/gcloud/README.md |
+| config.domainDefaults.archival.history.URI | string | `""` | Default history archival URI |
+| config.domainDefaults.archival.history.status | string | `"disabled"` | Default history archival status: enabled, disabled |
+| config.domainDefaults.archival.visibility.URI | string | `""` | Default visibility archival URI |
+| config.domainDefaults.archival.visibility.status | string | `"disabled"` | Default visibility archival status: enabled, disabled |
+| config.dynamicConfig.client | string | `"filebased"` | Dynamic config client type: noop, filebased, configstore |
+| config.dynamicConfig.filebased.filepath | string | `"/etc/cadence/config/dynamicconfig/config.yaml"` | Path to dynamic config file |
+| config.dynamicConfig.filebased.pollInterval | string | `"60s"` | Poll interval for config changes |
+| config.kafka.brokers | string | `"kafka-service.kafka-namespace.svc.cluster.local"` | Kafka broker service. Can reference Kubernetes services |
+| config.kafka.enabled | bool | `false` | Enable Kafka for async workflows |
+| config.kafka.port | int | `9092` | Kafka port |
+| config.kafka.sasl.enabled | bool | `false` | Enable SASL authentication |
+| config.kafka.sasl.mechanism | string | `"PLAIN"` | SASL mechanism: plain, sha512 or sha256 |
+| config.kafka.sasl.password | string | `""` | SASL password |
+| config.kafka.sasl.username | string | `""` | SASL username |
+| config.kafka.tls.caFile | string | `""` | CA certificate file to verify server certificates |
+| config.kafka.tls.caFiles | list | `[]` | Multiple CA certificate files (alternative to caFile) |
+| config.kafka.tls.certFile | string | `""` | Client certificate file for mutual TLS |
+| config.kafka.tls.enableHostVerification | bool | `true` | Verify server hostname matches certificate |
+| config.kafka.tls.enabled | bool | `false` | Enable TLS |
+| config.kafka.tls.keyFile | string | `""` | Client private key file for mutual TLS |
+| config.kafka.tls.requireClientAuth | bool | `false` | Require client certificate authentication |
+| config.kafka.tls.serverName | string | `""` | Override server name for certificate verification |
+| config.kafka.topicProperties | object | `{}` | Topic properties (optional) |
+| config.kafka.visibilityDLQTopic | string | `"cadence-visibility-dlq"` | Kafka visibility DLQ topic name |
+| config.kafka.visibilityTopic | string | `"cadence-visibility"` | Kafka visibility topic name |
+| config.log.encoding | string | `"json"` | Log encoding format: json, console (defaults to "json") |
+| config.log.level | string | `nil` | Logging level: debug, info, warn, error (inherits from global.log if not specified) |
+| config.log.levelKey | string | `"level"` | Log level key name (defaults to "level") |
+| config.log.outputFile | string | `""` | Output file path for logging (if stdout is false) |
+| config.log.stdout | string | `nil` | Enable stdout logging (inherits from global.log if not specified) |
+| config.log.useEnvVars | bool | `false` | Allow using environment variables for log configuration. If enabled, it will use ENV variable of each server component. |
+| config.persistence.advancedVisibilityStore | string | `"es-visibility"` | Name of the advanced visibility datastore |
+| config.persistence.database.cassandra.allowedAuthenticators | list | `[]` | Allowed authenticators for custom authentication |
+| config.persistence.database.cassandra.connectAttributes | object | `{}` | Additional connection attributes |
+| config.persistence.database.cassandra.connectTimeout | string | `"10s"` | Connection timeout |
+| config.persistence.database.cassandra.consistency | string | `"LOCAL_QUORUM"` | Default consistency level |
+| config.persistence.database.cassandra.datacenter | string | `""` | Datacenter filter for Cassandra |
+| config.persistence.database.cassandra.hostSelectionPolicy | string | `"tokenaware,roundrobin"` | Host selection policy |
+| config.persistence.database.cassandra.hosts | string | `"cassandra-service.cadence.svc.cluster.local"` | Cassandra hosts. Can reference Kubernetes services |
+| config.persistence.database.cassandra.keyspace | string | `"cadence"` | Cassandra keyspace for main data |
+| config.persistence.database.cassandra.maxConns | int | `10` | Maximum number of connections |
+| config.persistence.database.cassandra.password | string | `"cassandra"` | Cassandra password |
+| config.persistence.database.cassandra.port | int | `9042` | Cassandra port |
+| config.persistence.database.cassandra.protoVersion | int | `4` | Cassandra protocol version |
+| config.persistence.database.cassandra.region | string | `""` | AWS region filter for Cassandra (if using AWS Keyspaces) |
+| config.persistence.database.cassandra.serialConsistency | string | `"LOCAL_SERIAL"` | Serial consistency level |
+| config.persistence.database.cassandra.timeout | string | `"1s"` | Query timeout |
+| config.persistence.database.cassandra.tls.caFile | string | `""` | CA certificate file to verify server certificates |
+| config.persistence.database.cassandra.tls.caFiles | list | `[]` | Multiple CA certificate files (alternative to caFile) |
+| config.persistence.database.cassandra.tls.certFile | string | `""` | Client certificate file for mutual TLS |
+| config.persistence.database.cassandra.tls.enableHostVerification | bool | `true` | Verify server hostname matches certificate |
+| config.persistence.database.cassandra.tls.enabled | bool | `false` | Enable TLS |
+| config.persistence.database.cassandra.tls.keyFile | string | `""` | Client private key file for mutual TLS |
+| config.persistence.database.cassandra.tls.requireClientAuth | bool | `false` | Require client certificate authentication |
+| config.persistence.database.cassandra.tls.serverName | string | `"cassandra"` | Override server name for certificate verification |
+| config.persistence.database.cassandra.user | string | `"cassandra"` | Cassandra username |
+| config.persistence.database.cassandra.visibilityKeyspace | string | `"cadence_visibility"` | Cassandra keyspace for visibility data |
+| config.persistence.database.driver | string | `"cassandra"` | Database driver: cassandra, mysql, postgres |
+| config.persistence.database.mysql.port | int | `3306` | Default port for MySQL (overrides sql.port if specified) |
+| config.persistence.database.mysql.txIsolationCompat | bool | `false` | Enable transaction isolation compatibility mode |
+| config.persistence.database.postgres.port | int | `5432` | Default port for PostgreSQL (overrides sql.port if specified) |
+| config.persistence.database.sql.connectAttributes | object | `{}` | Connection attributes (key-value pairs for connection string) |
+| config.persistence.database.sql.dbname | string | `"cadence"` | Database name for main data |
+| config.persistence.database.sql.decodingTypes | list | `["thriftrw"]` | Decoding types for SQL blobs |
+| config.persistence.database.sql.encodingType | string | `"thriftrw"` | Encoding type for SQL blobs |
+| config.persistence.database.sql.hosts | string | `"mysql-service.mysql-namespace.svc.cluster.local"` | Database host. Can reference Kubernetes services |
+| config.persistence.database.sql.maxConnLifetime | string | `"1h"` | Maximum connection lifetime |
+| config.persistence.database.sql.maxConns | int | `20` | Maximum number of connections |
+| config.persistence.database.sql.maxIdleConns | int | `20` | Maximum number of idle connections |
+| config.persistence.database.sql.multipleDatabasesConfig | list | `[]` | Multiple databases configuration (when useMultipleDatabases is true) |
+| config.persistence.database.sql.numShards | int | `1` | Number of database shards (default: 1) |
+| config.persistence.database.sql.password | string | `""` | Database password |
+| config.persistence.database.sql.port | string | `nil` | Database port (will use driver default if not specified) |
+| config.persistence.database.sql.tls.caFile | string | `""` | Path to CA certificate file |
+| config.persistence.database.sql.tls.caFiles | list | `[]` | Multiple CA certificate files |
+| config.persistence.database.sql.tls.certFile | string | `""` | Path to client certificate file |
+| config.persistence.database.sql.tls.enableHostVerification | bool | `true` | Enable hostname verification (inverse of skipHostVerification) |
+| config.persistence.database.sql.tls.enabled | bool | `false` | Enable TLS |
+| config.persistence.database.sql.tls.keyFile | string | `""` | Path to client private key file |
+| config.persistence.database.sql.tls.requireClientAuth | bool | `false` | Require client authentication for mutual TLS |
+| config.persistence.database.sql.tls.serverName | string | `""` | Server name for certificate verification |
+| config.persistence.database.sql.tls.sslMode | string | `""` | For MySQL: false, true, skip-verify, preferred. (Additional this should work: required, verify-ca, verify-identity) |
+| config.persistence.database.sql.useMultipleDatabases | bool | `false` | Use multiple databases for sharding |
+| config.persistence.database.sql.user | string | `"cadence"` | Database username |
+| config.persistence.database.sql.visibilityDbname | string | `"cadence_visibility"` | Database name for visibility data |
+| config.persistence.defaultStore | string | `"default"` | Name of the default datastore |
+| config.persistence.elasticsearch.awsSigning | object | `{"enabled":false,"region":"","service":"es"}` | Enable AWS signing (for AWS Elasticsearch) |
+| config.persistence.elasticsearch.enabled | bool | `false` | Enable Elasticsearch for advanced visibility |
+| config.persistence.elasticsearch.hosts | string | `"elasticsearch-service.elastic-namespace.svc.cluster.local"` | Elasticsearch host. |
+| config.persistence.elasticsearch.password | string | `""` | Elasticsearch password |
+| config.persistence.elasticsearch.port | int | `9200` | Elasticsearch port |
+| config.persistence.elasticsearch.protocol | string | `""` | Protocol to use (http/https). If not specified, auto-detected based on TLS settings |
+| config.persistence.elasticsearch.tls.caFile | string | `""` | CA certificate file to verify server certificates |
+| config.persistence.elasticsearch.tls.caFiles | list | `[]` | Multiple CA certificate files (alternative to caFile) |
+| config.persistence.elasticsearch.tls.certFile | string | `""` | Client certificate file for mutual TLS |
+| config.persistence.elasticsearch.tls.enableHostVerification | bool | `true` | Verify server hostname matches certificate |
+| config.persistence.elasticsearch.tls.enabled | bool | `false` | Enable TLS |
+| config.persistence.elasticsearch.tls.keyFile | string | `""` | Client private key file for mutual TLS |
+| config.persistence.elasticsearch.tls.requireClientAuth | bool | `false` | Require client certificate authentication |
+| config.persistence.elasticsearch.tls.serverName | string | `""` | Override server name for certificate verification |
+| config.persistence.elasticsearch.user | string | `""` | Elasticsearch username |
+| config.persistence.elasticsearch.version | string | `"v7"` | Elasticsearch version (v6, use v7 for v7 or higher) |
+| config.persistence.elasticsearch.visibilityIndex | string | `"cadence-visibility"` | Elasticsearch visibility index name |
+| config.persistence.enablePersistenceLatencyHistogramMetrics | bool | `false` | Enable persistence latency histogram metrics |
+| config.persistence.numHistoryShards | int | `4` | Number of history shards for partitioning (CANNOT BE CHANGED ONCE SET) |
+| config.persistence.visibilityStore | string | `"visibility"` | Name of the visibility datastore (basic visibility) |
+| config.publicClient.hostPort | string | `""` | Frontend service address (defaults to current cluster's RPC address) |
+| config.publicClient.refreshInterval | string | `"10s"` | DNS refresh interval |
+| config.publicClient.transport | string | `"grpc"` | Transport protocol: grpc, tchannel |
+| config.ringpop.bootstrapMode | string | `"dns"` | Bootstrap mode: dns, hosts, file |
+| config.ringpop.maxJoinDuration | string | `"30s"` | Maximum duration to wait for joining the ring |
+| config.ringpop.name | string | `"cadence"` | Ringpop cluster name |
+| config.services.grpcMaxMsgSize | int | `4194304` | gRPC max message size |
+| config.services.metrics.prometheus.timerType | string | `"histogram"` | Timer type: histogram, summary |
+| config.services.metrics.statsd.endpoint | string | `""` | StatsD endpoint. Can reference Kubernetes services |
+| config.services.metrics.statsd.prefixes | object | `{"frontend":"cadence-frontend","history":"cadence-history","matching":"cadence-matching","worker":"cadence-worker"}` | Metric prefixes for each service |
+| config.services.metrics.type | string | `"prometheus"` | Metrics type: statsd, prometheus |
+| config.services.pprof.enabled | bool | `false` | Enable pprof endpoints |
+| config.services.pprof.ports | object | `{"frontend":6060,"history":6062,"matching":6061,"worker":6063}` | Pprof ports for each service |
+| dynamicConfig.values | object | `{"system.minRetentionDays":[{"constraints":{},"value":0}],"system.readVisibilityStoreName":[{"value":"db"}],"system.writeVisibilityStoreName":[{"value":"db"}]}` | Dynamic config values to be set in the Cadence server List of keys can be found at https://pkg.go.dev/github.com/uber/cadence/common/dynamicconfig/dynamicproperties |
 | frontend.affinity | object | `{}` | Affinity rules (inherits from global if not specified) |
 | frontend.containerSecurityContext | object | `{}` | Container security context (inherits from global if not specified) |
 | frontend.env | list | `[]` | Environment variables for frontend service |
@@ -58,8 +212,8 @@ This chart deploys Uber Cadence server components and web UI.
 | fullnameOverride | string | `nil` | Provide a name to override the full names of resources |
 | global.affinity | object | `{}` | Global affinity rules |
 | global.containerSecurityContext | object | `{}` | Global container security context |
-| global.env | list | `[{"name":"ENABLE_ES","value":"false"},{"name":"SKIP_SCHEMA_SETUP","value":"true"},{"name":"RINGPOP_BOOTSTRAP_MODE","value":"dns"},{"name":"BIND_ON_IP","value":"0.0.0.0"}]` | Global environment variables (shared only by Cadence Server services [frontend, worker, matching and history]) |
-| global.image | object | `{"pullPolicy":"IfNotPresent","repository":"docker.io/ubercadence/server","tag":"v1.3.1-auto-setup"}` | Global image configuration (shared only by Cadence Server services [frontend, worker, matching and history]) |
+| global.env | list | `[]` | Global environment variables (shared only by Cadence Server services [frontend, worker, matching and history]) |
+| global.image | object | `{"pullPolicy":"IfNotPresent","repository":"docker.io/ubercadence/server","tag":"v1.3.1"}` | Global image configuration (shared only by Cadence Server services [frontend, worker, matching and history]) |
 | global.imagePullSecrets | list | `[]` | Image pull secrets for private registries |
 | global.log | object | `{"level":"info","stdout":true}` | Global logging configuration (shared only by Cadence Server services [frontend, worker, matching and history]) |
 | global.log.level | string | `"info"` | Logging level (debug, info, warn, error) |
@@ -68,6 +222,9 @@ This chart deploys Uber Cadence server components and web UI.
 | global.podSecurityContext | object | `{}` | Global pod security context |
 | global.priorityClassName | string | `""` | Global priority class name for pod scheduling |
 | global.secretEnv | list | `[]` | Global secret environment variables (shared only by Cadence Server services [frontend, worker, matching and history]) |
+| global.tls | object | `{"volumeMounts":[],"volumes":[]}` | Global TLS volumes configuration |
+| global.tls.volumeMounts | list | `[]` | Volume mounts for TLS certificates |
+| global.tls.volumes | list | `[]` | Additional volumes for TLS certificates (The mode is important to have the minimum permissions) |
 | global.tolerations | list | `[]` | Global tolerations |
 | global.topologySpreadConstraints | list | `[]` | Global topology spread constraints |
 | history.affinity | object | `{}` | Affinity rules (inherits from global if not specified) |
@@ -126,6 +283,21 @@ This chart deploys Uber Cadence server components and web UI.
 | networkPolicy.enabled | bool | `false` | Enable network policies |
 | networkPolicy.ingress | list | `[]` | Ingress rules |
 | rbac.create | bool | `false` | Enable RBAC creation |
+| schema.checkSchema.cassandra.image.pullPolicy | string | `"IfNotPresent"` |  |
+| schema.checkSchema.cassandra.image.repository | string | `"cassandra"` |  |
+| schema.checkSchema.cassandra.image.tag | string | `"4.0"` |  |
+| schema.checkSchema.elasticsearch.image.pullPolicy | string | `"IfNotPresent"` |  |
+| schema.checkSchema.elasticsearch.image.repository | string | `"alpine/curl"` |  |
+| schema.checkSchema.elasticsearch.image.tag | string | `"latest"` |  |
+| schema.checkSchema.mysql.image.pullPolicy | string | `"IfNotPresent"` |  |
+| schema.checkSchema.mysql.image.repository | string | `"alpine/mysql"` |  |
+| schema.checkSchema.mysql.image.tag | string | `"latest"` |  |
+| schema.checkSchema.postgres.image.pullPolicy | string | `"IfNotPresent"` |  |
+| schema.checkSchema.postgres.image.repository | string | `"alpine/psql"` |  |
+| schema.checkSchema.postgres.image.tag | string | `"latest"` |  |
+| schema.setupJob.enabled | bool | `true` |  |
+| schema.version.default | string | `"0.42"` |  |
+| schema.version.visibility | string | `"0.9"` |  |
 | serviceAccount.annotations | object | `{}` | Annotations for service account |
 | serviceAccount.automountServiceAccountToken | bool | `true` | Automatically mount service account token |
 | serviceAccount.create | bool | `true` | Enable service account creation |
@@ -133,7 +305,7 @@ This chart deploys Uber Cadence server components and web UI.
 | web.affinity | object | `{}` | Affinity rules (inherits from global if not specified) |
 | web.containerSecurityContext | object | `{}` | Container security context (inherits from global if not specified) |
 | web.env | list | `[{"name":"CADENCE_WEB_PORT","value":"8088"}]` | Environment variables for web UI |
-| web.image | object | `{"imagePullSecrets":[],"pullPolicy":"IfNotPresent","repository":"docker.io/ubercadence/web","tag":"v4.0.3"}` | Image configuration for Web UI |
+| web.image | object | `{"imagePullSecrets":[],"pullPolicy":"IfNotPresent","repository":"docker.io/ubercadence/web","tag":"v4.0.5"}` | Image configuration for Web UI |
 | web.ingress.annotations | object | `{}` | Ingress annotations |
 | web.ingress.className | string | `""` | Ingress class name |
 | web.ingress.enabled | bool | `false` | Enable ingress |
