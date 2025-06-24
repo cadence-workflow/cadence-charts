@@ -773,7 +773,7 @@ config:
       # Cassandra configuration
       cassandra:
         # -- Cassandra hosts. Can reference Kubernetes services
-        hosts: "cassandra-service.cadence-testing.svc.cluster.local"
+        hosts: "cassandra-service.cadence.svc.cluster.local"
         # -- Cassandra port
         port: 9042
         # -- Cassandra keyspace for main data
@@ -838,7 +838,7 @@ config:
       # -- Protocol to use (http/https). If not specified, auto-detected based on TLS settings
       protocol: ""
       # -- Elasticsearch host.
-      hosts: "elasticsearch.elastic-namespace.svc.cluster.local"
+      hosts: "elasticsearch-service.elastic-namespace.svc.cluster.local"
       # -- Elasticsearch port
       port: 9200
       # -- Elasticsearch visibility index name
@@ -934,7 +934,7 @@ config:
     # -- Enable Kafka for async workflows
     enabled: false
     # -- Kafka broker service. Can reference Kubernetes services
-    brokers: "kafka-cluster.kafka.svc.cluster.local"
+    brokers: "kafka-service.kafka-namespace.svc.cluster.local"
     # -- Kafka port
     port: 9092
     # -- Kafka visibility topic name
