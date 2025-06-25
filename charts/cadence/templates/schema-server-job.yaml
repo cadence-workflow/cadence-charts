@@ -413,6 +413,9 @@ spec:
                 cmd="$cmd -pw $CASSANDRA_PASSWORD"
               fi
 
+              # Add protocol version
+              cmd="$cmd -pv $PROTOCOL_VERSION"
+
               # Add allowed authenticators from environment variable
               if [ -n "$ALLOWED_AUTHENTICATORS" ]; then
                 cmd="$cmd $ALLOWED_AUTHENTICATORS"
@@ -481,6 +484,8 @@ spec:
           value: {{ .Values.config.persistence.database.cassandra.hosts | quote }}
         - name: DB_NAME
           value: {{ .Values.config.persistence.database.cassandra.keyspace | quote }}
+        - name: PROTOCOL_VERSION
+          value: {{ .Values.config.persistence.database.cassandra.protoVersion | quote }}
         - name: DB_VISIBILITY_NAME
           value: {{ .Values.config.persistence.database.cassandra.visibilityKeyspace | quote }}
         - name: REPLICATION_FACTOR
