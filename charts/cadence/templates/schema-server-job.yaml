@@ -439,10 +439,14 @@ spec:
             
             # Setup main database schema
             echo "Creating main keyspace: $DB_NAME"
-            $(build_cassandra_cmd) create -k $DB_NAME --rf $REPLICATION_FACTOR
-            
+            if [ "$DATA_CENTER" = "" ]; then
+              $(build_cassandra_cmd) create -k $DB_NAME --rf $REPLICATION_FACTOR
+            else
+              $(build_cassandra_cmd) create -k $DB_NAME --rf $REPLICATION_FACTOR -dc $DATA_CENTER
+            fi
+
             echo "Setting up main schema version 0.0"
-            $(build_cassandra_cmd) -k $DB_NAME setup-schema -v 0.0
+            $(build_cassandra_cmd) -k $DB_NAME setup-schema -v 0.0 || echo "Schema already exists"
             
             echo "Updating main schema to latest version"
             $(build_cassandra_cmd) -k $DB_NAME update-schema -d $CADENCE_HOME/schema/cassandra/cadence/versioned
@@ -450,10 +454,14 @@ spec:
             # Setup visibility database schema (only if ES is not enabled)
             if [ "$ES_ENABLED" = "false" ]; then
               echo "Creating visibility keyspace: $DB_VISIBILITY_NAME"
-              $(build_cassandra_cmd) create -k $DB_VISIBILITY_NAME --rf $REPLICATION_FACTOR
-              
+              if [ "$DATA_CENTER" = "" ]; then
+                $(build_cassandra_cmd) create -k $DB_VISIBILITY_NAME --rf $REPLICATION_FACTOR
+              else
+                $(build_cassandra_cmd) create -k $DB_VISIBILITY_NAME --rf $REPLICATION_FACTOR -dc $DATA_CENTER
+              fi
+
               echo "Setting up visibility schema version 0.0"
-              $(build_cassandra_cmd) -k $DB_VISIBILITY_NAME setup-schema -v 0.0
+              $(build_cassandra_cmd) -k $DB_VISIBILITY_NAME setup-schema -v 0.0 || echo "Schema already exists"
               
               echo "Updating visibility schema to latest version"
               $(build_cassandra_cmd) -k $DB_VISIBILITY_NAME update-schema -d $CADENCE_HOME/schema/cassandra/visibility/versioned
@@ -479,6 +487,8 @@ spec:
           value: {{ .Values.config.persistence.database.cassandra.visibilityKeyspace | quote }}
         - name: REPLICATION_FACTOR
           value: {{ .Values.config.persistence.database.cassandra.replicationFactor | default 1 | quote }}
+        - name: DATA_CENTER
+          value: {{ .Values.config.persistence.database.cassandra.datacenter | quote }}
         # Allowed authenticators (build --aa parameters)
         - name: ALLOWED_AUTHENTICATORS
           value: {{ if .Values.config.persistence.database.cassandra.allowedAuthenticators }}{{ range $index, $auth := .Values.config.persistence.database.cassandra.allowedAuthenticators }}{{ if $index }} {{ end }}--aa {{ $auth | quote }}{{ end }}{{ else }}"--aa org.apache.cassandra.auth.PasswordAuthenticator"{{ end }}
@@ -554,7 +564,7 @@ spec:
             $(build_postgres_cmd) create-database --db $DB_NAME
             
             echo "Setting up main schema version 0.0"
-            $(build_postgres_cmd) --db $DB_NAME setup-schema -v 0.0
+            $(build_postgres_cmd) --db $DB_NAME setup-schema -v 0.0 || echo "Schema already exists"
             
             echo "Updating main schema to latest version"
             $(build_postgres_cmd) --db $DB_NAME update-schema -d $CADENCE_HOME/schema/postgres/cadence/versioned
@@ -565,7 +575,7 @@ spec:
               $(build_postgres_cmd) create-database --db $DB_VISIBILITY_NAME
               
               echo "Setting up visibility schema version 0.0"
-              $(build_postgres_cmd) --db $DB_VISIBILITY_NAME setup-schema -v 0.0
+              $(build_postgres_cmd) --db $DB_VISIBILITY_NAME setup-schema -v 0.0 || echo "Schema already exists"
               
               echo "Updating visibility schema to latest version"
               $(build_postgres_cmd) --db $DB_VISIBILITY_NAME update-schema -d $CADENCE_HOME/schema/postgres/visibility/versioned
@@ -659,7 +669,7 @@ spec:
             $(build_mysql_cmd) create-database --db $DB_NAME
             
             echo "Setting up main schema version 0.0"
-            $(build_mysql_cmd) --db $DB_NAME setup-schema -v 0.0
+            $(build_mysql_cmd) --db $DB_NAME setup-schema -v 0.0 || echo "Schema already exists"
             
             echo "Updating main schema to latest version"
             $(build_mysql_cmd) --db $DB_NAME update-schema -d $CADENCE_HOME/schema/mysql/v8/cadence/versioned
@@ -670,7 +680,7 @@ spec:
               $(build_mysql_cmd) create-database --db $DB_VISIBILITY_NAME
               
               echo "Setting up visibility schema version 0.0"
-              $(build_mysql_cmd) --db $DB_VISIBILITY_NAME setup-schema -v 0.0
+              $(build_mysql_cmd) --db $DB_VISIBILITY_NAME setup-schema -v 0.0 || echo "Schema already exists"
               
               echo "Updating visibility schema to latest version"
               $(build_mysql_cmd) --db $DB_VISIBILITY_NAME update-schema -d $CADENCE_HOME/schema/mysql/v8/visibility/versioned
