@@ -780,6 +780,8 @@ config:
         keyspace: "cadence"
         # -- Cassandra keyspace for visibility data
         visibilityKeyspace: "cadence_visibility"
+        # -- Number of replicas of cassandra deployed to ensure reliability and fault tolerance across the cluster
+        replicationFactor: 1
         # -- Cassandra username
         user: "cassandra"
         # -- Cassandra password
@@ -1115,16 +1117,33 @@ dynamicConfig:
 #################### SCHEMA CONFIGURATION #####################
 ###############################################################
 schema:
+  # -- Schema Jobs resources
+  resources: {}
+    # limits:
+    #   cpu: "500m"
+    #   memory: "1Gi"
+    # requests:
+    #   cpu: "500m"
+    #   memory: "1Gi"
+  # -- Schema Jobs affinity rules
+  affinity: {}
+  # -- Schema Jobs tolerations
+  tolerations: []
+  # -- Schema Jobs node selector
+  nodeSelector: {}
+
+  createJob:
+    enabled: true
+  setupJob:
+    enabled: true
+  updateJob:
+    enabled: false
+
   version:
     default: "0.42"
     visibility: "0.9"
-  # createJob:
-  #   enabled: false
-  # No support for mysql & postgresql yet.
-  setupJob:
-    enabled: true
-  # updateJob:
-  #   enabled: false
+
+  # -- Images used for validate schema creation on cadence-server
   checkSchema:
     cassandra:
       image:
