@@ -451,6 +451,16 @@ web:
     imagePullSecrets: []
       # - name: myregistrykey
 
+  # -- Image configuration for BusyBox to check frontend service
+  busybox:
+    enabled: true
+    image:
+      repository: "busybox"
+      tag: "latest"
+      pullPolicy: IfNotPresent
+      imagePullSecrets: []
+        # - name: myregistrykey
+
   # -- Number of web UI replicas to deploy
   replicas: 1
 
@@ -773,7 +783,7 @@ config:
       # Cassandra configuration
       cassandra:
         # -- Cassandra hosts. Can reference Kubernetes services
-        hosts: "cassandra-service.cadence.svc.cluster.local"
+        hosts: "cadence-cassandra.cadence.svc.cluster.local"
         # -- Cassandra port
         port: 9042
         # -- Cassandra keyspace for main data
@@ -790,7 +800,7 @@ config:
         protoVersion: 4
         # -- AWS region filter for Cassandra (if using AWS Keyspaces)
         region: ""
-        # -- Datacenter filter for Cassandra
+        # -- Datacenter filter for Cassandra (Used for schema setup too)
         datacenter: ""
         # -- Maximum number of connections
         maxConns: 10
@@ -1117,14 +1127,18 @@ dynamicConfig:
 #################### SCHEMA CONFIGURATION #####################
 ###############################################################
 schema:
-  # This job have validation mechanism, so it wont replace your database if it's already existing.
-  # It wont rollback your schema version to avoid data deletion
-  # It will update your schema version if there is any update avaibable.
-  # All the schema parameters are taken from .Values.config so configure all regarding before running the schema job.
+  # Schema validation and deployment configuration
+  # This job validates and updates the database schema safely:
+  # - Won't replace existing databases
+  # - Won't rollback schema versions to prevent data loss
+  # - Will update schema version if updates are available
+  # All schema parameters are taken from .Values.config
+  
+  # -- Schema job for main database schema management
   serverJob:
+    # -- Enable server schema job
     enabled: true
-
-    # -- Schema Jobs resources
+    # -- Schema job resource allocation
     resources: {}
       # limits:
       #   cpu: "500m"
@@ -1132,17 +1146,18 @@ schema:
       # requests:
       #   cpu: "500m"
       #   memory: "1Gi"
-    # -- Schema Jobs affinity rules
+    # -- Schema job affinity rules
     affinity: {}
-    # -- Schema Jobs tolerations
+    # -- Schema job tolerations
     tolerations: []
-    # -- Schema Jobs node selector
+    # -- Schema job node selector
     nodeSelector: {}
 
+  # -- ElasticSearch schema job configuration
   elasticSearchJob:
+    # -- Enable ElasticSearch schema job
     enabled: true
-
-    # -- Schema Jobs resources
+    # -- ElasticSearch schema job resource allocation
     resources: {}
       # limits:
       #   cpu: "500m"
@@ -1150,66 +1165,44 @@ schema:
       # requests:
       #   cpu: "500m"
       #   memory: "1Gi"
-    # -- Schema Jobs affinity rules
+    # -- ElasticSearch schema job affinity rules
     affinity: {}
-    # -- Schema Jobs tolerations
+    # -- ElasticSearch schema job tolerations
     tolerations: []
-    # -- Schema Jobs node selector
+    # -- ElasticSearch schema job node selector
     nodeSelector: {}
 
-  # Pending to be deprecated for auto-detection.
+  # Schema version configuration
+  # TODO: Pending deprecation for auto-detection
   version:
+    # -- Default schema version
     default: "0.42"
+    # -- Visibility schema version
     visibility: "0.9"
 
-  # -- Images used for validate schema creation on cadence-server
+  # -- Container images for schema validation
   checkSchema:
+    # -- Cassandra schema validation image
     cassandra:
       image:
         repository: "cassandra"
-        tag: "4.0"
+        tag: "4"
         pullPolicy: IfNotPresent
+    # -- MySQL schema validation image
     mysql:
       image:
         repository: "alpine/mysql"
         tag: "latest"
         pullPolicy: IfNotPresent
+    # -- PostgreSQL schema validation image
     postgres:
       image:
         repository: "alpine/psql"
         tag: "latest"
         pullPolicy: IfNotPresent
+    # -- ElasticSearch schema validation image
     elasticsearch:
       image:
         repository: alpine/curl
         tag: "latest"
         pullPolicy: IfNotPresent
-
-###############################################################
-################### DATABASE CONFIGURATION ####################
-# Use only if you want to deploy the database from this chart #
-###############################################################
-
-# Cassandra configuration
-cassandra:
-  # -- External Cassandra endpoint to connect to. Required when cassandra.deployment.enabled is set to false
-  endpoint: ""
-
-  deployment:
-    # -- When enabled, a single instance Cassandra will be deployed as part of the Helm chart
-    # -- When disabled, the Cassandra deployment is expected to be provided externally
-    enabled: true
-
-    image:
-      repository: "cassandra"
-      tag: "4.1.1"
-      pullPolicy: IfNotPresent
-
-    # -- Resource limits and requests for Cassandra
-    resources:
-      limits:
-        cpu: 1
-        memory: 2Gi
-      requests:
-        cpu: 500m
-        memory: 1Gi
