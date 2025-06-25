@@ -382,6 +382,10 @@ spec:
         {{- end }}
         {{- end }}
         {{- end }}
+        volumeMounts:
+        {{- with $.Values.global.tls.volumeMounts }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
       containers:
       - name: cadence-schema-server
         {{- $globalImage := .Values.global.image | default dict }}
@@ -529,6 +533,8 @@ spec:
         - name: SSL_CLIENT_KEY
           value: {{ .Values.config.persistence.database.cassandra.tls.keyFile | quote }}
         {{- end }}
+        - name: CASSANDRA_TLS_SERVER_NAME
+          value: {{ .Values.config.persistence.database.cassandra.tls.serverName | quote }}
         {{- end }}
     
         {{- else if eq $dbDriver "postgres" }}
