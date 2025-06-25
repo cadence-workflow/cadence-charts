@@ -1,4 +1,4 @@
-{{- if .Values.schema.createJob.enabled -}}
+{{- if .Values.schema.serverJob.enabled -}}
 {{- $dbDriver := .Values.config.persistence.database.driver }}
 ---
 apiVersion: batch/v1
@@ -10,7 +10,7 @@ metadata:
     app.kubernetes.io/component: schema-server
   annotations:
     "helm.sh/hook": pre-install,pre-upgrade
-    "helm.sh/hook-weight": "-3"
+    "helm.sh/hook-weight": "-1"
     "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
 spec:
   template:
@@ -30,19 +30,19 @@ spec:
         {{- toYaml $mergedImagePullSecrets | nindent 8 }}
       {{- end }}
       {{- $globalNodeSelector := $.Values.global.nodeSelector | default dict }}
-      {{- $schemaNodeSelector := $.Values.schema.nodeSelector | default $globalNodeSelector }}
+      {{- $schemaNodeSelector := $.Values.schema.serverJob.nodeSelector | default $globalNodeSelector }}
       {{- if $schemaNodeSelector }}
       nodeSelector:
         {{- toYaml $schemaNodeSelector | nindent 8 }}
       {{- end }}
       {{- $globalAffinity := $.Values.global.affinity | default dict }}
-      {{- $schemaAffinity := $.Values.schema.affinity | default $globalAffinity }}
+      {{- $schemaAffinity := $.Values.schema.serverJob.affinity | default $globalAffinity }}
       {{- if $schemaAffinity }}
       affinity:
         {{- toYaml $schemaAffinity | nindent 8 }}
       {{- end }}
       {{- $globalTolerations := $.Values.global.tolerations | default list }}
-      {{- $schemaTolerations := $.Values.schema.tolerations | default $globalTolerations }}
+      {{- $schemaTolerations := $.Values.schema.serverJob.tolerations | default $globalTolerations }}
       {{- if $schemaTolerations }}
       tolerations:
         {{- toYaml $schemaTolerations | nindent 8 }}
