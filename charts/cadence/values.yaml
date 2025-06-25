@@ -1117,28 +1117,47 @@ dynamicConfig:
 #################### SCHEMA CONFIGURATION #####################
 ###############################################################
 schema:
-  # -- Schema Jobs resources
-  resources: {}
-    # limits:
-    #   cpu: "500m"
-    #   memory: "1Gi"
-    # requests:
-    #   cpu: "500m"
-    #   memory: "1Gi"
-  # -- Schema Jobs affinity rules
-  affinity: {}
-  # -- Schema Jobs tolerations
-  tolerations: []
-  # -- Schema Jobs node selector
-  nodeSelector: {}
-
-  createJob:
+  # This job have validation mechanism, so it wont replace your database if it's already existing.
+  # It wont rollback your schema version to avoid data deletion
+  # It will update your schema version if there is any update avaibable.
+  # All the schema parameters are taken from .Values.config so configure all regarding before running the schema job.
+  serverJob:
     enabled: true
-  setupJob:
-    enabled: true
-  updateJob:
-    enabled: false
 
+    # -- Schema Jobs resources
+    resources: {}
+      # limits:
+      #   cpu: "500m"
+      #   memory: "1Gi"
+      # requests:
+      #   cpu: "500m"
+      #   memory: "1Gi"
+    # -- Schema Jobs affinity rules
+    affinity: {}
+    # -- Schema Jobs tolerations
+    tolerations: []
+    # -- Schema Jobs node selector
+    nodeSelector: {}
+
+  elasticSearchJob:
+    enabled: true
+
+    # -- Schema Jobs resources
+    resources: {}
+      # limits:
+      #   cpu: "500m"
+      #   memory: "1Gi"
+      # requests:
+      #   cpu: "500m"
+      #   memory: "1Gi"
+    # -- Schema Jobs affinity rules
+    affinity: {}
+    # -- Schema Jobs tolerations
+    tolerations: []
+    # -- Schema Jobs node selector
+    nodeSelector: {}
+
+  # Pending to be deprecated for auto-detection.
   version:
     default: "0.42"
     visibility: "0.9"
