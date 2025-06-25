@@ -835,7 +835,7 @@ config:
           # -- Require client certificate authentication
           requireClientAuth: false
           # -- Override server name for certificate verification
-          serverName: "cassandra"
+          serverName: "localhost"
 
     # Elasticsearch configuration for advanced visibility
     elasticsearch:
