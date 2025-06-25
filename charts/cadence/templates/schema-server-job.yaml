@@ -1,13 +1,13 @@
-{{- if .Values.schema.setupJob.enabled -}}
+{{- if .Values.schema.createJob.enabled -}}
 {{- $dbDriver := .Values.config.persistence.database.driver }}
 ---
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ include "cadence.fullname" . }}-schema-setup
+  name: {{ include "cadence.fullname" . }}-schema-server
   labels:
     {{- include "cadence.labels" . | nindent 4 }}
-    app.kubernetes.io/component: schema-setup
+    app.kubernetes.io/component: schema-server
   annotations:
     "helm.sh/hook": pre-install,pre-upgrade
     "helm.sh/hook-weight": "-3"
@@ -17,7 +17,7 @@ spec:
     metadata:
       labels:
         {{- include "cadence.labels" . | nindent 8 }}
-        app.kubernetes.io/component: schema-setup
+        app.kubernetes.io/component: schema-server
     spec:
       {{- if $.Values.serviceAccount.create }}
       serviceAccountName: {{ include "cadence.serviceAccountName" $ }}
@@ -49,7 +49,7 @@ spec:
       {{- end }}
       restartPolicy: OnFailure
       containers:
-      - name: cadence-schema-setup
+      - name: cadence-schema-server
         {{- $globalImage := .Values.global.image | default dict }}
         {{- $schemaImage := $.Values.frontend.image | default dict }}
         {{- $repository := $schemaImage.repository | default $globalImage.repository }}
