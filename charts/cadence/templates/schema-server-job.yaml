@@ -287,7 +287,7 @@ spec:
           - |
             # Build connection string based on TLS configuration
             build_mysql_cmd() {
-              local cmd="mariadb -h $DB_HOST -P $DB_PORT -u $DB_USER"
+              local cmd="mariadb -h $DB_HOST -P $DB_PORT -u $DB_USER -p$MYSQL_PWD"
               
               # Add SSL parameters if TLS is enabled
               if [ "$TLS_ENABLED" = "true" ]; then
@@ -298,7 +298,7 @@ spec:
                   "preferred")
                     ;;
                   "required"|"true"|"skip-verify")
-                    cmd="$cmd --ssl --ssl-verify-server-cert=false"
+                    cmd="$cmd --ssl --ssl-verify-server-cert=off"
                     ;;
                   "verify-ca")
                     cmd="$cmd --ssl --ssl-verify-server-cert"
@@ -323,6 +323,8 @@ spec:
                 if [ -n "$SSL_CLIENT_KEY" ]; then
                   cmd="$cmd --ssl-key=$SSL_CLIENT_KEY"
                 fi
+              else
+                cmd="$cmd --skip-ssl"
               fi
               
               echo "$cmd"
@@ -330,7 +332,7 @@ spec:
 
             # Wait for MySQL to be ready
             echo "Waiting for MySQL to be ready..."
-            until mariadb-admin ping -h $DB_HOST -P $DB_PORT -u $DB_USER --password=$MYSQL_PWD --skip-ssl --silent; do
+            until $(build_mysql_cmd) -e "SELECT 1" >/dev/null 2>&1; do
               echo 'MySQL is not ready yet...'
               sleep 5
             done
