@@ -677,7 +677,7 @@ spec:
             
             # Create main database
             echo "Creating main database: $DB_NAME"
-            $(build_mysql_cmd) create-database --db $DB_NAME
+            $(build_mysql_cmd) create-database --db $DB_NAME || echo "Database already exists"
             
             echo "Setting up main schema version 0.0"
             $(build_mysql_cmd) --db $DB_NAME setup-schema -v 0.0 || echo "Schema already exists"
@@ -688,7 +688,7 @@ spec:
             # Setup visibility database (only if ES is not enabled)
             if [ "$ES_ENABLED" = "false" ]; then
               echo "Creating visibility database: $DB_VISIBILITY_NAME"
-              $(build_mysql_cmd) create-database --db $DB_VISIBILITY_NAME
+              $(build_mysql_cmd) create-database --db $DB_VISIBILITY_NAME || echo "Database already exists"
               
               echo "Setting up visibility schema version 0.0"
               $(build_mysql_cmd) --db $DB_VISIBILITY_NAME setup-schema -v 0.0 || echo "Schema already exists"
