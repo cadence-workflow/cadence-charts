@@ -1172,14 +1172,6 @@ schema:
     # -- ElasticSearch schema job node selector
     nodeSelector: {}
 
-  # Schema version configuration
-  # TODO: Pending deprecation for auto-detection
-  version:
-    # -- Default schema version
-    default: "0.42"
-    # -- Visibility schema version
-    visibility: "0.9"
-
   # -- Container images for schema validation
   checkSchema:
     # -- Cassandra schema validation image

@@ -1,5 +1,6 @@
 {{- range $serviceName := (list "frontend" "history" "matching" "worker") }}
 {{- $service := index $.Values $serviceName }}
+{{- $dbDriver := $.Values.config.persistence.database.driver }}
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -77,8 +78,56 @@ spec:
         {{- toYaml $serviceTopologySpreadConstraints | nindent 8 }}
       {{- end }}
       initContainers:
+      - name: extract-schema-versions
+        {{- $globalImage := $.Values.global.image | default dict }}
+        {{- $serviceImage := $service.image | default dict }}
+        {{- $repository := $serviceImage.repository | default $globalImage.repository }}
+        {{- $tag := $serviceImage.tag | default $globalImage.tag }}
+        image: {{ $repository }}:{{ $tag }}
+        {{- $pullPolicy := $serviceImage.pullPolicy | default $globalImage.pullPolicy | default "IfNotPresent" }}
+        imagePullPolicy: {{ $pullPolicy }}
+        {{- $globalContainerSecurityContext := $.Values.global.containerSecurityContext | default dict }}
+        {{- $serviceContainerSecurityContext := $service.containerSecurityContext | default $globalContainerSecurityContext }}
+        {{- if $serviceContainerSecurityContext }}
+        securityContext:
+          {{- toYaml $serviceContainerSecurityContext | nindent 10 }}
+        {{- end }}
+        command: ["/bin/sh"]
+        args:
+          - -c
+          - |
+            # Extraer versiones del archivo version.go
+            VERSION_FILE="/etc/cadence/schema/cassandra/version.go"
+            
+            if [ -f "$VERSION_FILE" ]; then
+              default_version=$(grep 'const Version' "$VERSION_FILE" | awk -F'"' '{print $2}')
+              visibility_version=$(grep 'const VisibilityVersion' "$VERSION_FILE" | awk -F'"' '{print $2}')
+              
+              echo "DEFAULT_VERSION=$default_version" > /shared/schema-versions.env
+              echo "VISIBILITY_VERSION=$visibility_version" >> /shared/schema-versions.env
+              
+              echo "Extracted versions:"
+              echo "  DEFAULT_VERSION=$default_version"
+              echo "  VISIBILITY_VERSION=$visibility_version"
+            else
+              echo "Error: version.go file not found at $VERSION_FILE"
+              exit 1
+            fi
+        env:
+        {{- if eq $dbDriver "cassandra" }}
+        - name: VERSION_FILE
+          value: "/etc/cadence/schema/cassandra/version.go"
+        {{- else if eq $dbDriver "postgres" }}
+        - name: VERSION_FILE
+          value: "/etc/cadence/schema/postgres/version.go"
+        {{- else if eq $dbDriver "mysql" }}
+        - name: VERSION_FILE
+          value: "/etc/cadence/schema/mysql/version.go"
+        {{- end }}
+        volumeMounts:
+        - name: versions-data
+          mountPath: /shared
       - name: wait-for-schema
-        {{- $dbDriver := $.Values.config.persistence.database.driver }}
         {{- if eq $dbDriver "cassandra" }}
         image: {{ $.Values.schema.checkSchema.cassandra.image.repository }}:{{ $.Values.schema.checkSchema.cassandra.image.tag }}
         imagePullPolicy: {{ $.Values.schema.checkSchema.cassandra.image.pullPolicy }}
@@ -86,6 +135,13 @@ spec:
           - sh
           - -c
           - |
+            # Load extracted versions
+            source /shared/schema-versions.env
+            
+            echo "Using extracted versions:"
+            echo "  DEFAULT_VERSION=$DEFAULT_VERSION"
+            echo "  VISIBILITY_VERSION=$VISIBILITY_VERSION"
+
             # Create .cassandra directory for cqlshrc if it doesn't exist
             mkdir -p ~/.cassandra
 
@@ -185,11 +241,6 @@ spec:
               sleep 10
             done
         env:
-        # Schema version parameters
-        - name: DEFAULT_VERSION
-          value: {{ $.Values.schema.version.default | quote }}
-        - name: VISIBILITY_VERSION
-          value: {{ $.Values.schema.version.visibility | quote }}
         - name: ES_ENABLED
           value: {{ $.Values.config.persistence.elasticsearch.enabled | quote }}
         # Basic connection parameters
@@ -246,6 +297,13 @@ spec:
           - sh
           - -c
           - |
+            # Load extracted versions
+            source /shared/schema-versions.env
+            
+            echo "Using extracted versions:"
+            echo "  DEFAULT_VERSION=$DEFAULT_VERSION"
+            echo "  VISIBILITY_VERSION=$VISIBILITY_VERSION"
+
             # Build connection string based on TLS configuration
             build_psql_cmd() {
               local cmd="psql -h $DB_HOST -p $DB_PORT -U $DB_USER"
@@ -302,11 +360,6 @@ spec:
             
             echo "PostgreSQL schema is ready!"
         env:
-        # Schema version parameters
-        - name: DEFAULT_VERSION
-          value: {{ $.Values.schema.version.default | quote }}
-        - name: VISIBILITY_VERSION
-          value: {{ $.Values.schema.version.visibility | quote }}
         - name: ES_ENABLED
           value: {{ $.Values.config.persistence.elasticsearch.enabled | quote }}
         # Basic connection parameters
@@ -359,6 +412,13 @@ spec:
           - sh
           - -c
           - |
+            # Load extracted versions
+            source /shared/schema-versions.env
+            
+            echo "Using extracted versions:"
+            echo "  DEFAULT_VERSION=$DEFAULT_VERSION"
+            echo "  VISIBILITY_VERSION=$VISIBILITY_VERSION"
+
             # Build connection string based on TLS configuration
             build_mysql_cmd() {
               local cmd="mariadb -h $DB_HOST -P $DB_PORT -u $DB_USER"
@@ -433,11 +493,6 @@ spec:
             
             echo "MySQL schema is ready!"
         env:
-        # Schema version parameters
-        - name: DEFAULT_VERSION
-          value: {{ $.Values.schema.version.default | quote }}
-        - name: VISIBILITY_VERSION
-          value: {{ $.Values.schema.version.visibility | quote }}
         - name: ES_ENABLED
           value: {{ $.Values.config.persistence.elasticsearch.enabled | quote }}
         # Basic connection parameters
@@ -719,6 +774,8 @@ spec:
         {{- end }}
         {{- end }}
         volumeMounts:
+        - name: versions-data
+          mountPath: /shared
         {{- with $.Values.global.tls.volumeMounts }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
@@ -801,6 +858,8 @@ spec:
       - name: config
         configMap:
           name: {{ include "cadence.fullname" $ }}-configmap
+      - name: versions-data
+        emptyDir: {}
       {{- with $.Values.global.tls.volumes }}
       {{- toYaml . | nindent 6 }}
       {{- end }}
