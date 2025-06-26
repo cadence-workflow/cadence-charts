@@ -200,34 +200,34 @@ spec:
           - sh
           - -c
           - |
-            # Build connection string based on TLS configuration
-            build_psql_cmd() {
-              local cmd="psql -h $DB_HOST -p $DB_PORT -U $DB_USER"
+            # Set up PostgreSQL environment variables
+            export PGPASSWORD="$POSTGRES_PWD"
+
+            # Add SSL mode if TLS is enabled
+            if [ "$TLS_ENABLED" = "true" ] && [ -n "$SSL_MODE" ]; then
+              # Set SSL mode as environment variable (psql reads PGSSLMODE)
+              export PGSSLMODE="$SSL_MODE"
               
-              # Add SSL mode if TLS is enabled
-              if [ "$TLS_ENABLED" = "true" ] && [ -n "$SSL_MODE" ]; then
-                cmd="$cmd --set=sslmode=$SSL_MODE"
-                
-                # Add SSL certificate parameters if provided
-                if [ -n "$SSL_CERTFILE" ]; then
-                  cmd="$cmd --set=sslrootcert=$SSL_CERTFILE"
-                fi
-                
-                if [ -n "$SSL_CLIENT_CERT" ]; then
-                  cmd="$cmd --set=sslcert=$SSL_CLIENT_CERT"
-                fi
-                
-                if [ -n "$SSL_CLIENT_KEY" ]; then
-                  cmd="$cmd --set=sslkey=$SSL_CLIENT_KEY"
-                fi
+              # Add SSL certificate parameters as environment variables if provided
+              if [ -n "$SSL_CERTFILE" ]; then
+                export PGSSLROOTCERT="$SSL_CERTFILE"
               fi
               
-              echo "$cmd"
-            }
+              if [ -n "$SSL_CLIENT_CERT" ]; then
+                export PGSSLCERT="$SSL_CLIENT_CERT"
+              fi
+              
+              if [ -n "$SSL_CLIENT_KEY" ]; then
+                export PGSSLKEY="$SSL_CLIENT_KEY"
+              fi
+            else
+              # Disable SSL if TLS is not enabled
+              export PGSSLMODE="disable"
+            fi
 
-            # Wait for PostgreSQL to be ready
+            # Wait for PostgreSQL to be ready with authentication and TLS
             echo "Waiting for PostgreSQL to be ready..."
-            until pg_isready -h $DB_HOST -p $DB_PORT -U $DB_USER; do
+            until psql -h $DB_HOST -p $DB_PORT -U $DB_USER -d postgres -c "SELECT 1" >/dev/null 2>&1; do
               echo 'PostgreSQL is not ready yet...'
               sleep 5
             done
