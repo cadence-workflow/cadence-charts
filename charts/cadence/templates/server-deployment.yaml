@@ -135,9 +135,14 @@ spec:
           - sh
           - -c
           - |
+            # Waiting for versions file
+            while [ ! -f /shared/schema-versions.env ]; do
+              echo "Waiting for schema versions file..."
+              sleep 2
+            done
+
             # Load extracted versions
-            source /shared/schema-versions.env
-            
+            export $(cat /shared/schema-versions.env | xargs)
             echo "Using extracted versions:"
             echo "  DEFAULT_VERSION=$DEFAULT_VERSION"
             echo "  VISIBILITY_VERSION=$VISIBILITY_VERSION"
@@ -297,9 +302,14 @@ spec:
           - sh
           - -c
           - |
-            # Load extracted versions
-            source /shared/schema-versions.env
+            # Waiting for versions file
+            while [ ! -f /shared/schema-versions.env ]; do
+              echo "Waiting for schema versions file..."
+              sleep 2
+            done
             
+            # Load extracted versions
+            export $(cat /shared/schema-versions.env | xargs)
             echo "Using extracted versions:"
             echo "  DEFAULT_VERSION=$DEFAULT_VERSION"
             echo "  VISIBILITY_VERSION=$VISIBILITY_VERSION"
@@ -412,9 +422,14 @@ spec:
           - sh
           - -c
           - |
-            # Load extracted versions
-            source /shared/schema-versions.env
+            # Waiting for versions file
+            while [ ! -f /shared/schema-versions.env ]; do
+              echo "Waiting for schema versions file..."
+              sleep 2
+            done
             
+            # Load extracted versions
+            export $(cat /shared/schema-versions.env | xargs)
             echo "Using extracted versions:"
             echo "  DEFAULT_VERSION=$DEFAULT_VERSION"
             echo "  VISIBILITY_VERSION=$VISIBILITY_VERSION"
