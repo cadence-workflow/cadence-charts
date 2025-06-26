@@ -96,9 +96,6 @@ spec:
         args:
           - -c
           - |
-            # Extraer versiones del archivo version.go
-            VERSION_FILE="/etc/cadence/schema/cassandra/version.go"
-            
             if [ -f "$VERSION_FILE" ]; then
               default_version=$(grep 'const Version' "$VERSION_FILE" | awk -F'"' '{print $2}')
               visibility_version=$(grep 'const VisibilityVersion' "$VERSION_FILE" | awk -F'"' '{print $2}')
