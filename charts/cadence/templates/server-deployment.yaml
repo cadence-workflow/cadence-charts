@@ -551,6 +551,9 @@ spec:
         {{- end }}
         {{- end }}
         {{- end }}
+        volumeMounts:
+        - name: versions-data
+          mountPath: /shared
         {{- if $.Values.config.persistence.elasticsearch.enabled }}
       # ElasticSearch Schema Validation Init Container
       - name: check-elasticsearch-schema
@@ -785,9 +788,6 @@ spec:
         {{- end }}
         {{- end }}
         {{- end }}
-        volumeMounts:
-        - name: versions-data
-          mountPath: /shared
         {{- with $.Values.global.tls.volumeMounts }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
