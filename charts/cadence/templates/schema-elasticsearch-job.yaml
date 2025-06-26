@@ -133,10 +133,6 @@ spec:
           value: {{ $.Values.config.persistence.elasticsearch.port | default 9200 | quote }}
         - name: ES_PROTOCOL
           value: {{ $.Values.config.persistence.elasticsearch.protocol | default "" | quote }}
-        - name: VISIBILITY_INDEX
-          value: {{ $.Values.config.persistence.elasticsearch.visibilityIndex | quote }}
-        - name: ES_VERSION
-          value: {{ $.Values.config.persistence.elasticsearch.version | quote }}
         # Authentication parameters
         {{- if $.Values.config.persistence.elasticsearch.user }}
         - name: ES_USER
