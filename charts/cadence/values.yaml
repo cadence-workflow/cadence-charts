@@ -751,7 +751,7 @@ config:
           # -- Enable TLS
           enabled: false
           # -- SSL mode (for PostgreSQL: disable, allow, prefer, require, verify-ca, verify-full)
-          # -- For MySQL: false, true, skip-verify, preferred. (Additional this should work: required, verify-ca, verify-identity)
+          # -- For MySQL: false, true, skip-verify, preferred
           sslMode: ""
           # -- Path to CA certificate file
           caFile: ""
