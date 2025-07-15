@@ -1116,7 +1116,7 @@ dynamicConfig:
 ###############################################################
 schema:
   version:
-    default: "0.42"
+    default: "0.43"
     visibility: "0.9"
   # createJob:
   #   enabled: false
