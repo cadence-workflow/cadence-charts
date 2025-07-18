@@ -67,6 +67,8 @@ Other dashboards:
 - https://raw.githubusercontent.com/cadence-workflow/cadence/refs/heads/master/docker/grafana/provisioning/dashboards/cadence-client-overall.json
 - https://raw.githubusercontent.com/cadence-workflow/cadence/refs/heads/master/docker/grafana/provisioning/dashboards/cadence-matching.json
 - https://raw.githubusercontent.com/cadence-workflow/cadence/refs/heads/master/docker/grafana/provisioning/dashboards/cadence-persistence.json
+- https://raw.githubusercontent.com/cadence-workflow/cadence/refs/heads/master/docker/grafana/provisioning/dashboards/cadence-frontend.json
+
 ```
 
 
