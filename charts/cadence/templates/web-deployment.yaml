@@ -73,6 +73,28 @@ spec:
       topologySpreadConstraints:
         {{- toYaml $serviceTopologySpreadConstraints | nindent 8 }}
       {{- end }}
+      {{- if $.Values.web.busybox.enabled }}
+      initContainers:
+      - name: wait-frontend
+        {{- $globalPodSecurityContext := .Values.global.podSecurityContext | default dict }}
+        {{- $servicePodSecurityContext := .Values.web.podSecurityContext | default $globalPodSecurityContext }}
+        {{- if $servicePodSecurityContext }}
+        securityContext:
+          {{- toYaml $servicePodSecurityContext | nindent 8 }}
+        {{- end }}
+        image: "{{ .Values.web.busybox.image.repository }}:{{ .Values.web.busybox.image.tag }}"
+        imagePullPolicy: {{ .Values.web.busybox.image.pullPolicy }}
+        command: ['sh', '-c']
+        args:
+        - |
+          HOST=$(echo "{{ include "cadence.grpcPeers" . }}" | cut -d: -f1)
+          PORT=$(echo "{{ include "cadence.grpcPeers" . }}" | cut -d: -f2)
+          until nc -z $HOST $PORT; do 
+            echo "waiting for frontend at $HOST:$PORT..."
+            sleep 2
+          done
+          echo "frontend is ready!"
+      {{- end }}
       containers:
       - name: cadence-web
         image: {{ .Values.web.image.repository }}:{{ .Values.web.image.tag }}

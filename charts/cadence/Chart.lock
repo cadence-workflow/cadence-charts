@@ -1,0 +1,12 @@
+dependencies:
+- name: cassandra
+  repository: oci://registry-1.docker.io/bitnamicharts
+  version: 11.4.2
+- name: postgresql
+  repository: oci://registry-1.docker.io/bitnamicharts
+  version: 16.7.13
+- name: mysql
+  repository: oci://registry-1.docker.io/bitnamicharts
+  version: 12.3.5
+digest: sha256:d355eb032d520a4005678225960f11fbce541e4aaea7fce4a7e90ecebcbe1807
+generated: "2025-06-25T16:33:38.605196+02:00"
