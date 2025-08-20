@@ -4,7 +4,7 @@
 
 ```
 helm package ./charts/cadence
-helm template cadence-release cadence-0.1.8.tgz > template_out.yaml
+helm template cadence-release cadence-0.2.0.tgz > template_out.yaml
 ```
 
 ## Build and deploy to a k8s cluster

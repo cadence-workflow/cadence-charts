@@ -465,16 +465,7 @@ data:
       primaryClusterName: {{ .Values.config.cluster.primaryClusterName | default "cluster0" }}
       currentClusterName: {{ .Values.config.cluster.currentClusterName | default "cluster0" }}
       clusterGroup:
-        {{ .Values.config.cluster.currentClusterName | default "cluster0" }}:
-          enabled: true
-          initialFailoverVersion: {{ .Values.config.cluster.initialFailoverVersion | default 0 }}
-          {{- $transport := .Values.config.cluster.rpcTransport | default "grpc" }}
-          {{- if eq $transport "grpc" }}
-          rpcAddress: {{ include "cadence.fullname" . }}-frontend:{{ .Values.frontend.grpcPort | default 7833 }}
-          {{- else }}
-          rpcAddress: {{ include "cadence.fullname" . }}-frontend:{{ .Values.frontend.port | default 7933 }}
-          {{- end }}
-          rpcTransport: {{ $transport | quote }}
+        {{- if .Values.config.cluster.clusterGroup }}
         {{- range $clusterName, $clusterConfig := .Values.config.cluster.clusterGroup }}
         {{ $clusterName }}:
           enabled: {{ $clusterConfig.enabled | default true }}
@@ -486,6 +477,18 @@ data:
           {{- fail (printf "rpcAddress is required for cluster %s" $clusterName) }}
           {{- end }}
           rpcTransport: {{ $clusterTransport | quote }}
+        {{- end }}
+        {{- else }}
+        {{ .Values.config.cluster.currentClusterName | default "cluster0" }}:
+          enabled: true
+          initialFailoverVersion: {{ .Values.config.cluster.initialFailoverVersion | default 0 }}
+          {{- $transport := .Values.config.cluster.rpcTransport | default "grpc" }}
+          {{- if eq $transport "grpc" }}
+          rpcAddress: {{ include "cadence.fullname" . }}-frontend:{{ .Values.frontend.grpcPort | default 7833 }}
+          {{- else }}
+          rpcAddress: {{ include "cadence.fullname" . }}-frontend:{{ .Values.frontend.port | default 7933 }}
+          {{- end }}
+          rpcTransport: {{ $transport | quote }}
         {{- end }}
       {{- if .Values.config.cluster.clusterRedirectionPolicy }}
       clusterRedirectionPolicy:
