@@ -60,7 +60,7 @@ This chart deploys Uber Cadence server components and web UI.
 | config.asyncWorkflowQueues.default-queue.type | string | `"kafka"` | Queue type: kafka |
 | config.asyncWorkflowQueues.enabled | bool | `false` | Enable async workflow queues |
 | config.blobstore.filestore.outputDirectory | string | `"/etc/cadence/blobstore"` | Output directory for blob storage |
-| config.cluster.clusterGroup | string | `nil` | Cluster group configuration with additional clusters |
+| config.cluster.clusterGroup | string | `nil` | Cluster group configuration with clusters (this override the default cluster) |
 | config.cluster.clusterRedirectionPolicy | object | `{"policy":"noop"}` | Cluster redirection policy for cross-cluster operations |
 | config.cluster.clusterRedirectionPolicy.policy | string | `"noop"` | Policy for handling cross-cluster requests (noop, selected-apis-forwarding, all-domain-apis-forwarding, selected-apis-forwarding-v2) |
 | config.cluster.currentClusterName | string | `"cluster0"` | Name of the current cluster |
@@ -108,7 +108,7 @@ This chart deploys Uber Cadence server components and web UI.
 | config.persistence.database.cassandra.consistency | string | `"LOCAL_QUORUM"` | Default consistency level |
 | config.persistence.database.cassandra.datacenter | string | `""` | Datacenter filter for Cassandra |
 | config.persistence.database.cassandra.hostSelectionPolicy | string | `"tokenaware,roundrobin"` | Host selection policy |
-| config.persistence.database.cassandra.hosts | string | `"cassandra-service.cadence.svc.cluster.local"` | Cassandra hosts. Can reference Kubernetes services |
+| config.persistence.database.cassandra.hosts | string | `"cassandra-service.cadencetest.svc.cluster.local"` | Cassandra hosts. Can reference Kubernetes services |
 | config.persistence.database.cassandra.keyspace | string | `"cadence"` | Cassandra keyspace for main data |
 | config.persistence.database.cassandra.maxConns | int | `10` | Maximum number of connections |
 | config.persistence.database.cassandra.password | string | `"cassandra"` | Cassandra password |
