@@ -4,7 +4,7 @@
 
 ```
 helm package ./charts/cadence
-helm template cadence-release cadence-0.1.8.tgz > template_out.yaml
+helm template cadence-release cadence-0.2.0.tgz > template_out.yaml
 ```
 
 ## Build and deploy to a k8s cluster
@@ -34,7 +34,7 @@ kubectl port-forward svc/cadence-release-frontend 7833:7833 -n cadencetest
 cadence \
     --address localhost:7833 \
     --transport grpc \
-    --domain samples-domain \
+    --domain default \
     domain register \
     --retention 1
 ```
