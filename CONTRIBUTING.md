@@ -34,7 +34,7 @@ kubectl port-forward svc/cadence-release-frontend 7833:7833 -n cadencetest
 cadence \
     --address localhost:7833 \
     --transport grpc \
-    --domain samples-domain \
+    --domain default \
     domain register \
     --retention 1
 ```
