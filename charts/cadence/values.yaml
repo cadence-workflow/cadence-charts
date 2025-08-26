@@ -8,7 +8,7 @@ global:
   # -- Global image configuration (shared only by Cadence Server services [frontend, worker, matching and history])
   image:
     repository: "docker.io/ubercadence/server"
-    tag: "v1.3.1-auto-setup"
+    tag: "v1.3.2-auto-setup"
     pullPolicy: IfNotPresent
 
   # -- Image pull secrets for private registries
