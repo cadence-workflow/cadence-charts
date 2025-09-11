@@ -501,7 +501,7 @@ data:
         rpc:
           port: {{ .Values.frontend.port | default 7933 }}
           grpcPort: {{ .Values.frontend.grpcPort | default 7833 }}
-          bindOnIP: {{ `{{ default .Env.POD_IP "0.0.0.0" }}` }}
+          bindOnIP: "0.0.0.0"
           grpcMaxMsgSize: {{ .Values.config.services.grpcMaxMsgSize | default 4194304 | int }}
         metrics:
           {{- if eq .Values.config.services.metrics.type "statsd" }}
@@ -522,7 +522,7 @@ data:
         rpc:
           port: {{ .Values.history.port | default 7934 }}
           grpcPort: {{ .Values.history.grpcPort | default 7834 }}
-          bindOnIP: {{ `{{ default .Env.POD_IP "0.0.0.0" }}` }}
+          bindOnIP: "0.0.0.0"
           grpcMaxMsgSize: {{ .Values.config.services.grpcMaxMsgSize | default 4194304 | int }}
         metrics:
           {{- if eq .Values.config.services.metrics.type "statsd" }}
@@ -543,7 +543,7 @@ data:
         rpc:
           port: {{ .Values.matching.port | default 7935 }}
           grpcPort: {{ .Values.matching.grpcPort | default 7835 }}
-          bindOnIP: {{ `{{ default .Env.POD_IP "0.0.0.0" }}` }}
+          bindOnIP: "0.0.0.0"
           grpcMaxMsgSize: {{ .Values.config.services.grpcMaxMsgSize | default 4194304 | int }}
         metrics:
           {{- if eq .Values.config.services.metrics.type "statsd" }}
@@ -563,7 +563,7 @@ data:
       worker:
         rpc:
           port: {{ .Values.worker.port | default 7939 }}
-          bindOnIP: {{ `{{ default .Env.POD_IP "0.0.0.0" }}` }}
+          bindOnIP: "0.0.0.0"
           grpcMaxMsgSize: {{ .Values.config.services.grpcMaxMsgSize | default 4194304 | int }}
         metrics:
           {{- if eq .Values.config.services.metrics.type "statsd" }}
