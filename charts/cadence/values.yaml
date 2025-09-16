@@ -8,7 +8,7 @@ global:
   # -- Global image configuration (shared only by Cadence Server services [frontend, worker, matching and history])
   image:
     repository: "docker.io/ubercadence/server"
-    tag: "v1.3.2-auto-setup"
+    tag: "v1.3.2"
     pullPolicy: IfNotPresent
 
   # -- Image pull secrets for private registries
@@ -16,21 +16,23 @@ global:
   # - name: myregistrykey
 
   # -- Global environment variables (shared only by Cadence Server services [frontend, worker, matching and history])
-  env:
-    - name: ENABLE_ES
-      value: "false"
-    - name: SKIP_SCHEMA_SETUP
-      value: "true"
-    - name: RINGPOP_BOOTSTRAP_MODE
-      value: "dns"
-    - name: BIND_ON_IP
-      value: 0.0.0.0
+  env: []
+  # - name: ENV_VAR
+  #   value: "value"
+  # Enable this variable if you are using Google Storage.
+  # - name: GOOGLE_APPLICATION_CREDENTIALS
+  #   value: "absolute/path/to/json/file"
 
   # -- Global secret environment variables (shared only by Cadence Server services [frontend, worker, matching and history])
   secretEnv: []
   # - name: GLOBAL_SECRET_ENV_VAR
   #   value: "value"
-
+  # Enable this variables if you are using S3.
+  # - name: AWS_ACCESS_KEY_ID
+  #   value: "value"
+  # - name: AWS_SECRET_ACCESS_KEY
+  #   value: "value"
+ 
   # -- Global pod security context
   podSecurityContext: {}
     # runAsNonRoot: true
@@ -56,6 +58,38 @@ global:
 
   # -- Global node selector
   nodeSelector: {}
+
+  # -- Global TLS volumes configuration
+  tls:
+    # -- Additional volumes for TLS certificates (The mode is important to have the minimum permissions)
+    volumes: []
+    # - name: multiple-ca-certs
+    #   configMap:
+    #     name: cassandra-ca-bundle
+    #     items:
+    #       - key: root-ca.crt
+    #         path: root-ca.pem
+    #       - key: intermediate-ca.crt
+    #         path: intermediate-ca.pem
+    # - name: example-tls-certs
+    #   secret:
+    #     secretName: example-crt-secret
+    #     items:
+    #       - key: ca.crt
+    #         path: ca.pem
+    #         mode: 0644 
+    #       - key: tls.crt
+    #         path: client.pem
+    #         mode: 0644 
+    #       - key: tls.key
+    #         path: client-key.pem
+    #         mode: 0600 
+
+    # -- Volume mounts for TLS certificates
+    volumeMounts: []
+    # - name: example-tls-certs
+    #   mountPath: /etc/cadence/ssl/
+    #   readOnly: true
 
   # -- Global logging configuration (shared only by Cadence Server services [frontend, worker, matching and history])
   log:
@@ -412,7 +446,7 @@ web:
   # -- Image configuration for Web UI
   image:
     repository: "docker.io/ubercadence/web"
-    tag: "v4.0.3"
+    tag: "v4.0.6"
     pullPolicy: IfNotPresent
     imagePullSecrets: []
       # - name: myregistrykey
@@ -517,14 +551,6 @@ web:
       # - secretName: cadence-web-tls
       #   hosts:
       #     - cadence.example.com
-
-# Dynamic configuration
-dynamicConfig:
-  # -- Dynamic config values to be set in the Cadence server
-  # List of keys can be found at https://pkg.go.dev/github.com/uber/cadence@v1.3.0/common/dynamicconfig/dynamicproperties
-  values:
-    history.workflowIDExternalRateLimitEnabled:
-      - value: true
 
 # Service Account configuration
 serviceAccount:
@@ -632,20 +658,509 @@ autoscaling:
     targetCPUUtilizationPercentage: 70
     targetMemoryUtilizationPercentage: 80
 
-##############################
-### DATABASE CONFIGURATION ###
-##############################
+#############################################
+########### CADENCE CONFIGURATION ###########
+#############################################
+config:
+  # Log configuration
+  log:
+    # -- Enable stdout logging (inherits from global.log if not specified)
+    stdout: ~
+    # -- Logging level: debug, info, warn, error (inherits from global.log if not specified)
+    level: ~
+    # -- Output file path for logging (if stdout is false)
+    outputFile: ""
+    # -- Log level key name (defaults to "level")
+    levelKey: level
+    # -- Log encoding format: json, console (defaults to "json")
+    encoding: json
+    # -- Allow using environment variables for log configuration. If enabled, it will use ENV variable of each server component.
+    useEnvVars: false
+  
+  # Ringpop configuration for service discovery
+  ringpop:
+    # -- Ringpop cluster name
+    name: "cadence"
+    # -- Bootstrap mode: dns, hosts, file
+    bootstrapMode: "dns"
+    # -- Maximum duration to wait for joining the ring
+    maxJoinDuration: "30s"
+
+  # Persistence configuration
+  persistence:
+    # -- Number of history shards for partitioning (CANNOT BE CHANGED ONCE SET)
+    numHistoryShards: 4
+    # -- Name of the default datastore
+    defaultStore: "default"
+    # -- Name of the visibility datastore (basic visibility)
+    visibilityStore: "visibility"
+    # -- Name of the advanced visibility datastore
+    advancedVisibilityStore: "es-visibility"
+    # -- Enable persistence latency histogram metrics
+    enablePersistenceLatencyHistogramMetrics: false
+
+    # Database configuration
+    database:
+      # -- Database driver: cassandra, mysql, postgres
+      driver: "cassandra"
+
+      # Common SQL configuration (applies to both MySQL and PostgreSQL)
+      sql:
+        # -- Database host. Can reference Kubernetes services
+        hosts: "mysql-service.mysql-namespace.svc.cluster.local"
+        # -- Database port (will use driver default if not specified)
+        port: null
+        # -- Database name for main data
+        dbname: "cadence"
+        # -- Database name for visibility data
+        visibilityDbname: "cadence_visibility"
+        # -- Database username
+        user: "cadence"
+        # -- Database password
+        password: ""
+        # -- Maximum number of connections
+        maxConns: 20
+        # -- Maximum number of idle connections
+        maxIdleConns: 20
+        # -- Maximum connection lifetime
+        maxConnLifetime: "1h"
+        # -- Number of database shards (default: 1)
+        numShards: 1
+        # -- Encoding type for SQL blobs
+        encodingType: "thriftrw"
+        # -- Decoding types for SQL blobs
+        decodingTypes: ["thriftrw"]
+        # -- Use multiple databases for sharding
+        useMultipleDatabases: false
+        # -- Multiple databases configuration (when useMultipleDatabases is true)
+        multipleDatabasesConfig: []
+        # -- Connection attributes (key-value pairs for connection string)
+        connectAttributes: {}
+        # TLS configuration for SQL databases
+        tls:
+          # -- Enable TLS
+          enabled: false
+          # -- SSL mode (for PostgreSQL: disable, allow, prefer, require, verify-ca, verify-full)
+          # -- For MySQL: false, true, skip-verify, preferred. (Additional this should work: required, verify-ca, verify-identity)
+          sslMode: ""
+          # -- Path to CA certificate file
+          caFile: ""
+          # -- Multiple CA certificate files
+          caFiles: []
+          # -- Path to client certificate file
+          certFile: ""
+          # -- Path to client private key file
+          keyFile: ""
+          # -- Enable hostname verification (inverse of skipHostVerification)
+          enableHostVerification: true
+          # -- Require client authentication for mutual TLS
+          requireClientAuth: false
+          # -- Server name for certificate verification
+          serverName: ""
+
+      # MySQL-specific configuration
+      mysql:
+        # -- Default port for MySQL (overrides sql.port if specified)
+        port: 3306
+        # -- Enable transaction isolation compatibility mode
+        txIsolationCompat: false
+
+      # PostgreSQL-specific configuration
+      postgres:
+        # -- Default port for PostgreSQL (overrides sql.port if specified)
+        port: 5432
+
+      # Cassandra configuration
+      cassandra:
+        # -- Cassandra hosts. Can reference Kubernetes services
+        hosts: "cassandra-service.cadencetest.svc.cluster.local"
+        # -- Cassandra port
+        port: 9042
+        # -- Cassandra keyspace for main data
+        keyspace: "cadence"
+        # -- Cassandra keyspace for visibility data
+        visibilityKeyspace: "cadence_visibility"
+        # -- Cassandra username
+        user: "cassandra"
+        # -- Cassandra password
+        password: "cassandra"
+        # -- Cassandra protocol version
+        protoVersion: 4
+        # -- AWS region filter for Cassandra (if using AWS Keyspaces)
+        region: ""
+        # -- Datacenter filter for Cassandra
+        datacenter: ""
+        # -- Maximum number of connections
+        maxConns: 10
+        # -- Connection timeout
+        connectTimeout: "10s"
+        # -- Query timeout
+        timeout: "1s"
+        # -- Default consistency level
+        consistency: "LOCAL_QUORUM"
+        # -- Serial consistency level
+        serialConsistency: "LOCAL_SERIAL"
+        # -- Host selection policy
+        hostSelectionPolicy: "tokenaware,roundrobin"
+        # -- Allowed authenticators for custom authentication
+        allowedAuthenticators: []
+        # -- Additional connection attributes
+        connectAttributes: {}
+        # TLS configuration for Cassandra
+        tls:
+          # -- Enable TLS
+          enabled: false
+          # -- CA certificate file to verify server certificates
+          caFile: ""
+          # -- Multiple CA certificate files (alternative to caFile)
+          caFiles: []
+          # -- Client certificate file for mutual TLS
+          certFile: ""
+          # -- Client private key file for mutual TLS
+          keyFile: ""
+          # -- Verify server hostname matches certificate
+          enableHostVerification: true
+          # -- Require client certificate authentication
+          requireClientAuth: false
+          # -- Override server name for certificate verification
+          serverName: "cassandra"
+
+    # Elasticsearch configuration for advanced visibility
+    elasticsearch:
+      # -- Enable Elasticsearch for advanced visibility
+      enabled: false
+      # -- Elasticsearch version (v6, use v7 for v7 or higher)
+      version: "v7"
+      # -- Elasticsearch username
+      user: ""
+      # -- Elasticsearch password
+      password: ""
+      # -- Protocol to use (http/https). If not specified, auto-detected based on TLS settings
+      protocol: ""
+      # -- Elasticsearch host.
+      hosts: "elasticsearch-service.elastic-namespace.svc.cluster.local"
+      # -- Elasticsearch port
+      port: 9200
+      # -- Elasticsearch visibility index name
+      visibilityIndex: "cadence-visibility"
+      # -- Enable AWS signing (for AWS Elasticsearch)
+      awsSigning:
+        enabled: false
+        region: ""
+        service: "es"
+      # TLS configuration for ElasticSearch
+      tls:
+        # -- Enable TLS
+        enabled: false
+        # -- CA certificate file to verify server certificates
+        caFile: ""
+        # -- Multiple CA certificate files (alternative to caFile)
+        caFiles: []
+        # -- Client certificate file for mutual TLS
+        certFile: ""
+        # -- Client private key file for mutual TLS
+        keyFile: ""
+        # -- Verify server hostname matches certificate
+        enableHostVerification: true
+        # -- Require client certificate authentication
+        requireClientAuth: false
+        # -- Override server name for certificate verification
+        serverName: ""
+  
+  # Cluster configuration
+  cluster:
+    # -- Version increment used during cluster failover operations
+    failoverVersionIncrement: 10
+    # -- Name of the primary cluster in a multi-cluster setup
+    primaryClusterName: "cluster0"
+    # -- Name of the current cluster
+    currentClusterName: "cluster0"
+    # -- Whether this cluster is not the primary cluster
+    isNotPrimary: false
+    # -- RPC transport protocol (grpc or tchannel)
+    rpcTransport: "grpc"
+    # -- Initial failover version for this cluster
+    initialFailoverVersion: 0
+    # -- Cluster group configuration with clusters (this override the default cluster)
+    clusterGroup:
+      # Example of additional cluster configuration:
+      # cluster0:
+      #   enabled: true
+      #   initialFailoverVersion: 0
+      #   rpcAddress: "cadence-cluster1.example.com:7933"
+      #   rpcTransport: "grpc"
+      # cluster1:
+      #   enabled: true
+      #   initialFailoverVersion: 0
+      #   rpcAddress: "cadence-cluster1.example.com:7933"
+      #   rpcTransport: "grpc"
+    # -- Cluster redirection policy for cross-cluster operations
+    clusterRedirectionPolicy:
+      # -- Policy for handling cross-cluster requests (noop, selected-apis-forwarding, all-domain-apis-forwarding, selected-apis-forwarding-v2)
+      policy: "noop"
+  
+  # Services configuration
+  services:
+    # -- gRPC max message size
+    grpcMaxMsgSize: 4194304  # 4MB
+
+    # Metrics configuration
+    metrics:
+      # -- Metrics type: statsd, prometheus
+      type: "prometheus"
+      # StatsD configuration
+      statsd:
+        # -- StatsD endpoint. Can reference Kubernetes services
+        endpoint: ""
+        # -- Metric prefixes for each service
+        prefixes:
+          frontend: "cadence-frontend"
+          matching: "cadence-matching"
+          history: "cadence-history"
+          worker: "cadence-worker"
+      # Prometheus configuration
+      prometheus:
+        # -- Timer type: histogram, summary
+        timerType: "histogram"
+    
+    # Pprof configuration
+    pprof:
+      # -- Enable pprof endpoints
+      enabled: false
+      # -- Pprof ports for each service
+      ports:
+        frontend: 6060
+        matching: 6061
+        history: 6062
+        worker: 6063
+
+  # Kafka configuration for async workflows
+  kafka:
+    # -- Enable Kafka for async workflows
+    enabled: false
+    # -- Kafka broker service. Can reference Kubernetes services
+    brokers: "kafka-service.kafka-namespace.svc.cluster.local"
+    # -- Kafka port
+    port: 9092
+    # -- Kafka visibility topic name
+    visibilityTopic: "cadence-visibility"
+    # -- Kafka visibility DLQ topic name
+    visibilityDLQTopic: "cadence-visibility-dlq"
+    # -- Topic properties (optional)
+    topicProperties: {}
+    # TLS configuration for Kafka
+    tls:
+      # -- Enable TLS
+      enabled: false
+      # -- CA certificate file to verify server certificates
+      caFile: ""
+      # -- Multiple CA certificate files (alternative to caFile)
+      caFiles: []
+      # -- Client certificate file for mutual TLS
+      certFile: ""
+      # -- Client private key file for mutual TLS
+      keyFile: ""
+      # -- Verify server hostname matches certificate
+      enableHostVerification: true
+      # -- Require client certificate authentication
+      requireClientAuth: false
+      # -- Override server name for certificate verification
+      serverName: ""
+    # SASL configuration
+    sasl:
+      # -- Enable SASL authentication
+      enabled: false
+      # -- SASL mechanism: plain, sha512 or sha256
+      mechanism: "PLAIN"
+      # -- SASL username
+      username: ""
+      # -- SASL password
+      password: ""
+  
+  # Archival configuration
+  archival:
+    # History archival configuration
+    history:
+      # -- Archival status: enabled, disabled, paused
+      status: "disabled"
+      # -- Enable reading from archives
+      enableRead: false
+      # -- Archive providers configuration
+      provider:
+        # -- Storage type: filestore, s3, gcs
+        type: "filestore"
+        # Filestore archiver
+        filestore:
+          # -- File mode for archived files
+          fileMode: "0644"
+          # -- Directory mode for archive directories
+          dirMode: "0755"
+        # S3 archiver
+        # - Documentation for S3 here: https://github.com/cadence-workflow/cadence/blob/v1.3.0/common/archiver/s3store/README.md
+        s3store:
+          # -- AWS region
+          region: ""
+          # -- S3 endpoint (for S3-compatible storage)
+          endpoint: ""
+          # -- Force path style URLs
+          s3ForcePathStyle: false
+        # Google Cloud Storage archiver
+        # - Documentation for GStorage here: https://github.com/cadence-workflow/cadence/blob/v1.3.0/common/archiver/gcloud/README.md
+        gstorage:
+          # -- Path to service account key file
+          credentialsPath: ""
+    
+    # Visibility archival configuration
+    visibility:
+      # -- Archival status: enabled, disabled, paused
+      status: "disabled"
+      # -- Enable reading from archives
+      enableRead: false
+      # -- Archive providers configuration
+      provider:
+        # -- Storage type: filestore, s3, gcs
+        type: "filestore"
+        # Filestore archiver
+        filestore:
+          # -- File mode for archived files
+          fileMode: "0644"
+          # -- Directory mode for archive directories
+          dirMode: "0755"
+        # S3 archiver
+        # - Documentation for S3 here: https://github.com/cadence-workflow/cadence/blob/v1.3.0/common/archiver/s3store/README.md
+        s3store:
+          # -- AWS region
+          region: ""
+          # -- S3 endpoint (for S3-compatible storage)
+          endpoint: ""
+          # -- Force path style URLs
+          s3ForcePathStyle: false
+        # Google Cloud Storage archiver
+        # - Documentation for GStorage here: https://github.com/cadence-workflow/cadence/blob/v1.3.0/common/archiver/gcloud/README.md
+        gstorage:
+          # -- Path to service account key file
+          credentialsPath: ""
+
+  # Domain defaults configuration
+  domainDefaults:
+    # -- Default archival settings for new domains
+    # - Documentation for S3 here: https://github.com/cadence-workflow/cadence/blob/v1.3.0/common/archiver/s3store/README.md
+    # - Documentation for GStorage here: https://github.com/cadence-workflow/cadence/blob/v1.3.0/common/archiver/gcloud/README.md
+    archival:
+      history:
+        # -- Default history archival status: enabled, disabled
+        status: "disabled"
+        # -- Default history archival URI
+        URI: ""
+      visibility:
+        # -- Default visibility archival status: enabled, disabled
+        status: "disabled"
+        # -- Default visibility archival URI
+        URI: ""
+  
+  # Blobstore configuration
+  blobstore:
+    # Filestore blobstore
+    filestore:
+      # -- Output directory for blob storage
+      outputDirectory: "/etc/cadence/blobstore"
+  
+  # Public client configuration
+  publicClient:
+    # -- Frontend service address (defaults to current cluster's RPC address)
+    hostPort: ""
+    # -- Transport protocol: grpc, tchannel
+    transport: "grpc"
+    # -- DNS refresh interval
+    refreshInterval: "10s"
+  
+  # Dynamic configuration
+  dynamicConfig:
+    # -- Dynamic config client type: noop, filebased, configstore
+    client: "filebased"
+    # File-based dynamic config
+    filebased:
+      # -- Path to dynamic config file
+      filepath: "/etc/cadence/config/dynamicconfig/config.yaml"
+      # -- Poll interval for config changes
+      pollInterval: "60s"
+  
+  # Async workflow queues configuration
+  # This is not operative yet. It will be in next releases.
+  asyncWorkflowQueues:
+    # -- Enable async workflow queues
+    enabled: false
+    # -- Async workflow queue providers
+    default-queue:
+      # -- Queue type: kafka
+      type: "kafka"
+      # -- Queue configuration
+      config:
+        # -- Kafka topic for async workflows
+        topic: "cadence-async-wf"
+        # -- Kafka cluster reference
+        cluster: "default"
+
+# Dynamic configuration
+dynamicConfig:
+  # -- Dynamic config values to be set in the Cadence server
+  # List of keys can be found at https://pkg.go.dev/github.com/uber/cadence/common/dynamicconfig/dynamicproperties
+  values:
+    system.minRetentionDays:
+    - value: 0
+      constraints: {}
+    # Visibility write have to be set in funtion of advanced visibility or not. See https://pkg.go.dev/github.com/uber/cadence/common/dynamicconfig/dynamicproperties#WriteVisibilityStoreName for more information.
+    system.writeVisibilityStoreName:
+      - value: "db"
+    # Visibility read have to be set in funtion of advanced visibility or not. See https://pkg.go.dev/github.com/uber/cadence/common/dynamicconfig/dynamicproperties#ReadVisibilityStoreName for more information.
+    system.readVisibilityStoreName:
+      - value: "db"
+
+###############################################################
+#################### SCHEMA CONFIGURATION #####################
+###############################################################
+schema:
+  version:
+    default: "0.43"
+    visibility: "0.9"
+  # createJob:
+  #   enabled: false
+  # No support for mysql & postgresql yet.
+  setupJob:
+    enabled: true
+  # updateJob:
+  #   enabled: false
+  checkSchema:
+    cassandra:
+      image:
+        repository: "cassandra"
+        tag: "4.0"
+        pullPolicy: IfNotPresent
+    mysql:
+      image:
+        repository: "alpine/mysql"
+        tag: "latest"
+        pullPolicy: IfNotPresent
+    postgres:
+      image:
+        repository: "alpine/psql"
+        tag: "latest"
+        pullPolicy: IfNotPresent
+    elasticsearch:
+      image:
+        repository: alpine/curl
+        tag: "latest"
+        pullPolicy: IfNotPresent
+
+###############################################################
+################### DATABASE CONFIGURATION ####################
+# Use only if you want to deploy the database from this chart #
+###############################################################
 
 # Cassandra configuration
 cassandra:
   # -- External Cassandra endpoint to connect to. Required when cassandra.deployment.enabled is set to false
   endpoint: ""
-
-  schema:
-    # -- Cassandra schema version of the Cadence keyspace to use
-    version: "0.42"
-    # -- Cassandra schema version of the Cadence visibility keyspace to use
-    visibility_version: "0.9"
 
   deployment:
     # -- When enabled, a single instance Cassandra will be deployed as part of the Helm chart
