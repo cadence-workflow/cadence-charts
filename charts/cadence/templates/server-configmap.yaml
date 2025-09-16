@@ -451,6 +451,7 @@ data:
     # Ringpop configuration
     ringpop:
       name: {{ .Values.config.ringpop.name | default "cadence" }}
+      broadcastAddress: {{ `{{ default .Env.POD_IP "0.0.0.0" }}` }}
       bootstrapMode: {{ .Values.config.ringpop.bootstrapMode | default "dns" }}
       bootstrapHosts:
         - {{ include "cadence.fullname" . }}-frontend-headless:{{ .Values.frontend.port | default 7933 }}
