@@ -8,7 +8,7 @@ global:
   # -- Global image configuration (shared only by Cadence Server services [frontend, worker, matching and history])
   image:
     repository: "docker.io/ubercadence/server"
-    tag: "v1.3.2"
+    tag: "v1.3.1"
     pullPolicy: IfNotPresent
 
   # -- Image pull secrets for private registries
@@ -446,10 +446,20 @@ web:
   # -- Image configuration for Web UI
   image:
     repository: "docker.io/ubercadence/web"
-    tag: "v4.0.6"
+    tag: "v4.0.5"
     pullPolicy: IfNotPresent
     imagePullSecrets: []
       # - name: myregistrykey
+
+  # -- Image configuration for BusyBox to check frontend service
+  busybox:
+    enabled: true
+    image:
+      repository: "busybox"
+      tag: "latest"
+      pullPolicy: IfNotPresent
+      imagePullSecrets: []
+        # - name: myregistrykey
 
   # -- Number of web UI replicas to deploy
   replicas: 1
@@ -707,7 +717,7 @@ config:
       # Common SQL configuration (applies to both MySQL and PostgreSQL)
       sql:
         # -- Database host. Can reference Kubernetes services
-        hosts: "mysql-service.mysql-namespace.svc.cluster.local"
+        hosts: "cadence-mysql.cadence.svc.cluster.local"
         # -- Database port (will use driver default if not specified)
         port: null
         # -- Database name for main data
@@ -741,7 +751,7 @@ config:
           # -- Enable TLS
           enabled: false
           # -- SSL mode (for PostgreSQL: disable, allow, prefer, require, verify-ca, verify-full)
-          # -- For MySQL: false, true, skip-verify, preferred. (Additional this should work: required, verify-ca, verify-identity)
+          # -- For MySQL: false, true, skip-verify, preferred
           sslMode: ""
           # -- Path to CA certificate file
           caFile: ""
@@ -773,13 +783,15 @@ config:
       # Cassandra configuration
       cassandra:
         # -- Cassandra hosts. Can reference Kubernetes services
-        hosts: "cassandra-service.cadencetest.svc.cluster.local"
+        hosts: "cadence-cassandra.cadence.svc.cluster.local"
         # -- Cassandra port
         port: 9042
         # -- Cassandra keyspace for main data
         keyspace: "cadence"
         # -- Cassandra keyspace for visibility data
         visibilityKeyspace: "cadence_visibility"
+        # -- Number of replicas of cassandra deployed to ensure reliability and fault tolerance across the cluster
+        replicationFactor: 1
         # -- Cassandra username
         user: "cassandra"
         # -- Cassandra password
@@ -788,7 +800,7 @@ config:
         protoVersion: 4
         # -- AWS region filter for Cassandra (if using AWS Keyspaces)
         region: ""
-        # -- Datacenter filter for Cassandra
+        # -- Datacenter filter for Cassandra (Used for schema setup too)
         datacenter: ""
         # -- Maximum number of connections
         maxConns: 10
@@ -823,7 +835,7 @@ config:
           # -- Require client certificate authentication
           requireClientAuth: false
           # -- Override server name for certificate verification
-          serverName: "cassandra"
+          serverName: "localhost"
 
     # Elasticsearch configuration for advanced visibility
     elasticsearch:
@@ -881,14 +893,9 @@ config:
     rpcTransport: "grpc"
     # -- Initial failover version for this cluster
     initialFailoverVersion: 0
-    # -- Cluster group configuration with clusters (this override the default cluster)
+    # -- Cluster group configuration with additional clusters
     clusterGroup:
       # Example of additional cluster configuration:
-      # cluster0:
-      #   enabled: true
-      #   initialFailoverVersion: 0
-      #   rpcAddress: "cadence-cluster1.example.com:7933"
-      #   rpcTransport: "grpc"
       # cluster1:
       #   enabled: true
       #   initialFailoverVersion: 0
@@ -1120,63 +1127,338 @@ dynamicConfig:
 #################### SCHEMA CONFIGURATION #####################
 ###############################################################
 schema:
-  version:
-    default: "0.43"
-    visibility: "0.9"
-  # createJob:
-  #   enabled: false
-  # No support for mysql & postgresql yet.
-  setupJob:
+  # Schema validation and deployment configuration
+  # This job validates and updates the database schema safely:
+  # - Won't replace existing databases
+  # - Won't rollback schema versions to prevent data loss
+  # - Will update schema version if updates are available
+  # All schema parameters are taken from .Values.config
+  
+  # -- Schema job for main database schema management
+  serverJob:
+    # -- Enable server schema job
     enabled: true
-  # updateJob:
-  #   enabled: false
+    # -- Schema job resource allocation
+    resources: {}
+      # limits:
+      #   cpu: "500m"
+      #   memory: "1Gi"
+      # requests:
+      #   cpu: "500m"
+      #   memory: "1Gi"
+    # -- Schema job affinity rules
+    affinity: {}
+    # -- Schema job tolerations
+    tolerations: []
+    # -- Schema job node selector
+    nodeSelector: {}
+
+  # -- ElasticSearch schema job configuration
+  elasticSearchJob:
+    # -- Enable ElasticSearch schema job
+    enabled: true
+    # -- ElasticSearch schema job resource allocation
+    resources: {}
+      # limits:
+      #   cpu: "500m"
+      #   memory: "1Gi"
+      # requests:
+      #   cpu: "500m"
+      #   memory: "1Gi"
+    # -- ElasticSearch schema job affinity rules
+    affinity: {}
+    # -- ElasticSearch schema job tolerations
+    tolerations: []
+    # -- ElasticSearch schema job node selector
+    nodeSelector: {}
+
+  # -- Container images for schema validation
   checkSchema:
+    # -- Cassandra schema validation image
     cassandra:
       image:
         repository: "cassandra"
-        tag: "4.0"
+        tag: "4"
         pullPolicy: IfNotPresent
+    # -- MySQL schema validation image
     mysql:
       image:
         repository: "alpine/mysql"
         tag: "latest"
         pullPolicy: IfNotPresent
+    # -- PostgreSQL schema validation image
     postgres:
       image:
         repository: "alpine/psql"
         tag: "latest"
         pullPolicy: IfNotPresent
+    # -- ElasticSearch schema validation image
     elasticsearch:
       image:
         repository: alpine/curl
         tag: "latest"
         pullPolicy: IfNotPresent
 
-###############################################################
-################### DATABASE CONFIGURATION ####################
-# Use only if you want to deploy the database from this chart #
-###############################################################
+##################################################################
+#################### DATABASE CONFIGURATION ######################
+##################################################################
+# Database deployment configuration
+# Enable only if you want to deploy the database components from this chart
+# For production environments, consider using external managed databases
 
-# Cassandra configuration
+# Cassandra database configuration
+# ref: https://github.com/bitnami/charts/tree/main/bitnami/cassandra
+# More documentation: https://artifacthub.io/packages/helm/bitnami/cassandra
 cassandra:
-  # -- External Cassandra endpoint to connect to. Required when cassandra.deployment.enabled is set to false
-  endpoint: ""
+  # -- Enable Cassandra database deployment
+  enabled: true
+  # -- Number of Cassandra replicas
+  replicaCount: 1
 
-  deployment:
-    # -- When enabled, a single instance Cassandra will be deployed as part of the Helm chart
-    # -- When disabled, the Cassandra deployment is expected to be provided externally
-    enabled: true
+  # Database user configuration
+  dbUser:
+    # -- Cassandra username
+    user: cassandra
+    # -- Force password setting
+    forcePassword: false
+    # -- Cassandra password (leave empty for auto-generation)
+    password: "cassandra"
 
-    image:
-      repository: "cassandra"
-      tag: "4.1.1"
-      pullPolicy: IfNotPresent
+  # Cassandra cluster configuration
+  cluster:
+    # -- Cassandra cluster name
+    name: cassandra
+    # -- Number of seed nodes
+    seedCount: 1
+    # -- Number of tokens per node
+    numTokens: 256
+    # -- Datacenter name
+    datacenter: dc1
+    # -- Rack name
+    rack: rack1
+    # -- Endpoint snitch strategy
+    endpointSnitch: SimpleSnitch
 
-    # -- Resource limits and requests for Cassandra
-    resources:
-      limits:
-        cpu: 1
-        memory: 2Gi
-      requests:
-        cpu: 500m
-        memory: 1Gi
+  # JVM configuration
+  jvm:
+    # -- Additional JVM options
+    extraOpts: ""
+    # -- Maximum heap size (auto-calculated if empty)
+    maxHeapSize: ""
+    # -- New generation heap size (auto-calculated if empty)
+    newHeapSize: ""
+
+  # -- Cassandra resource allocation
+  resources: {}
+    # limits:
+    #   cpu: "500m"
+    #   memory: "1Gi"
+    # requests:
+    #   cpu: "500m"
+    #   memory: "1Gi"
+
+  # Persistence configuration
+  persistence:
+    # -- Enable persistent storage
+    enabled: false
+    # -- Use existing persistent volume claim
+    existingClaim: ""
+    # -- Storage class for data volume
+    storageClass: ""
+    # -- Storage class for commit log volume
+    commitStorageClass: ""
+    # -- Persistent volume annotations
+    annotations: {}
+    # -- Persistent volume access modes
+    accessModes:
+      - ReadWriteOnce
+    # -- Data volume size
+    size: 8Gi
+    # -- Commit log volume size
+    commitLogsize: 2Gi
+
+  # TLS configuration
+  tls:
+    # -- Internode encryption level (none, all, dc, rack)
+    internodeEncryption: none
+    # -- Enable client-to-node encryption
+    clientEncryption: false
+    # -- Auto-generate TLS certificates
+    autoGenerated: false
+    # -- Existing secret with TLS certificates
+    existingSecret: ""
+    # -- Secret containing TLS passwords
+    passwordsSecret: ""
+    # -- Keystore password
+    keystorePassword: ""
+    # -- Truststore password
+    truststorePassword: ""
+    # -- Secret containing TLS certificates
+    certificatesSecret: ""
+    # -- TLS encryption secret name
+    tlsEncryptionSecretName: ""
+    # -- Resource preset for TLS containers
+    resourcesPreset: "nano"
+
+# PostgreSQL database configuration
+# ref: https://github.com/bitnami/charts/tree/main/bitnami/postgresql
+# More documentation: https://artifacthub.io/packages/helm/bitnami/postgresql
+postgresql:
+  # -- Enable PostgreSQL database deployment
+  enabled: false
+
+  # Authentication configuration
+  auth:
+    # -- Enable postgres admin user
+    enablePostgresUser: true
+    # -- Password for postgres admin user (leave empty for auto-generation)
+    postgresPassword: ""
+    # -- Custom username to create
+    username: ""
+    # -- Password for custom user (leave empty for auto-generation)
+    password: ""
+    # -- Custom database name to create
+    database: ""
+
+  # Primary database configuration
+  primary:
+    # -- Primary database resource allocation
+    # resources:
+    #   requests:
+    #     cpu: 2
+    #     memory: 512Mi
+    #   limits:
+    #     cpu: 3
+    #     memory: 1024Mi
+    
+    # Persistence configuration
+    persistence:
+      # -- Enable PostgreSQL primary data persistence using PVC
+      enabled: true
+      # -- Volume name to assign
+      volumeName: "data"
+      # -- Use existing persistent volume claim
+      existingClaim: ""
+      # -- Volume mount path
+      mountPath: /bitnami/postgresql
+      # -- Volume subdirectory to mount
+      subPath: ""
+      # -- Storage class for PostgreSQL primary data volume
+      storageClass: ""
+      # -- PVC access modes for PostgreSQL volume
+      accessModes:
+        - ReadWriteOnce
+      # -- PVC storage request size
+      size: 8Gi
+      # -- PVC annotations
+      annotations: {}
+      # -- PVC labels
+      labels: {}
+      # -- Selector to match existing Persistent Volume
+      selector: {}
+      # -- Custom PVC data source
+      dataSource: {}
+
+  # TLS configuration
+  tls:
+    # -- Enable TLS traffic support
+    enabled: false
+    # -- Auto-generate self-signed TLS certificates
+    autoGenerated: false
+    # -- Use server's TLS cipher preferences over client's
+    preferServerCiphers: true
+    # -- Secret containing TLS certificates
+    certificatesSecret: ""
+    # -- Certificate filename
+    certFilename: ""
+    # -- Certificate key filename
+    certKeyFilename: ""
+    # -- CA certificate filename for client authentication
+    certCAFilename: ""
+    # -- Certificate Revocation List filename
+    crlFilename: ""
+
+# MySQL database configuration
+# ref: https://github.com/bitnami/charts/tree/main/bitnami/mysql
+# More documentation: https://artifacthub.io/packages/helm/bitnami/mysql
+mysql:
+  # -- Enable MySQL database deployment
+  enabled: false
+
+  # Authentication configuration
+  auth:
+    # -- Password for root user (leave empty for auto-generation)
+    rootPassword: ""
+    # -- Create the configured database
+    createDatabase: true
+    # -- Database name to create
+    database: "my_database"
+    # -- Custom username to create
+    username: ""
+    # -- Password for custom user (leave empty for auto-generation)
+    password: ""
+    # -- MySQL replication username
+    replicationUser: replicator
+    # -- MySQL replication user password (leave empty for auto-generation)
+    replicationPassword: ""
+    # -- Use existing secret for passwords
+    # Secret must contain keys: mysql-root-password, mysql-replication-password, mysql-password
+    existingSecret: ""
+    # -- Mount credentials as files instead of environment variables
+    usePasswordFiles: true
+
+  # Primary database configuration
+  primary:
+    # -- Primary database resource allocation
+    # resources:
+    #   requests:
+    #     cpu: 2
+    #     memory: 512Mi
+    #   limits:
+    #     cpu: 3
+    #     memory: 1024Mi
+    
+    # Persistence configuration
+    persistence:
+      # -- Enable persistence using PersistentVolumeClaim
+      enabled: true
+      # -- Use existing PersistentVolumeClaim
+      existingClaim: ""
+      # -- Volume subdirectory to mount
+      subPath: ""
+      # -- Storage class for MySQL primary persistent volume
+      storageClass: ""
+      # -- Persistent volume claim annotations
+      annotations: {}
+      # -- Persistent volume access modes
+      accessModes:
+        - ReadWriteOnce
+      # -- Persistent volume size
+      size: 8Gi
+      # -- Selector to match existing Persistent Volume
+      selector: {}
+
+  # TLS configuration
+  tls:
+    # -- Enable TLS support
+    enabled: false
+    # -- Secret containing TLS certificates
+    existingSecret: ""
+    # -- Certificate filename
+    certFilename: tls.crt
+    # -- Certificate key filename
+    certKeyFilename: tls.key
+    # -- CA certificate filename
+    certCAFilename: ""
+    # -- CA certificate content
+    ca: ""
+    # -- Certificate content
+    cert: ""
+    # -- Private key content
+    key: ""
+    # Automatic certificate generation
+    autoGenerated:
+      # -- Enable automatic certificate generation
+      enabled: true
+      # -- Certificate generation mechanism (helm, cert-manager)
+      engine: helm

@@ -1,6 +1,6 @@
 # cadence
 
-![Version: 0.2.0](https://img.shields.io/badge/Version-0.2.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.3.2](https://img.shields.io/badge/AppVersion-1.3.2-informational?style=flat-square)
+![Version: 0.2.0](https://img.shields.io/badge/Version-0.2.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.3.1](https://img.shields.io/badge/AppVersion-1.3.1-informational?style=flat-square)
 
 Cadence is a distributed, scalable, durable, and highly available orchestration engine
 to execute asynchronous long-running business logic in a scalable and resilient way.
@@ -60,7 +60,7 @@ This chart deploys Uber Cadence server components and web UI.
 | config.asyncWorkflowQueues.default-queue.type | string | `"kafka"` | Queue type: kafka |
 | config.asyncWorkflowQueues.enabled | bool | `false` | Enable async workflow queues |
 | config.blobstore.filestore.outputDirectory | string | `"/etc/cadence/blobstore"` | Output directory for blob storage |
-| config.cluster.clusterGroup | string | `nil` | Cluster group configuration with clusters (this override the default cluster) |
+| config.cluster.clusterGroup | string | `nil` | Cluster group configuration with additional clusters |
 | config.cluster.clusterRedirectionPolicy | object | `{"policy":"noop"}` | Cluster redirection policy for cross-cluster operations |
 | config.cluster.clusterRedirectionPolicy.policy | string | `"noop"` | Policy for handling cross-cluster requests (noop, selected-apis-forwarding, all-domain-apis-forwarding, selected-apis-forwarding-v2) |
 | config.cluster.currentClusterName | string | `"cluster0"` | Name of the current cluster |
@@ -108,7 +108,7 @@ This chart deploys Uber Cadence server components and web UI.
 | config.persistence.database.cassandra.consistency | string | `"LOCAL_QUORUM"` | Default consistency level |
 | config.persistence.database.cassandra.datacenter | string | `""` | Datacenter filter for Cassandra |
 | config.persistence.database.cassandra.hostSelectionPolicy | string | `"tokenaware,roundrobin"` | Host selection policy |
-| config.persistence.database.cassandra.hosts | string | `"cassandra-service.cadencetest.svc.cluster.local"` | Cassandra hosts. Can reference Kubernetes services |
+| config.persistence.database.cassandra.hosts | string | `"cassandra-service.cadence.svc.cluster.local"` | Cassandra hosts. Can reference Kubernetes services |
 | config.persistence.database.cassandra.keyspace | string | `"cadence"` | Cassandra keyspace for main data |
 | config.persistence.database.cassandra.maxConns | int | `10` | Maximum number of connections |
 | config.persistence.database.cassandra.password | string | `"cassandra"` | Cassandra password |
@@ -213,7 +213,7 @@ This chart deploys Uber Cadence server components and web UI.
 | global.affinity | object | `{}` | Global affinity rules |
 | global.containerSecurityContext | object | `{}` | Global container security context |
 | global.env | list | `[]` | Global environment variables (shared only by Cadence Server services [frontend, worker, matching and history]) |
-| global.image | object | `{"pullPolicy":"IfNotPresent","repository":"docker.io/ubercadence/server","tag":"v1.3.2"}` | Global image configuration (shared only by Cadence Server services [frontend, worker, matching and history]) |
+| global.image | object | `{"pullPolicy":"IfNotPresent","repository":"docker.io/ubercadence/server","tag":"v1.3.1"}` | Global image configuration (shared only by Cadence Server services [frontend, worker, matching and history]) |
 | global.imagePullSecrets | list | `[]` | Image pull secrets for private registries |
 | global.log | object | `{"level":"info","stdout":true}` | Global logging configuration (shared only by Cadence Server services [frontend, worker, matching and history]) |
 | global.log.level | string | `"info"` | Logging level (debug, info, warn, error) |
@@ -296,7 +296,7 @@ This chart deploys Uber Cadence server components and web UI.
 | schema.checkSchema.postgres.image.repository | string | `"alpine/psql"` |  |
 | schema.checkSchema.postgres.image.tag | string | `"latest"` |  |
 | schema.setupJob.enabled | bool | `true` |  |
-| schema.version.default | string | `"0.43"` |  |
+| schema.version.default | string | `"0.42"` |  |
 | schema.version.visibility | string | `"0.9"` |  |
 | serviceAccount.annotations | object | `{}` | Annotations for service account |
 | serviceAccount.automountServiceAccountToken | bool | `true` | Automatically mount service account token |
@@ -305,7 +305,7 @@ This chart deploys Uber Cadence server components and web UI.
 | web.affinity | object | `{}` | Affinity rules (inherits from global if not specified) |
 | web.containerSecurityContext | object | `{}` | Container security context (inherits from global if not specified) |
 | web.env | list | `[{"name":"CADENCE_WEB_PORT","value":"8088"}]` | Environment variables for web UI |
-| web.image | object | `{"imagePullSecrets":[],"pullPolicy":"IfNotPresent","repository":"docker.io/ubercadence/web","tag":"v4.0.6"}` | Image configuration for Web UI |
+| web.image | object | `{"imagePullSecrets":[],"pullPolicy":"IfNotPresent","repository":"docker.io/ubercadence/web","tag":"v4.0.5"}` | Image configuration for Web UI |
 | web.ingress.annotations | object | `{}` | Ingress annotations |
 | web.ingress.className | string | `""` | Ingress class name |
 | web.ingress.enabled | bool | `false` | Enable ingress |
