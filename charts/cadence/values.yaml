@@ -783,7 +783,7 @@ config:
       # Cassandra configuration
       cassandra:
         # -- Cassandra hosts. Can reference Kubernetes services
-        hosts: "cassandra-cassandra.cadencetest.svc.cluster.local"
+        hosts: "cadence-release-cassandra.cadencetest.svc.cluster.local"
         # -- Cassandra port
         port: 9042
         # -- Cassandra keyspace for main data
