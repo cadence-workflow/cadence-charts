@@ -451,6 +451,7 @@ data:
     # Ringpop configuration
     ringpop:
       name: {{ .Values.config.ringpop.name | default "cadence" }}
+      broadcastAddress: {{ `{{ default .Env.POD_IP "0.0.0.0" }}` }}
       bootstrapMode: {{ .Values.config.ringpop.bootstrapMode | default "dns" }}
       bootstrapHosts:
         - {{ include "cadence.fullname" . }}-frontend-headless:{{ .Values.frontend.port | default 7933 }}
@@ -465,16 +466,7 @@ data:
       primaryClusterName: {{ .Values.config.cluster.primaryClusterName | default "cluster0" }}
       currentClusterName: {{ .Values.config.cluster.currentClusterName | default "cluster0" }}
       clusterGroup:
-        {{ .Values.config.cluster.currentClusterName | default "cluster0" }}:
-          enabled: true
-          initialFailoverVersion: {{ .Values.config.cluster.initialFailoverVersion | default 0 }}
-          {{- $transport := .Values.config.cluster.rpcTransport | default "grpc" }}
-          {{- if eq $transport "grpc" }}
-          rpcAddress: {{ include "cadence.fullname" . }}-frontend:{{ .Values.frontend.grpcPort | default 7833 }}
-          {{- else }}
-          rpcAddress: {{ include "cadence.fullname" . }}-frontend:{{ .Values.frontend.port | default 7933 }}
-          {{- end }}
-          rpcTransport: {{ $transport | quote }}
+        {{- if .Values.config.cluster.clusterGroup }}
         {{- range $clusterName, $clusterConfig := .Values.config.cluster.clusterGroup }}
         {{ $clusterName }}:
           enabled: {{ $clusterConfig.enabled | default true }}
@@ -487,6 +479,18 @@ data:
           {{- end }}
           rpcTransport: {{ $clusterTransport | quote }}
         {{- end }}
+        {{- else }}
+        {{ .Values.config.cluster.currentClusterName | default "cluster0" }}:
+          enabled: true
+          initialFailoverVersion: {{ .Values.config.cluster.initialFailoverVersion | default 0 }}
+          {{- $transport := .Values.config.cluster.rpcTransport | default "grpc" }}
+          {{- if eq $transport "grpc" }}
+          rpcAddress: {{ include "cadence.fullname" . }}-frontend:{{ .Values.frontend.grpcPort | default 7833 }}
+          {{- else }}
+          rpcAddress: {{ include "cadence.fullname" . }}-frontend:{{ .Values.frontend.port | default 7933 }}
+          {{- end }}
+          rpcTransport: {{ $transport | quote }}
+        {{- end }}
       {{- if .Values.config.cluster.clusterRedirectionPolicy }}
       clusterRedirectionPolicy:
         policy: {{ .Values.config.cluster.clusterRedirectionPolicy.policy | default "noop" }}
@@ -498,7 +502,7 @@ data:
         rpc:
           port: {{ .Values.frontend.port | default 7933 }}
           grpcPort: {{ .Values.frontend.grpcPort | default 7833 }}
-          bindOnIP: {{ `{{ default .Env.POD_IP "0.0.0.0" }}` }}
+          bindOnIP: "0.0.0.0"
           grpcMaxMsgSize: {{ .Values.config.services.grpcMaxMsgSize | default 4194304 | int }}
         metrics:
           {{- if eq .Values.config.services.metrics.type "statsd" }}
@@ -519,7 +523,7 @@ data:
         rpc:
           port: {{ .Values.history.port | default 7934 }}
           grpcPort: {{ .Values.history.grpcPort | default 7834 }}
-          bindOnIP: {{ `{{ default .Env.POD_IP "0.0.0.0" }}` }}
+          bindOnIP: "0.0.0.0"
           grpcMaxMsgSize: {{ .Values.config.services.grpcMaxMsgSize | default 4194304 | int }}
         metrics:
           {{- if eq .Values.config.services.metrics.type "statsd" }}
@@ -540,7 +544,7 @@ data:
         rpc:
           port: {{ .Values.matching.port | default 7935 }}
           grpcPort: {{ .Values.matching.grpcPort | default 7835 }}
-          bindOnIP: {{ `{{ default .Env.POD_IP "0.0.0.0" }}` }}
+          bindOnIP: "0.0.0.0"
           grpcMaxMsgSize: {{ .Values.config.services.grpcMaxMsgSize | default 4194304 | int }}
         metrics:
           {{- if eq .Values.config.services.metrics.type "statsd" }}
@@ -560,7 +564,7 @@ data:
       worker:
         rpc:
           port: {{ .Values.worker.port | default 7939 }}
-          bindOnIP: {{ `{{ default .Env.POD_IP "0.0.0.0" }}` }}
+          bindOnIP: "0.0.0.0"
           grpcMaxMsgSize: {{ .Values.config.services.grpcMaxMsgSize | default 4194304 | int }}
         metrics:
           {{- if eq .Values.config.services.metrics.type "statsd" }}

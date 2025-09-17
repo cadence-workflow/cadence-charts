@@ -8,7 +8,7 @@ global:
   # -- Global image configuration (shared only by Cadence Server services [frontend, worker, matching and history])
   image:
     repository: "docker.io/ubercadence/server"
-    tag: "v1.3.1"
+    tag: "v1.3.2"
     pullPolicy: IfNotPresent
 
   # -- Image pull secrets for private registries
@@ -446,7 +446,7 @@ web:
   # -- Image configuration for Web UI
   image:
     repository: "docker.io/ubercadence/web"
-    tag: "v4.0.5"
+    tag: "v4.0.6"
     pullPolicy: IfNotPresent
     imagePullSecrets: []
       # - name: myregistrykey
@@ -717,7 +717,7 @@ config:
       # Common SQL configuration (applies to both MySQL and PostgreSQL)
       sql:
         # -- Database host. Can reference Kubernetes services
-        hosts: "cadence-mysql.cadence.svc.cluster.local"
+        hosts: "mysql-service.mysql-namespace.svc.cluster.local"
         # -- Database port (will use driver default if not specified)
         port: null
         # -- Database name for main data
@@ -783,7 +783,7 @@ config:
       # Cassandra configuration
       cassandra:
         # -- Cassandra hosts. Can reference Kubernetes services
-        hosts: "cadence-cassandra.cadence.svc.cluster.local"
+        hosts: "cassandra-cassandra.cadencetest.svc.cluster.local"
         # -- Cassandra port
         port: 9042
         # -- Cassandra keyspace for main data
@@ -893,9 +893,14 @@ config:
     rpcTransport: "grpc"
     # -- Initial failover version for this cluster
     initialFailoverVersion: 0
-    # -- Cluster group configuration with additional clusters
+    # -- Cluster group configuration with additional clusters (this override the default cluster)
     clusterGroup:
       # Example of additional cluster configuration:
+      # cluster0:
+      #   enabled: true
+      #   initialFailoverVersion: 0
+      #   rpcAddress: "cadence-cluster1.example.com:7933"
+      #   rpcTransport: "grpc"
       # cluster1:
       #   enabled: true
       #   initialFailoverVersion: 0
