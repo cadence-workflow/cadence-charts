@@ -1,3 +1,4 @@
 cadence-*.tgz
 .DS_Store
 template_out.yaml
+*/cadence/charts
