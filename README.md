@@ -117,17 +117,17 @@ See the [values.yaml](values.yaml) file for configuration options. You can overr
 
 ```bash
 # Set custom replica counts
-helm install cadence-release cadence/cadence -n cadence-test \
+helm install cadence-release cadence/cadence -n cadencetest \
   --set server.frontend.replicaCount=3 \
   --set server.history.replicaCount=3
 
 # Use external database
-helm install cadence-release cadence/cadence -n cadence-test \
+helm install cadence-release cadence/cadence -n cadencetest \
   --set cassandra.enabled=false \
   --set server.config.persistence.default.cassandra.hosts=my-cassandra.example.com
 
 # Disable automatic schema setup (if managing schemas externally)
-helm install cadence-release cadence/cadence -n cadence-test \
+helm install cadence-release cadence/cadence -n cadencetest \
   --set schema.setup.enabled=false
 
 ### Full Server Configuration
@@ -147,7 +147,7 @@ Refer to the [Cadence server documentation](https://cadenceworkflow.io/docs/oper
 To uninstall/delete the chart:
 
 ```bash
-helm delete cadence-release -n cadence-test
+helm delete cadence-release -n cadencetest
 ```
 
 This will remove all Kubernetes components associated with the chart and delete the release.
@@ -161,10 +161,10 @@ To upgrade an existing release:
 helm repo update
 
 # Upgrade release
-helm upgrade cadence-release cadence/cadence -n cadence-test
+helm upgrade cadence-release cadence/cadence -n cadencetest
 
 # Upgrade with new values
-helm upgrade cadence-release cadence/cadence -n cadence-test -f custom-values.yaml
+helm upgrade cadence-release cadence/cadence -n cadencetest -f custom-values.yaml
 ```
 
 ## Troubleshooting
