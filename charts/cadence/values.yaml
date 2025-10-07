@@ -1217,6 +1217,12 @@ schema:
 cassandra:
   # -- Enable Cassandra database deployment
   enabled: true
+
+  image:
+    # registry: docker.io
+    repository: bitnamilegacy/cassandra
+    # tag:
+
   # -- Number of Cassandra replicas
   replicaCount: 1
 
@@ -1312,6 +1318,11 @@ postgresql:
   # -- Enable PostgreSQL database deployment
   enabled: false
 
+  image:
+    # registry: docker.io
+    repository: bitnamilegacy/postgresql
+    # tag:
+
   # Authentication configuration
   auth:
     # -- Enable postgres admin user
@@ -1389,6 +1400,11 @@ postgresql:
 mysql:
   # -- Enable MySQL database deployment
   enabled: false
+
+  image:
+    # registry: docker.io
+    repository: bitnamilegacy/mysql
+    # tag:
 
   # Authentication configuration
   auth:
