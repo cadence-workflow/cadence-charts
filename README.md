@@ -45,6 +45,25 @@ helm repo update
 
 You can then run `helm search repo cadence` to see the charts.
 
+### Install Chart Dependencies for local Chart
+
+For edit directly the Chart files locally, you need to update the chart dependencies (Cassandra, PostgreSQL, or MySQL):
+
+```bash
+# Download the chart
+helm pull cadence/cadence --untar
+
+# Navigate to the chart directory
+cd cadence
+
+# Update dependencies
+helm dependency update
+
+# After that you can install using local directory
+```
+
+This will download the required database charts based on your configuration.
+
 ### Install Cadence
 
 To install the cadence chart with default settings (includes Cassandra):
