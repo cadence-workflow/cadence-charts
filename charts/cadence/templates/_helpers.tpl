@@ -135,10 +135,3 @@ Cadence GRPC Peers endpoint
 {{- define "cadence.grpcPeers" -}}
 {{ include "cadence.fullname" . }}-frontend.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.frontend.grpcPort | default 7833 }}
 {{- end }}
-
-{{/*
-Get the Cassandra endpoint
-*/}}
-{{- define "cassandra.endpoint" -}}
-{{ .Values.cassandra.endpoint | default (printf "cassandra-service.%s.svc.cluster.local" $.Release.Namespace)  }}
-{{- end -}}
