@@ -116,12 +116,33 @@ The automation will handle publishing the new version using [Chart Releaser Acti
 
 After the new version is available in the helm repository, deploy it to a Kubernetes cluster to validate the release.
 
+## Sign off Your Work
+
+The Developer Certificate of Origin (DCO) is a lightweight way for contributors to certify that they wrote or otherwise have the right to submit the code they are contributing to the project. Here is the full text of the [DCO](http://developercertificate.org/). Contributors must sign-off that they adhere to these requirements by adding a `Signed-off-by` line to commit messages.
+
+```text
+This is my commit message
+
+Signed-off-by: Random J Developer <random@developer.example.org>
+```
+
+See `git help commit`:
+
+```text
+-s, --signoff
+    Add Signed-off-by line by the committer at the end of the commit log
+    message. The meaning of a signoff depends on the project, but it typically
+    certifies that committer has the rights to submit this work under the same
+    license and agrees to a Developer Certificate of Origin (see
+    http://developercertificate.org/ for more information).
+```
+
 ## Version Management Checklist
 
 When updating versions, ensure consistency across:
-- [ ] `Chart.yaml`: `version` (chart version) and `appVersion` (Cadence version)
-- [ ] `values.yaml`: `global.image.tag` (should match appVersion)
-- [ ] Dependencies in `Chart.yaml` (check for updates, aim for latest-1 stable)
-- [ ] Update dependencies with `helm dependency update`
+- [ ] `Chart.yaml`: Chart `version` bumped
+- [ ] `values.yaml`: `global.image.tag` (should match with `Chart.yaml` appVersion)
+- [ ] Dependencies in `Chart.yaml` (check for updates with `helm dependency update`, aim for latest major-1 stable)
+- [ ] [DCO](https://github.com/prometheus-community/helm-charts/blob/main/CONTRIBUTING.md#sign-off-your-work) signed
 - [ ] Test deployment locally
 - [ ] Run `helm-docs` to update documentation
