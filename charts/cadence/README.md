@@ -1,6 +1,6 @@
 # cadence
 
-![Version: 1.0.0](https://img.shields.io/badge/Version-1.0.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.3.2](https://img.shields.io/badge/AppVersion-1.3.2-informational?style=flat-square)
+![Version: 1.0.1](https://img.shields.io/badge/Version-1.0.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.3.2](https://img.shields.io/badge/AppVersion-1.3.2-informational?style=flat-square)
 
 Cadence is a distributed, scalable, durable, and highly available orchestration engine
 to execute asynchronous long-running business logic in a scalable and resilient way.
@@ -45,6 +45,7 @@ This chart deploys Uber Cadence server components and web UI.
 | cassandra.dbUser.password | string | `"cassandra"` | Cassandra password (leave empty for auto-generation) |
 | cassandra.dbUser.user | string | `"cassandra"` | Cassandra username |
 | cassandra.enabled | bool | `true` | Enable Cassandra database deployment |
+| cassandra.image.repository | string | `"bitnamilegacy/cassandra"` |  |
 | cassandra.jvm.extraOpts | string | `""` | Additional JVM options |
 | cassandra.jvm.maxHeapSize | string | `""` | Maximum heap size (auto-calculated if empty) |
 | cassandra.jvm.newHeapSize | string | `""` | New generation heap size (auto-calculated if empty) |
@@ -324,6 +325,7 @@ This chart deploys Uber Cadence server components and web UI.
 | mysql.auth.usePasswordFiles | bool | `true` | Mount credentials as files instead of environment variables |
 | mysql.auth.username | string | `""` | Custom username to create |
 | mysql.enabled | bool | `false` | Enable MySQL database deployment |
+| mysql.image.repository | string | `"bitnamilegacy/mysql"` |  |
 | mysql.primary.persistence | object | `{"accessModes":["ReadWriteOnce"],"annotations":{},"enabled":true,"existingClaim":"","selector":{},"size":"8Gi","storageClass":"","subPath":""}` | Primary database resource allocation resources:   requests:     cpu: 2     memory: 512Mi   limits:     cpu: 3     memory: 1024Mi Persistence configuration |
 | mysql.primary.persistence.accessModes | list | `["ReadWriteOnce"]` | Persistent volume access modes |
 | mysql.primary.persistence.annotations | object | `{}` | Persistent volume claim annotations |
@@ -353,6 +355,7 @@ This chart deploys Uber Cadence server components and web UI.
 | postgresql.auth.postgresPassword | string | `""` | Password for postgres admin user (leave empty for auto-generation) |
 | postgresql.auth.username | string | `""` | Custom username to create |
 | postgresql.enabled | bool | `false` | Enable PostgreSQL database deployment |
+| postgresql.image.repository | string | `"bitnamilegacy/postgresql"` |  |
 | postgresql.primary.persistence | object | `{"accessModes":["ReadWriteOnce"],"annotations":{},"dataSource":{},"enabled":true,"existingClaim":"","labels":{},"mountPath":"/bitnami/postgresql","selector":{},"size":"8Gi","storageClass":"","subPath":"","volumeName":"data"}` | Primary database resource allocation resources:   requests:     cpu: 2     memory: 512Mi   limits:     cpu: 3     memory: 1024Mi Persistence configuration |
 | postgresql.primary.persistence.accessModes | list | `["ReadWriteOnce"]` | PVC access modes for PostgreSQL volume |
 | postgresql.primary.persistence.annotations | object | `{}` | PVC annotations |
@@ -400,7 +403,7 @@ This chart deploys Uber Cadence server components and web UI.
 | web.busybox | object | `{"enabled":true,"image":{"imagePullSecrets":[],"pullPolicy":"IfNotPresent","repository":"busybox","tag":"latest"}}` | Image configuration for BusyBox to check frontend service |
 | web.containerSecurityContext | object | `{}` | Container security context (inherits from global if not specified) |
 | web.env | list | `[{"name":"CADENCE_WEB_PORT","value":"8088"}]` | Environment variables for web UI |
-| web.image | object | `{"imagePullSecrets":[],"pullPolicy":"IfNotPresent","repository":"docker.io/ubercadence/web","tag":"v4.0.6"}` | Image configuration for Web UI |
+| web.image | object | `{"imagePullSecrets":[],"pullPolicy":"IfNotPresent","repository":"docker.io/ubercadence/web","tag":"v4.0.7"}` | Image configuration for Web UI |
 | web.ingress.annotations | object | `{}` | Ingress annotations |
 | web.ingress.className | string | `""` | Ingress class name |
 | web.ingress.enabled | bool | `false` | Enable ingress |
