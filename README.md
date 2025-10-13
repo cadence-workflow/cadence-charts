@@ -69,7 +69,7 @@ This will download the required database charts based on your configuration.
 To install the cadence chart with default settings (includes Cassandra):
 
 ```bash
-helm install my-cadence cadence/cadence
+helm install cadence-release -n cadencetest cadence/cadence
 ```
 
 The chart will automatically:
@@ -192,8 +192,8 @@ helm upgrade cadence-release cadence/cadence -n cadencetest -f custom-values.yam
 
 If schema setup jobs fail, check the logs:
 ```bash
-kubectl logs job/my-cadence-schema-cassandra
-kubectl logs job/my-cadence-schema-elasticsearch
+kubectl logs job/cadence-release-schema-server
+kubectl logs job/cadence-release-schema-elasticsearch
 ```
 
 ### Services Not Starting
