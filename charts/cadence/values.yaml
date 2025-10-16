@@ -446,7 +446,7 @@ web:
   # -- Image configuration for Web UI
   image:
     repository: "docker.io/ubercadence/web"
-    tag: "v4.0.9"
+    tag: "v4.0.10"
     pullPolicy: IfNotPresent
     imagePullSecrets: []
       # - name: myregistrykey
