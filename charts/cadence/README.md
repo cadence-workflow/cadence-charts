@@ -1,6 +1,6 @@
 # cadence
 
-![Version: 1.0.6](https://img.shields.io/badge/Version-1.0.6-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v1.3.5](https://img.shields.io/badge/AppVersion-v1.3.5-informational?style=flat-square)
+![Version: 1.0.7](https://img.shields.io/badge/Version-1.0.7-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v1.3.5](https://img.shields.io/badge/AppVersion-v1.3.5-informational?style=flat-square)
 
 Cadence is a distributed, scalable, durable, and highly available orchestration engine
 to execute asynchronous long-running business logic in a scalable and resilient way.
@@ -403,7 +403,7 @@ This chart deploys Uber Cadence server components and web UI.
 | web.busybox | object | `{"enabled":true,"image":{"imagePullSecrets":[],"pullPolicy":"IfNotPresent","repository":"busybox","tag":"latest"}}` | Image configuration for BusyBox to check frontend service |
 | web.containerSecurityContext | object | `{}` | Container security context (inherits from global if not specified) |
 | web.env | list | `[{"name":"CADENCE_WEB_PORT","value":"8088"}]` | Environment variables for web UI |
-| web.image | object | `{"imagePullSecrets":[],"pullPolicy":"IfNotPresent","repository":"docker.io/ubercadence/web","tag":"v4.0.9"}` | Image configuration for Web UI |
+| web.image | object | `{"imagePullSecrets":[],"pullPolicy":"IfNotPresent","repository":"docker.io/ubercadence/web","tag":"v4.0.10"}` | Image configuration for Web UI |
 | web.ingress.annotations | object | `{}` | Ingress annotations |
 | web.ingress.className | string | `""` | Ingress class name |
 | web.ingress.enabled | bool | `false` | Enable ingress |
