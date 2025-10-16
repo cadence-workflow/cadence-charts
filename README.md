@@ -1,8 +1,6 @@
 # Cadence Charts
 
-This repo contains Cadence helm chart maintained by original Cadence team @Uber.
-This is an early version with known gaps and not production ready yet. 
-Please create/upvote an [issue](https://github.com/uber/cadence-charts/issues) explaining your needs to help us prioritize.
+This repository contains the Cadence Helm chart, officially maintained by the Cadence team at Uber. The chart provides a production-ready deployment solution for Cadence workflows and services.
 
 ## What is included
 
