@@ -3,6 +3,46 @@ entries:
   cadence:
   - apiVersion: v2
     appVersion: v1.3.5
+    created: "2025-10-20T19:59:56.299144652Z"
+    dependencies:
+    - condition: cassandra.enabled
+      name: cassandra
+      repository: oci://registry-1.docker.io/bitnamicharts
+      version: 11.x.x
+    - condition: postgresql.enabled
+      name: postgresql
+      repository: oci://registry-1.docker.io/bitnamicharts
+      version: 16.x.x
+    - condition: mysql.enabled
+      name: mysql
+      repository: oci://registry-1.docker.io/bitnamicharts
+      version: 12.x.x
+    description: 'Cadence is a distributed, scalable, durable, and highly available
+      orchestration engine  to execute asynchronous long-running business logic in
+      a scalable and resilient way. This chart deploys Uber Cadence server components
+      and web UI. '
+    digest: 6be4bfdd660c98933f8eb87b009fad3581cd48e180dbbd30c1c82451c9fd4cda
+    home: https://cadenceworkflow.io/
+    icon: https://cadenceworkflow.io/img/cadence-logo.svg
+    keywords:
+    - cadence
+    - uber
+    - workflow
+    - orchestration
+    - workflow-engine
+    maintainers:
+    - name: Cadence Community
+      url: https://github.com/cadence-workflow/cadence-charts
+    name: cadence
+    sources:
+    - https://github.com/cadence-workflow/cadence
+    - https://github.com/cadence-workflow/cadence-web
+    type: application
+    urls:
+    - https://github.com/cadence-workflow/cadence-charts/releases/download/cadence-1.0.8/cadence-1.0.8.tgz
+    version: 1.0.8
+  - apiVersion: v2
+    appVersion: v1.3.5
     created: "2025-10-16T15:55:26.752663647Z"
     dependencies:
     - condition: cassandra.enabled
@@ -499,4 +539,4 @@ entries:
     urls:
     - https://github.com/uber/cadence-charts/releases/download/cadence-0.1.0/cadence-0.1.0.tgz
     version: 0.1.0
-generated: "2025-10-16T15:55:26.752887926Z"
+generated: "2025-10-20T19:59:56.299294222Z"
