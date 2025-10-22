@@ -1,5 +1,9 @@
 # CONTRIBUTING
 
+For general contributing guidelines and processes shared across all Cadence repositories, please see the [Cadence Contributing Guide](https://github.com/cadence-workflow/cadence/blob/master/CONTRIBUTING.md).
+
+This document contains specific instructions for contributing to the Cadence Helm Charts repository.
+
 ## Build and generate template yml locally
 
 ```bash
