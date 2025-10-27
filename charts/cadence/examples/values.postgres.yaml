@@ -9,6 +9,7 @@ config:
     database:
       driver: "postgres"
       sql:
+        hosts: "cadence-release-postgresql.cadence-postgres.svc.cluster.local"
         port: 5432
         dbname: "cadence"
         visibilityDbname: "cadence_visibility"
