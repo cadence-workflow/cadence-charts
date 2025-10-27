@@ -91,21 +91,21 @@ spec:
             certfile = $SSL_CERTFILE
             EOF
               fi
-              
+
               # Add client certificate for mutual TLS
               if [ -n "$SSL_CLIENT_CERT" ] && [ "$SSL_CLIENT_CERT" != "" ]; then
                 cat >> ~/.cassandra/cqlshrc << EOF
             usercert = $SSL_CLIENT_CERT
             EOF
               fi
-              
+
               # Add client private key for mutual TLS
               if [ -n "$SSL_CLIENT_KEY" ] && [ "$SSL_CLIENT_KEY" != "" ]; then
                 cat >> ~/.cassandra/cqlshrc << EOF
             userkey = $SSL_CLIENT_KEY
             EOF
               fi
-              
+
               # Add validate setting
               if [ -n "$SSL_VALIDATE" ] && [ "$SSL_VALIDATE" != "" ]; then
                 cat >> ~/.cassandra/cqlshrc << EOF
@@ -126,12 +126,12 @@ spec:
             # Build cqlsh command
             build_cqlsh_cmd() {
               local cmd="cqlsh"
-              
+
               # Add SSL option if enabled
               if [ "$TLS_ENABLED" = "true" ]; then
                 cmd="$cmd --ssl"
               fi
-              
+
               echo "$cmd"
             }
 
@@ -207,16 +207,16 @@ spec:
             if [ "$TLS_ENABLED" = "true" ] && [ -n "$SSL_MODE" ]; then
               # Set SSL mode as environment variable (psql reads PGSSLMODE)
               export PGSSLMODE="$SSL_MODE"
-              
+
               # Add SSL certificate parameters as environment variables if provided
               if [ -n "$SSL_CERTFILE" ]; then
                 export PGSSLROOTCERT="$SSL_CERTFILE"
               fi
-              
+
               if [ -n "$SSL_CLIENT_CERT" ]; then
                 export PGSSLCERT="$SSL_CLIENT_CERT"
               fi
-              
+
               if [ -n "$SSL_CLIENT_KEY" ]; then
                 export PGSSLKEY="$SSL_CLIENT_KEY"
               fi
@@ -288,7 +288,7 @@ spec:
             # Build connection string based on TLS configuration
             build_mysql_cmd() {
               local cmd="mariadb -h $DB_HOST -P $DB_PORT -u $DB_USER -p$MYSQL_PWD"
-              
+
               # Add SSL parameters if TLS is enabled
               if [ "$TLS_ENABLED" = "true" ]; then
                 case "$SSL_MODE" in
@@ -310,23 +310,23 @@ spec:
                     cmd="$cmd --ssl"
                     ;;
                 esac
-                
+
                 # Add SSL certificate parameters if provided
                 if [ -n "$SSL_CERTFILE" ]; then
                   cmd="$cmd --ssl-ca=$SSL_CERTFILE"
                 fi
-                
+
                 if [ -n "$SSL_CLIENT_CERT" ]; then
                   cmd="$cmd --ssl-cert=$SSL_CLIENT_CERT"
                 fi
-                
+
                 if [ -n "$SSL_CLIENT_KEY" ]; then
                   cmd="$cmd --ssl-key=$SSL_CLIENT_KEY"
                 fi
               else
                 cmd="$cmd --skip-ssl"
               fi
-              
+
               echo "$cmd"
             }
 
@@ -406,11 +406,11 @@ spec:
             set -e
             echo "Starting Cadence schema setup for driver: $DB_DRIVER"
             echo "=== Setting up Cassandra Schema ==="
-            
+
             # Build cassandra-tool command with TLS options
             build_cassandra_cmd() {
               local cmd="cadence-cassandra-tool --ep $DB_HOST"
-              
+
               # Add authentication
               if [ -n "$DB_USER" ]; then
                 cmd="$cmd -u $DB_USER"
@@ -426,7 +426,7 @@ spec:
               if [ -n "$ALLOWED_AUTHENTICATORS" ]; then
                 cmd="$cmd $ALLOWED_AUTHENTICATORS"
               fi
-              
+
               # Add TLS options if enabled
               if [ "$TLS_ENABLED" = "true" ]; then
                 cmd="$cmd --tls"
@@ -440,36 +440,36 @@ spec:
                   cmd="$cmd --tls-key-file $SSL_CLIENT_KEY"
                 fi
               fi
-              
+
               echo "$cmd"
             }
-            
+
             # Setup main database schema
             echo "Creating main keyspace: $DB_NAME"
             if [ "$DATA_CENTER" = "" ]; then
-              $(build_cassandra_cmd) create -k $DB_NAME --rf $REPLICATION_FACTOR
+              $(build_cassandra_cmd) create -k $DB_NAME --rf $REPLICATION_FACTOR || echo "Keyspace already exists"
             else
-              $(build_cassandra_cmd) create -k $DB_NAME --rf $REPLICATION_FACTOR -dc $DATA_CENTER
+              $(build_cassandra_cmd) create -k $DB_NAME --rf $REPLICATION_FACTOR -dc $DATA_CENTER || echo "Keyspace already exists"
             fi
 
             echo "Setting up main schema version 0.0"
             $(build_cassandra_cmd) -k $DB_NAME setup-schema -v 0.0 || echo "Schema already exists"
-            
+
             echo "Updating main schema to latest version"
             $(build_cassandra_cmd) -k $DB_NAME update-schema -d $CADENCE_HOME/schema/cassandra/cadence/versioned || echo "Rollback is not allowed"
-            
+
             # Setup visibility database schema (only if ES is not enabled)
             if [ "$ES_ENABLED" = "false" ]; then
               echo "Creating visibility keyspace: $DB_VISIBILITY_NAME"
               if [ "$DATA_CENTER" = "" ]; then
-                $(build_cassandra_cmd) create -k $DB_VISIBILITY_NAME --rf $REPLICATION_FACTOR
+                $(build_cassandra_cmd) create -k $DB_VISIBILITY_NAME --rf $REPLICATION_FACTOR || echo "Keyspace already exists"
               else
-                $(build_cassandra_cmd) create -k $DB_VISIBILITY_NAME --rf $REPLICATION_FACTOR -dc $DATA_CENTER
+                $(build_cassandra_cmd) create -k $DB_VISIBILITY_NAME --rf $REPLICATION_FACTOR -dc $DATA_CENTER || echo "Keyspace already exists"
               fi
 
               echo "Setting up visibility schema version 0.0"
               $(build_cassandra_cmd) -k $DB_VISIBILITY_NAME setup-schema -v 0.0 || echo "Schema already exists"
-              
+
               echo "Updating visibility schema to latest version"
               $(build_cassandra_cmd) -k $DB_VISIBILITY_NAME update-schema -d $CADENCE_HOME/schema/cassandra/visibility/versioned || echo "Rollback is not allowed"
             else
@@ -538,7 +538,7 @@ spec:
         - name: CASSANDRA_TLS_SERVER_NAME
           value: {{ .Values.config.persistence.database.cassandra.tls.serverName | quote }}
         {{- end }}
-    
+
         {{- else if eq $dbDriver "postgres" }}
         # PostgreSQL Schema Setup
         command:
@@ -548,11 +548,11 @@ spec:
             set -e
             echo "Starting Cadence schema setup for driver: $DB_DRIVER"
             echo "=== Setting up PostgreSQL Schema ==="
-            
+
             # Build sql-tool command with TLS options
             build_postgres_cmd() {
               local cmd="cadence-sql-tool --ep $DB_HOST -p $DB_PORT -u $DB_USER -pw $POSTGRES_PWD --plugin postgres"
-              
+
               # Add TLS options if enabled
               if [ "$TLS_ENABLED" = "true" ]; then
                 cmd="$cmd --tls"
@@ -566,28 +566,28 @@ spec:
                   cmd="$cmd --tls-key-file $SSL_CLIENT_KEY"
                 fi
               fi
-              
+
               echo "$cmd"
             }
-            
+
             # Create main database
             echo "Creating main database: $DB_NAME"
-            $(build_postgres_cmd) create-database --db $DB_NAME
-            
+            $(build_postgres_cmd) create-database --db $DB_NAME || echo "Database already exists"
+
             echo "Setting up main schema version 0.0"
             $(build_postgres_cmd) --db $DB_NAME setup-schema -v 0.0 || echo "Schema already exists"
-            
+
             echo "Updating main schema to latest version"
             $(build_postgres_cmd) --db $DB_NAME update-schema -d $CADENCE_HOME/schema/postgres/cadence/versioned || echo "Rollback is not allowed"
-            
+
             # Setup visibility database (only if ES is not enabled)
             if [ "$ES_ENABLED" = "false" ]; then
               echo "Creating visibility database: $DB_VISIBILITY_NAME"
-              $(build_postgres_cmd) create-database --db $DB_VISIBILITY_NAME
-              
+              $(build_postgres_cmd) create-database --db $DB_VISIBILITY_NAME || echo "Database already exists"
+
               echo "Setting up visibility schema version 0.0"
               $(build_postgres_cmd) --db $DB_VISIBILITY_NAME setup-schema -v 0.0 || echo "Schema already exists"
-              
+
               echo "Updating visibility schema to latest version"
               $(build_postgres_cmd) --db $DB_VISIBILITY_NAME update-schema -d $CADENCE_HOME/schema/postgres/visibility/versioned || echo "Rollback is not allowed"
             else
@@ -653,11 +653,11 @@ spec:
             set -e
             echo "Starting Cadence schema setup for driver: $DB_DRIVER"
             echo "=== Setting up MySQL Schema ==="
-            
+
             # Build sql-tool command with TLS options
             build_mysql_cmd() {
               local cmd="cadence-sql-tool --ep $DB_HOST -p $DB_PORT -u $DB_USER -pw $MYSQL_PWD --plugin mysql"
-              
+
               # Add TLS options if enabled
               if [ "$TLS_ENABLED" = "true" ]; then
                 cmd="$cmd --tls"
@@ -671,34 +671,34 @@ spec:
                   cmd="$cmd --tls-key-file $SSL_CLIENT_KEY"
                 fi
               fi
-              
+
               echo "$cmd"
             }
-            
+
             # Create main database
             echo "Creating main database: $DB_NAME"
             $(build_mysql_cmd) create-database --db $DB_NAME || echo "Database already exists"
-            
+
             echo "Setting up main schema version 0.0"
             $(build_mysql_cmd) --db $DB_NAME setup-schema -v 0.0 || echo "Schema already exists"
-            
+
             echo "Updating main schema to latest version"
             $(build_mysql_cmd) --db $DB_NAME update-schema -d $CADENCE_HOME/schema/mysql/v8/cadence/versioned || echo "Rollback is not allowed"
-            
+
             # Setup visibility database (only if ES is not enabled)
             if [ "$ES_ENABLED" = "false" ]; then
               echo "Creating visibility database: $DB_VISIBILITY_NAME"
               $(build_mysql_cmd) create-database --db $DB_VISIBILITY_NAME || echo "Database already exists"
-              
+
               echo "Setting up visibility schema version 0.0"
               $(build_mysql_cmd) --db $DB_VISIBILITY_NAME setup-schema -v 0.0 || echo "Schema already exists"
-              
+
               echo "Updating visibility schema to latest version"
               $(build_mysql_cmd) --db $DB_VISIBILITY_NAME update-schema -d $CADENCE_HOME/schema/mysql/v8/visibility/versioned || echo "Rollback is not allowed"
             else
               echo "Skipping visibility schema setup (Elasticsearch enabled)"
             fi
-            
+
             echo "Schema setup completed successfully!"
         env:
         # Common environment variables
