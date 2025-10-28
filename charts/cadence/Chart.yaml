@@ -1,10 +1,10 @@
 apiVersion: v2
 name: cadence
-version: 1.0.8
+version: 1.0.9
 appVersion: v1.3.5
 
 description: |
-  Cadence is a distributed, scalable, durable, and highly available orchestration engine 
+  Cadence is a distributed, scalable, durable, and highly available orchestration engine
   to execute asynchronous long-running business logic in a scalable and resilient way.
   This chart deploys Uber Cadence server components and web UI.
 
