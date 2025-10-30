@@ -216,5 +216,5 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for instructions on how to contribute, ru
 - **Documentation**: [Cadence Documentation](https://cadenceworkflow.io/docs/)
 - **Community Chat**: Join our [CNCF Slack](https://communityinviter.com/apps/cloud-native/cncf) and find us in the `#cadence` channel
 - **Contributing**: See [CONTRIBUTING.md](CONTRIBUTING.md) for instructions on how to contribute, run samples etc.
-- **Issues**: Report bugs and request features via [GitHub Issues](https://github.com/uber/cadence-charts/issues)
+- **Issues**: Report bugs and request features via [GitHub Issues](https://github.com/cadence-workflow/cadence-charts/issues)
 
