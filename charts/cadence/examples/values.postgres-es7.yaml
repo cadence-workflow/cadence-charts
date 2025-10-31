@@ -1,0 +1,119 @@
+# Namespace note: install into namespace: cadence-codelab
+
+# Allow Bitnami charts to use legacy repository images
+global:
+  security:
+    allowInsecureImages: true
+
+# Force Cadence to use PostgreSQL for main DB
+config:
+  persistence:
+    database:
+      driver: "postgres"
+      sql:
+        hosts: "cadence-release-postgresql.cadence-postgres-es7.svc.cluster.local"
+        port: 5432
+        dbname: "cadence"
+        visibilityDbname: "cadence_visibility"
+        user: "cadence"
+        password: "changeme-strong"
+        tls:
+          enabled: false
+          sslMode: ""
+    elasticsearch:
+      enabled: true
+      version: "v7"
+      user: ""
+      password: ""
+      protocol: "http"
+      hosts: "cadence-release-elasticsearch.cadence-postgres-es7.svc.cluster.local"
+      port: 9200
+      visibilityIndex: "cadence-visibility"
+      tls:
+        enabled: false
+  kafka: # needed by elasticsearch integration
+    enabled: true
+    brokers: "cadence-release-kafka.cadence-postgres-es7.svc.cluster.local"
+# | config.kafka.brokers | string | `"kafka-service.kafka-namespace.svc.cluster.local"` | Kafka broker service. Can reference Kubernetes services |
+# | config.kafka.enabled | bool | `false` | Enable Kafka for async workflows |
+# | config.kafka.port | int | `9092` | Kafka port |
+# | config.kafka.sasl.enabled | bool | `false` | Enable SASL authentication |
+# | config.kafka.sasl.mechanism | string | `"PLAIN"` | SASL mechanism: plain, sha512 or sha256 |
+# | config.kafka.sasl.password | string | `""` | SASL password |
+# | config.kafka.sasl.username | string | `""` | SASL username |
+# | config.kafka.tls.caFile | string | `""` | CA certificate file to verify server certificates |
+# | config.kafka.tls.caFiles | list | `[]` | Multiple CA certificate files (alternative to caFile) |
+# | config.kafka.tls.certFile | string | `""` | Client certificate file for mutual TLS |
+# | config.kafka.tls.enableHostVerification | bool | `true` | Verify server hostname matches certificate |
+# | config.kafka.tls.enabled | bool | `false` | Enable TLS |
+# | config.kafka.tls.keyFile | string | `""` | Client private key file for mutual TLS |
+# | config.kafka.tls.requireClientAuth | bool | `false` | Require client certificate authentication |
+# | config.kafka.tls.serverName | string | `""` | Override server name for certificate verification |
+# | config.kafka.topicProperties | object | `{}` | Topic properties (optional) |
+# | config.kafka.visibilityDLQTopic | string | `"cadence-visibility-dlq"` | Kafka visibility DLQ topic name |
+# | config.kafka.visibilityTopic | string | `"cadence-visibility"` | Kafka visibility topic name |
+
+
+# Enable Cadence schema jobs
+schema:
+  serverJob:
+    enabled: true
+  elasticSearchJob:
+    enabled: true
+
+# Ensure Cadence uses Elasticsearch for advanced visibility
+# See values.yaml dynamicConfig keys in the chart
+dynamicConfig:
+  values:
+    system.writeVisibilityStoreName:
+      - value: "es-visibility"
+    system.readVisibilityStoreName:
+      - value: "es-visibility"
+
+# Deploy Postgres within the same release (Bitnami subchart)
+postgresql:
+  enabled: true
+  image:
+    registry: docker.io
+    repository: bitnamilegacy/postgresql
+    tag: "16.4.0"
+    pullPolicy: IfNotPresent
+  auth:
+    username: cadence
+    password: "changeme-strong"
+    database: cadence
+  primary:
+    persistence:
+      enabled: true
+      size: 8Gi
+
+# Deploy Elasticsearch with single node mode
+elasticsearch:
+  enabled: true
+  master:
+    masterOnly: false
+    replicaCount: 1
+    resources:
+      requests:
+        cpu: 1
+        memory: 1024Mi
+      limits:
+        cpu: 2
+        memory: 2048Mi
+  data:
+    replicaCount: 0
+  coordinating:
+    replicaCount: 0
+  ingest:
+    replicaCount: 0
+  sysctlImage:
+    enabled: false
+  image:
+    tag: 7.17.23
+    repository: bitnamilegacy/elasticsearch
+
+# Do NOT deploy Cassandra or MySQL
+cassandra:
+  enabled: false
+mysql:
+  enabled: false

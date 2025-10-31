@@ -1,7 +1,7 @@
 apiVersion: v2
 name: cadence
-version: 1.0.10
-appVersion: v1.3.6
+version: 1.1.0
+appVersion: v1.3.5
 
 description: |
   Cadence is a distributed, scalable, durable, and highly available orchestration engine
@@ -40,3 +40,7 @@ dependencies:
     version: 12.x.x
     repository: oci://registry-1.docker.io/bitnamicharts
     condition: mysql.enabled
+  - name: elasticsearch
+    version: 21.6.x
+    repository: oci://registry-1.docker.io/bitnamicharts
+    condition: elasticsearch.enabled
