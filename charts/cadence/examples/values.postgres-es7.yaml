@@ -70,6 +70,8 @@ dynamicConfig:
     system.readVisibilityStoreName:
       - value: "es-visibility"
 
+### subcharts values which can be omited if user has their own deployment
+
 # Deploy Postgres within the same release (Bitnami subchart)
 postgresql:
   enabled: true
@@ -111,6 +113,10 @@ elasticsearch:
   image:
     tag: 7.17.23
     repository: bitnamilegacy/elasticsearch
+
+kafka:
+  enabled: true
+  ??? TODO: add values
 
 # Do NOT deploy Cassandra or MySQL
 cassandra:

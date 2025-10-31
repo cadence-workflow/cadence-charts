@@ -44,3 +44,7 @@ dependencies:
     version: 21.6.x
     repository: oci://registry-1.docker.io/bitnamicharts
     condition: elasticsearch.enabled
+  - name: kafka
+    version: ?
+    repository: ?
+    condition: kafka.enabled
