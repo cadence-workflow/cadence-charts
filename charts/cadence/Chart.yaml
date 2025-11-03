@@ -1,7 +1,7 @@
 apiVersion: v2
 name: cadence
-version: 1.0.9
-appVersion: v1.3.5
+version: 1.0.10
+appVersion: v1.3.6
 
 description: |
   Cadence is a distributed, scalable, durable, and highly available orchestration engine
