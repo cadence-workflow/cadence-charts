@@ -11,5 +11,8 @@ dependencies:
 - name: elasticsearch
   repository: oci://registry-1.docker.io/bitnamicharts
   version: 21.6.3
-digest: sha256:75cdbb934145cb057a735f415dbf854fcbd1e3218cdbf2d91f05aa1c5c240dc1
-generated: "2025-10-27T12:47:15.596657-07:00"
+- name: kafka
+  repository: oci://registry-1.docker.io/bitnamicharts
+  version: 30.1.8
+digest: sha256:794d39e9345acfb117730c963e7818fa388613b2cbb2becef8c3ce43d1e15206
+generated: "2025-11-03T14:00:44.205655-08:00"

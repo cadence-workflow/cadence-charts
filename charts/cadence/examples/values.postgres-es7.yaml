@@ -1,4 +1,4 @@
-# Namespace note: install into namespace: cadence-codelab
+# Namespace note: install into namespace: cadence-postgres-es7
 
 # Allow Bitnami charts to use legacy repository images
 global:
@@ -20,6 +20,7 @@ config:
         tls:
           enabled: false
           sslMode: ""
+    visibilityStore: "default"
     elasticsearch:
       enabled: true
       version: "v7"
@@ -34,25 +35,6 @@ config:
   kafka: # needed by elasticsearch integration
     enabled: true
     brokers: "cadence-release-kafka.cadence-postgres-es7.svc.cluster.local"
-# | config.kafka.brokers | string | `"kafka-service.kafka-namespace.svc.cluster.local"` | Kafka broker service. Can reference Kubernetes services |
-# | config.kafka.enabled | bool | `false` | Enable Kafka for async workflows |
-# | config.kafka.port | int | `9092` | Kafka port |
-# | config.kafka.sasl.enabled | bool | `false` | Enable SASL authentication |
-# | config.kafka.sasl.mechanism | string | `"PLAIN"` | SASL mechanism: plain, sha512 or sha256 |
-# | config.kafka.sasl.password | string | `""` | SASL password |
-# | config.kafka.sasl.username | string | `""` | SASL username |
-# | config.kafka.tls.caFile | string | `""` | CA certificate file to verify server certificates |
-# | config.kafka.tls.caFiles | list | `[]` | Multiple CA certificate files (alternative to caFile) |
-# | config.kafka.tls.certFile | string | `""` | Client certificate file for mutual TLS |
-# | config.kafka.tls.enableHostVerification | bool | `true` | Verify server hostname matches certificate |
-# | config.kafka.tls.enabled | bool | `false` | Enable TLS |
-# | config.kafka.tls.keyFile | string | `""` | Client private key file for mutual TLS |
-# | config.kafka.tls.requireClientAuth | bool | `false` | Require client certificate authentication |
-# | config.kafka.tls.serverName | string | `""` | Override server name for certificate verification |
-# | config.kafka.topicProperties | object | `{}` | Topic properties (optional) |
-# | config.kafka.visibilityDLQTopic | string | `"cadence-visibility-dlq"` | Kafka visibility DLQ topic name |
-# | config.kafka.visibilityTopic | string | `"cadence-visibility"` | Kafka visibility topic name |
-
 
 # Enable Cadence schema jobs
 schema:
@@ -116,7 +98,80 @@ elasticsearch:
 
 kafka:
   enabled: true
-  ??? TODO: add values
+  image:
+    registry: docker.io
+    repository: bitnamilegacy/kafka
+    tag: "3.8.0"
+    pullPolicy: IfNotPresent
+  # KRaft mode configuration (Kafka without ZooKeeper)
+  kraft:
+    enabled: true
+  # Disable ZooKeeper since we're using KRaft
+  zookeeper:
+    enabled: false
+  # Controller and broker configuration for KRaft
+  controller:
+    replicaCount: 1
+    persistence:
+      enabled: true
+      size: 8Gi
+    resources:
+      requests:
+        cpu: 500m
+        memory: 1Gi
+      limits:
+        cpu: 1
+        memory: 2Gi
+    # GKE Autopilot compatibility
+    podSecurityContext:
+      fsGroup: 1001
+      runAsUser: 1001
+    containerSecurityContext:
+      runAsNonRoot: true
+      allowPrivilegeEscalation: false
+  broker:
+    replicaCount: 1
+    persistence:
+      enabled: true
+      size: 8Gi
+    resources:
+      requests:
+        cpu: 500m
+        memory: 1Gi
+      limits:
+        cpu: 1
+        memory: 2Gi
+    # GKE Autopilot compatibility
+    podSecurityContext:
+      fsGroup: 1001
+      runAsUser: 1001
+    containerSecurityContext:
+      runAsNonRoot: true
+      allowPrivilegeEscalation: false
+  # GKE Autopilot compatibility: disable privileged init container
+  sysctlImage:
+    enabled: false
+  # Kafka topic configuration for Cadence visibility
+  autoCreateTopicsEnable: true
+  numPartitions: 4
+  defaultReplicationFactor: 1
+  # Configure replication factors for internal topics (demo/single-node setup)
+  offsetsTopicReplicationFactor: 1
+  transactionStateLogReplicationFactor: 1
+  transactionStateLogMinIsr: 1
+  # Listener configuration
+  listeners:
+    client:
+      protocol: PLAINTEXT
+    controller:
+      protocol: PLAINTEXT
+    interbroker:
+      protocol: PLAINTEXT
+  # Service configuration
+  service:
+    type: ClusterIP
+    ports:
+      client: 9092
 
 # Do NOT deploy Cassandra or MySQL
 cassandra:
