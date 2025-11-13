@@ -3,7 +3,7 @@
 # Allow Bitnami charts to use legacy repository images
 global:
   image:
-    tag: "v1.3.6"  # Set cadence version
+    tag: "v1.3.7"  # Set cadence version
   security:
     allowInsecureImages: true
 
