@@ -2,12 +2,20 @@
 
 # Allow Bitnami charts to use legacy repository images
 global:
+  image:
+    tag: "v1.3.6"  # Set cadence version
   security:
     allowInsecureImages: true
 
 # Force Cadence to use PostgreSQL for main DB
 config:
   persistence:
+    # Name of the default datastore (PostgreSQL)
+    defaultStore: "default"
+    # Name of the basic visibility datastore (PostgreSQL)
+    visibilityStore: "visibility"
+    # Name of the advanced visibility datastore (Elasticsearch)
+    advancedVisibilityStore: "es-visibility"
     database:
       driver: "postgres"
       sql:
@@ -20,7 +28,6 @@ config:
         tls:
           enabled: false
           sslMode: ""
-    visibilityStore: "default"
     elasticsearch:
       enabled: true
       version: "v7"

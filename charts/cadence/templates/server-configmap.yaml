@@ -219,10 +219,9 @@ data:
               {{- end }}
             {{- end }}
           {{- end }}
-        {{- if ne .Values.config.persistence.elasticsearch.enabled true }}
+        {{- if .Values.config.persistence.visibilityStore }}
         # Visibility datastore
-        {{ if .Values.config.persistence.visibilityStore -}}
-        {{ .Values.config.persistence.visibilityStore | default "visibility" }}:
+        {{ .Values.config.persistence.visibilityStore }}:
           {{- if eq .Values.config.persistence.database.driver "cassandra" }}
           nosql:
             pluginName: "cassandra"
@@ -385,7 +384,6 @@ data:
               {{- end }}
               {{- if .Values.config.persistence.database.sql.tls.serverName }}
               serverName: {{ .Values.config.persistence.database.sql.tls.serverName | quote }}
-              {{- end }}
             {{- end }}
           {{- end }}
         {{- end }}
