@@ -458,8 +458,8 @@ spec:
             echo "Updating main schema to latest version"
             $(build_cassandra_cmd) -k $DB_NAME update-schema -d $CADENCE_HOME/schema/cassandra/cadence/versioned || echo "Rollback is not allowed"
 
-            # Setup visibility database schema (only if ES is not enabled)
-            if [ "$ES_ENABLED" = "false" ]; then
+            # Setup visibility database schema (if configured)
+            if [ -n "$DB_VISIBILITY_NAME" ]; then
               echo "Creating visibility keyspace: $DB_VISIBILITY_NAME"
               if [ "$DATA_CENTER" = "" ]; then
                 $(build_cassandra_cmd) create -k $DB_VISIBILITY_NAME --rf $REPLICATION_FACTOR || echo "Keyspace already exists"
@@ -473,7 +473,7 @@ spec:
               echo "Updating visibility schema to latest version"
               $(build_cassandra_cmd) -k $DB_VISIBILITY_NAME update-schema -d $CADENCE_HOME/schema/cassandra/visibility/versioned || echo "Rollback is not allowed"
             else
-              echo "Skipping visibility schema setup (Elasticsearch enabled)"
+              echo "Skipping visibility schema setup (no visibility keyspace configured)"
             fi
 
             echo "Schema setup completed successfully!"
@@ -580,8 +580,8 @@ spec:
             echo "Updating main schema to latest version"
             $(build_postgres_cmd) --db $DB_NAME update-schema -d $CADENCE_HOME/schema/postgres/cadence/versioned || echo "Rollback is not allowed"
 
-            # Setup visibility database (only if ES is not enabled)
-            if [ "$ES_ENABLED" = "false" ]; then
+            # Setup visibility database (if configured)
+            if [ -n "$DB_VISIBILITY_NAME" ]; then
               echo "Creating visibility database: $DB_VISIBILITY_NAME"
               $(build_postgres_cmd) create-database --db $DB_VISIBILITY_NAME || echo "Database already exists"
 
@@ -591,7 +591,7 @@ spec:
               echo "Updating visibility schema to latest version"
               $(build_postgres_cmd) --db $DB_VISIBILITY_NAME update-schema -d $CADENCE_HOME/schema/postgres/visibility/versioned || echo "Rollback is not allowed"
             else
-              echo "Skipping visibility schema setup (Elasticsearch enabled)"
+              echo "Skipping visibility schema setup (no visibility database configured)"
             fi
 
             echo "Schema setup completed successfully!"
@@ -685,8 +685,8 @@ spec:
             echo "Updating main schema to latest version"
             $(build_mysql_cmd) --db $DB_NAME update-schema -d $CADENCE_HOME/schema/mysql/v8/cadence/versioned || echo "Rollback is not allowed"
 
-            # Setup visibility database (only if ES is not enabled)
-            if [ "$ES_ENABLED" = "false" ]; then
+            # Setup visibility database (if configured)
+            if [ -n "$DB_VISIBILITY_NAME" ]; then
               echo "Creating visibility database: $DB_VISIBILITY_NAME"
               $(build_mysql_cmd) create-database --db $DB_VISIBILITY_NAME || echo "Database already exists"
 
@@ -696,7 +696,7 @@ spec:
               echo "Updating visibility schema to latest version"
               $(build_mysql_cmd) --db $DB_VISIBILITY_NAME update-schema -d $CADENCE_HOME/schema/mysql/v8/visibility/versioned || echo "Rollback is not allowed"
             else
-              echo "Skipping visibility schema setup (Elasticsearch enabled)"
+              echo "Skipping visibility schema setup (no visibility database configured)"
             fi
 
             echo "Schema setup completed successfully!"
