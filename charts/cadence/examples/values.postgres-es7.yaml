@@ -3,7 +3,7 @@
 # Allow Bitnami charts to use legacy repository images
 global:
   image:
-    tag: "v1.3.7"  # Set cadence version
+    tag: "v1.3.6"  # Default version - has known schema validation bug
   security:
     allowInsecureImages: true
 
@@ -77,6 +77,10 @@ postgresql:
     persistence:
       enabled: true
       size: 8Gi
+    initdb:
+      scripts:
+        create-visibility-db.sql: |
+          CREATE DATABASE cadence_visibility OWNER cadence;
 
 # Deploy Elasticsearch with single node mode
 elasticsearch:
