@@ -12,8 +12,6 @@ config:
   persistence:
     # Name of the default datastore (PostgreSQL)
     defaultStore: "default"
-    # Name of the basic visibility datastore (PostgreSQL)
-    visibilityStore: "visibility"
     # Name of the advanced visibility datastore (Elasticsearch)
     advancedVisibilityStore: "es-visibility"
     database:
@@ -22,7 +20,6 @@ config:
         hosts: "cadence-release-postgresql.cadence-postgres-es7.svc.cluster.local"
         port: 5432
         dbname: "cadence"
-        visibilityDbname: "cadence_visibility"
         user: "cadence"
         password: "changeme-strong"
         tls:
@@ -55,9 +52,9 @@ schema:
 dynamicConfig:
   values:
     system.writeVisibilityStoreName:
-      - value: "es-visibility"
+      - value: "es"
     system.readVisibilityStoreName:
-      - value: "es-visibility"
+      - value: "es"
 
 ### subcharts values which can be omited if user has their own deployment
 
@@ -77,10 +74,6 @@ postgresql:
     persistence:
       enabled: true
       size: 8Gi
-    initdb:
-      scripts:
-        create-visibility-db.sql: |
-          CREATE DATABASE cadence_visibility OWNER cadence;
 
 # Deploy Elasticsearch with single node mode
 elasticsearch:
