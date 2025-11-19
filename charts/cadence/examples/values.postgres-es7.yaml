@@ -14,8 +14,9 @@ config:
     defaultStore: "default"
     # Disable basic SQL visibility (we're using ES-only via Kafka)
     visibilityStore: ""
-    # Disable direct ES writes (we're using Kafka-based async visibility)
-    advancedVisibilityStore: ""
+    # Name of the advanced visibility datastore (Elasticsearch)
+    # Note: This defines the datastore, but dynamic config controls how it's used
+    advancedVisibilityStore: "es-visibility"
     database:
       driver: "postgres"
       sql:
