@@ -12,6 +12,8 @@ config:
   persistence:
     # Name of the default datastore (PostgreSQL)
     defaultStore: "default"
+    # Disable basic SQL visibility (we're using ES-only)
+    visibilityStore: ""
     # Name of the advanced visibility datastore (Elasticsearch)
     advancedVisibilityStore: "es-visibility"
     database:
