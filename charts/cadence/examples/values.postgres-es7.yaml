@@ -50,13 +50,13 @@ schema:
     enabled: true
 
 # Ensure Cadence uses Elasticsearch for advanced visibility
-# See values.yaml dynamicConfig keys in the chart
+# Note: "es" is a special keyword for advanced visibility, not the datastore name
 dynamicConfig:
   values:
     system.writeVisibilityStoreName:
-      - value: "es-visibility"
+      - value: "es"
     system.readVisibilityStoreName:
-      - value: "es-visibility"
+      - value: "es"
 
 ### subcharts values which can be omited if user has their own deployment
 
