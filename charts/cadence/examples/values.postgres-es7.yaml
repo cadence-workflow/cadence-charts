@@ -33,7 +33,7 @@ config:
       protocol: "http"
       hosts: "cadence-release-elasticsearch.cadence-postgres-es7.svc.cluster.local"
       port: 9200
-      visibilityIndex: "cadence-visibility"
+      visibilityIndex: "cadence-visibility-v1"
       tls:
         enabled: false
   kafka: # needed by elasticsearch integration
@@ -52,9 +52,9 @@ schema:
 dynamicConfig:
   values:
     system.writeVisibilityStoreName:
-      - value: "es"
+      - value: "es-visibility"
     system.readVisibilityStoreName:
-      - value: "es"
+      - value: "es-visibility"
 
 ### subcharts values which can be omited if user has their own deployment
 
