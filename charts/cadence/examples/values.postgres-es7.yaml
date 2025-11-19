@@ -14,9 +14,8 @@ config:
     defaultStore: "default"
     # Disable basic SQL visibility (we're using ES-only via Kafka)
     visibilityStore: ""
-    # Note: advancedVisibilityStore is NOT set here because we're using
-    # Kafka-based async visibility. The ES datastore is still defined below
-    # and referenced by the worker service for indexing.
+    # Disable direct ES writes (we're using Kafka-based async visibility)
+    advancedVisibilityStore: ""
     database:
       driver: "postgres"
       sql:
