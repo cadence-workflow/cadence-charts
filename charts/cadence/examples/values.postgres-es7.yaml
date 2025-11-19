@@ -12,10 +12,11 @@ config:
   persistence:
     # Name of the default datastore (PostgreSQL)
     defaultStore: "default"
-    # Disable basic SQL visibility (we're using ES-only)
+    # Disable basic SQL visibility (we're using ES-only via Kafka)
     visibilityStore: ""
-    # Name of the advanced visibility datastore (Elasticsearch)
-    advancedVisibilityStore: "es-visibility"
+    # Note: advancedVisibilityStore is NOT set here because we're using
+    # Kafka-based async visibility. The ES datastore is still defined below
+    # and referenced by the worker service for indexing.
     database:
       driver: "postgres"
       sql:
