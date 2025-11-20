@@ -3,7 +3,7 @@
 # Allow Bitnami charts to use legacy repository images
 global:
   image:
-    tag: "v1.3.6"  # Default version - has known schema validation bug
+    tag: "v1.3.6"  # Default version 
   security:
     allowInsecureImages: true
 
@@ -166,6 +166,22 @@ kafka:
   offsetsTopicReplicationFactor: 1
   transactionStateLogReplicationFactor: 1
   transactionStateLogMinIsr: 1
+  # Provision topics at startup to avoid race conditions
+  provisioning:
+    enabled: true
+    topics:
+      - name: __consumer_offsets
+        partitions: 50
+        replicationFactor: 1
+        config:
+          cleanup.policy: compact
+          compression.type: producer
+      - name: cadence-visibility
+        partitions: 4
+        replicationFactor: 1
+      - name: cadence-visibility-dlq
+        partitions: 4
+        replicationFactor: 1
   # Listener configuration
   listeners:
     client:
