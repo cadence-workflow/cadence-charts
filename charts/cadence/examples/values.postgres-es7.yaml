@@ -36,7 +36,7 @@ config:
       protocol: "http"
       hosts: "cadence-release-elasticsearch.cadence-postgres-es7.svc.cluster.local"
       port: 9200
-      visibilityIndex: "cadence-visibility-v1"
+      visibilityIndex: "cadence-visibility-es7"
       tls:
         enabled: false
   kafka: # needed by elasticsearch integration
