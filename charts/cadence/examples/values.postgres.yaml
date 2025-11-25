@@ -41,8 +41,10 @@ postgresql:
       enabled: true
       size: 8Gi
 
-# Do NOT deploy ES, Cassandra or MySQL
+# Do NOT deploy ES, Kafka, Cassandra or MySQL
 elasticsearch:
+  enabled: false
+kafka:
   enabled: false
 cassandra:
   enabled: false
