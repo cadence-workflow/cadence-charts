@@ -42,7 +42,7 @@ data:
     persistence:
       numHistoryShards: {{ .Values.config.persistence.numHistoryShards | default 4 }}
       defaultStore: {{ .Values.config.persistence.defaultStore | default "default" | quote }}
-      {{- if .Values.config.persistence.visibilityStore }}
+      {{- if and .Values.config.persistence.visibilityStore (not .Values.config.persistence.elasticsearch.enabled) }}
       visibilityStore: {{ .Values.config.persistence.visibilityStore | quote }}
       {{- end }}
       {{- if and .Values.config.persistence.advancedVisibilityStore .Values.config.persistence.elasticsearch.enabled }}
@@ -219,9 +219,10 @@ data:
               {{- end }}
             {{- end }}
           {{- end }}
-        {{- if .Values.config.persistence.visibilityStore }}
+        {{- if ne .Values.config.persistence.elasticsearch.enabled true }}
         # Visibility datastore
-        {{ .Values.config.persistence.visibilityStore }}:
+        {{ if .Values.config.persistence.visibilityStore -}}
+        {{ .Values.config.persistence.visibilityStore | default "visibility" }}:
           {{- if eq .Values.config.persistence.database.driver "cassandra" }}
           nosql:
             pluginName: "cassandra"
@@ -384,6 +385,7 @@ data:
               {{- end }}
               {{- if .Values.config.persistence.database.sql.tls.serverName }}
               serverName: {{ .Values.config.persistence.database.sql.tls.serverName | quote }}
+              {{- end }}
             {{- end }}
           {{- end }}
         {{- end }}
