@@ -338,7 +338,11 @@ spec:
 
             # Wait for PostgreSQL to be ready
             echo "Waiting for PostgreSQL to be ready..."
-            until pg_isready -h $DB_HOST -p $DB_PORT -U $DB_USER; do
+            until pg_isready -d "host=$DB_HOST \
+              port=$DB_PORT \
+              dbname=$DB_NAME \
+              user=$DB_USER \
+              sslmode=${SSL_MODE:-disable}"; do
               echo 'PostgreSQL is not ready yet...'
               sleep 5
             done
