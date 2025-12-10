@@ -11,8 +11,11 @@ dependencies:
 - name: elasticsearch
   repository: oci://registry-1.docker.io/bitnamicharts
   version: 21.6.3
+- name: opensearch
+  repository: https://opensearch-project.github.io/helm-charts/
+  version: 2.36.0
 - name: kafka
   repository: oci://registry-1.docker.io/bitnamicharts
   version: 30.1.8
-digest: sha256:794d39e9345acfb117730c963e7818fa388613b2cbb2becef8c3ce43d1e15206
-generated: "2025-11-03T14:00:44.205655-08:00"
+digest: sha256:087c1af31e91c47c94d3019711a90b274672fc562cf7d6d7fc650a322c5525a6
+generated: "2025-12-10T12:15:50.431821-08:00"

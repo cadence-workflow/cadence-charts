@@ -44,6 +44,10 @@ dependencies:
     version: 21.6.x
     repository: oci://registry-1.docker.io/bitnamicharts
     condition: elasticsearch.enabled
+  - name: opensearch
+    version: 2.x.x
+    repository: https://opensearch-project.github.io/helm-charts/
+    condition: opensearch.enabled
   - name: kafka
     version: 30.x.x
     repository: oci://registry-1.docker.io/bitnamicharts
