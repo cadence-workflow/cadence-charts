@@ -1,6 +1,6 @@
 # cadence
 
-![Version: 1.1.0](https://img.shields.io/badge/Version-1.1.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v1.3.6](https://img.shields.io/badge/AppVersion-v1.3.6-informational?style=flat-square)
+![Version: 1.2.0](https://img.shields.io/badge/Version-1.2.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v1.3.6](https://img.shields.io/badge/AppVersion-v1.3.6-informational?style=flat-square)
 
 Cadence is a distributed, scalable, durable, and highly available orchestration engine
 to execute asynchronous long-running business logic in a scalable and resilient way.
@@ -23,6 +23,7 @@ This chart deploys Uber Cadence server components and web UI.
 
 | Repository | Name | Version |
 |------------|------|---------|
+| https://opensearch-project.github.io/helm-charts/ | opensearch | 2.x.x |
 | oci://registry-1.docker.io/bitnamicharts | cassandra | 11.x.x |
 | oci://registry-1.docker.io/bitnamicharts | elasticsearch | 21.6.x |
 | oci://registry-1.docker.io/bitnamicharts | kafka | 30.x.x |
