@@ -1,4 +1,6 @@
 # Cadence Charts
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fcadence-workflow%2Fcadence-charts.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fcadence-workflow%2Fcadence-charts?ref=badge_shield)
+
 
 This repository contains the Cadence Helm chart, officially maintained by the Cadence team at Uber. The chart provides a production-ready deployment solution for Cadence workflows and services.
 
@@ -218,3 +220,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for instructions on how to contribute, ru
 - **Contributing**: See [CONTRIBUTING.md](CONTRIBUTING.md) for instructions on how to contribute, run samples etc.
 - **Issues**: Report bugs and request features via [GitHub Issues](https://github.com/cadence-workflow/cadence-charts/issues)
 
+
+
+## License
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fcadence-workflow%2Fcadence-charts.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fcadence-workflow%2Fcadence-charts?ref=badge_large)
