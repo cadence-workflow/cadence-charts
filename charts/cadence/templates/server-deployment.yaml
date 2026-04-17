@@ -815,6 +815,11 @@ spec:
           containerPort: {{ $service.grpcPort }}
           protocol: TCP
         {{- end }}
+        {{- if and (eq $serviceName "frontend") $service.httpApi.enabled }}
+        - name: http
+          containerPort: {{ $service.httpApi.port }}
+          protocol: TCP
+        {{- end }}
         {{- if $.Values.metrics.enabled }}
         - name: {{ $.Values.metrics.portName | default "metrics" }}
           containerPort: {{ $.Values.metrics.port | default 9090 }}

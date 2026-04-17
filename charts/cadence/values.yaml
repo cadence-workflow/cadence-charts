@@ -125,6 +125,31 @@ frontend:
   # -- GRPC port of cadence frontend service. DO NOT CHANGE
   grpcPort: 7833
 
+  # -- HTTP API configuration (https://cadenceworkflow.io/docs/concepts/http-api)
+  httpApi:
+    # -- Enable HTTP API on the frontend service
+    enabled: false
+    # -- HTTP API port
+    port: 8800
+    # -- List of RPC procedures exposed via HTTP in the form "<proto-package>.<Service>::<Method>"
+    procedures: []
+    # - uber.cadence.api.v1.DomainAPI::RegisterDomain
+    # - uber.cadence.api.v1.DomainAPI::DescribeDomain
+    # - uber.cadence.api.v1.DomainAPI::ListDomains
+    # - uber.cadence.api.v1.DomainAPI::UpdateDomain
+    # - uber.cadence.api.v1.DomainAPI::DeprecateDomain
+    # - uber.cadence.api.v1.WorkflowAPI::StartWorkflowExecution
+    # - uber.cadence.api.v1.WorkflowAPI::SignalWithStartWorkflowExecution
+    # - uber.cadence.api.v1.WorkflowAPI::SignalWorkflowExecution
+    # - uber.cadence.api.v1.WorkflowAPI::RequestCancelWorkflowExecution
+    # - uber.cadence.api.v1.WorkflowAPI::TerminateWorkflowExecution
+    # - uber.cadence.api.v1.WorkflowAPI::DescribeWorkflowExecution
+    # - uber.cadence.api.v1.WorkflowAPI::GetWorkflowExecutionHistory
+    # - uber.cadence.api.v1.WorkflowAPI::ListWorkflowExecutions
+    # - uber.cadence.api.v1.WorkflowAPI::ListOpenWorkflowExecutions
+    # - uber.cadence.api.v1.WorkflowAPI::ListClosedWorkflowExecutions
+    # - uber.cadence.api.v1.WorkflowAPI::QueryWorkflow
+
   # -- Environment variables for frontend service
   env: []
   # - name: ENV_VAR
