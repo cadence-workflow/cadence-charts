@@ -1161,7 +1161,7 @@ schema:
   # -- ElasticSearch schema job configuration
   elasticSearchJob:
     # -- Enable ElasticSearch schema job
-    enabled: true
+    enabled: false
     # -- ElasticSearch schema job resource allocation
     resources: {}
       # limits:
@@ -1483,3 +1483,12 @@ mysql:
       enabled: true
       # -- Certificate generation mechanism (helm, cert-manager)
       engine: helm
+
+kafka:
+  enabled: false
+
+elasticsearch:
+  enabled: false
+
+opensearch:
+  enabled: false

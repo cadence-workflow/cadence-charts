@@ -44,6 +44,8 @@ postgresql:
 # Do NOT deploy ES, Kafka, Cassandra or MySQL
 elasticsearch:
   enabled: false
+opensearch:
+  enabled: false
 kafka:
   enabled: false
 cassandra:

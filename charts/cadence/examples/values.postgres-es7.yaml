@@ -201,3 +201,5 @@ cassandra:
   enabled: false
 mysql:
   enabled: false
+opensearch:
+  enabled: false
