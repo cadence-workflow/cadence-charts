@@ -2,8 +2,6 @@
 
 # Allow Bitnami charts to use legacy repository images
 global:
-  image:
-    tag: "v1.3.6"  # Default version 
   security:
     allowInsecureImages: true
 
@@ -20,7 +18,9 @@ config:
     database:
       driver: "postgres"
       sql:
-        hosts: "cadence-release-postgresql.cadence-postgres-es7.svc.cluster.local"
+        # Hostname auto-generated as {release-name}-postgresql.{namespace}.svc.cluster.local
+        # when postgresql.enabled=true. Set explicitly for external PostgreSQL.
+        hosts: ""
         port: 5432
         dbname: "cadence"
         user: "cadence"
@@ -34,14 +34,18 @@ config:
       user: ""
       password: ""
       protocol: "http"
-      hosts: "cadence-release-elasticsearch.cadence-postgres-es7.svc.cluster.local"
+      # Hostname auto-generated as {release-name}-elasticsearch.{namespace}.svc.cluster.local
+      # when elasticsearch.enabled=true. Set explicitly for external Elasticsearch.
+      hosts: ""
       port: 9200
       visibilityIndex: "cadence-visibility-es7"
       tls:
         enabled: false
   kafka: # needed by elasticsearch integration
     enabled: true
-    brokers: "cadence-release-kafka.cadence-postgres-es7.svc.cluster.local"
+    # Hostname auto-generated as {release-name}-kafka.{namespace}.svc.cluster.local
+    # when kafka.enabled=true. Set explicitly for external Kafka.
+    brokers: ""
 
 # Enable Cadence schema jobs
 schema:

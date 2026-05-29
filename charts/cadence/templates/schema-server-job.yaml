@@ -148,7 +148,7 @@ spec:
           value: {{ $.Values.config.persistence.elasticsearch.enabled | quote }}
         # Basic connection parameters
         - name: DB_HOST
-          value: {{ $.Values.config.persistence.database.cassandra.hosts | quote }}
+          value: {{ include "cadence.cassandraHost" $ | quote }}
         - name: DB_PORT
           value: {{ $.Values.config.persistence.database.cassandra.port | quote }}
         - name: DB_NAME
@@ -237,7 +237,7 @@ spec:
           value: {{ $.Values.config.persistence.elasticsearch.enabled | quote }}
         # Basic connection parameters
         - name: DB_HOST
-          value: {{ $.Values.config.persistence.database.sql.hosts | quote }}
+          value: {{ include "cadence.sqlHost" $ | quote }}
         - name: DB_PORT
           value: {{ $.Values.config.persistence.database.postgres.port | default $.Values.config.persistence.database.sql.port | default 5432 | quote }}
         - name: DB_NAME
@@ -342,7 +342,7 @@ spec:
           value: {{ $.Values.config.persistence.elasticsearch.enabled | quote }}
         # Basic connection parameters
         - name: DB_HOST
-          value: {{ $.Values.config.persistence.database.sql.hosts | quote }}
+          value: {{ include "cadence.sqlHost" $ | quote }}
         - name: DB_PORT
           value: {{ $.Values.config.persistence.database.mysql.port | default $.Values.config.persistence.database.sql.port | default 3306 | quote }}
         - name: DB_NAME
@@ -487,7 +487,7 @@ spec:
           value: {{ .Values.config.persistence.elasticsearch.enabled | quote }}
         # Cassandra specific environment variables
         - name: DB_HOST
-          value: {{ .Values.config.persistence.database.cassandra.hosts | quote }}
+          value: {{ include "cadence.cassandraHost" $ | quote }}
         - name: DB_NAME
           value: {{ .Values.config.persistence.database.cassandra.keyspace | quote }}
         - name: PROTOCOL_VERSION
@@ -605,7 +605,7 @@ spec:
           value: {{ .Values.config.persistence.elasticsearch.enabled | quote }}
         # PostgreSQL specific environment variables
         - name: DB_HOST
-          value: {{ .Values.config.persistence.database.sql.hosts | quote }}
+          value: {{ include "cadence.sqlHost" . | quote }}
         - name: DB_PORT
           value: {{ .Values.config.persistence.database.postgres.port | default .Values.config.persistence.database.sql.port | default 5432 | quote }}
         - name: DB_NAME
@@ -710,7 +710,7 @@ spec:
           value: {{ .Values.config.persistence.elasticsearch.enabled | quote }}
         # MySQL specific environment variables
         - name: DB_HOST
-          value: {{ .Values.config.persistence.database.sql.hosts | quote }}
+          value: {{ include "cadence.sqlHost" . | quote }}
         - name: DB_PORT
           value: {{ .Values.config.persistence.database.mysql.port | default .Values.config.persistence.database.sql.port | default 3306 | quote }}
         - name: DB_NAME
