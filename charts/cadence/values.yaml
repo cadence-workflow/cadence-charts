@@ -716,8 +716,8 @@ config:
 
       # Common SQL configuration (applies to both MySQL and PostgreSQL)
       sql:
-        # -- Database host. Can reference Kubernetes services
-        hosts: "mysql-service.mysql-namespace.svc.cluster.local"
+        # -- Database host. Auto-generated as {release-name}-{db}.{namespace}.svc.cluster.local when postgresql/mysql.enabled=true
+        hosts: ""
         # -- Database port (will use driver default if not specified)
         port: null
         # -- Database name for main data
@@ -782,8 +782,8 @@ config:
 
       # Cassandra configuration
       cassandra:
-        # -- Cassandra hosts. Can reference Kubernetes services
-        hosts: "cadence-release-cassandra.cadencetest.svc.cluster.local"
+        # -- Cassandra hosts. Auto-generated as {release-name}-cassandra.{namespace}.svc.cluster.local when cassandra.enabled=true. Set this for external Cassandra.
+        hosts: ""
         # -- Cassandra port
         port: 9042
         # -- Cassandra keyspace for main data
@@ -849,8 +849,8 @@ config:
       password: ""
       # -- Protocol to use (http/https). If not specified, auto-detected based on TLS settings
       protocol: ""
-      # -- Elasticsearch host.
-      hosts: "elasticsearch-service.elastic-namespace.svc.cluster.local"
+      # -- Elasticsearch host. Auto-generated as {release-name}-elasticsearch.{namespace}.svc.cluster.local when elasticsearch.enabled=true
+      hosts: ""
       # -- Elasticsearch port
       port: 9200
       # -- Elasticsearch visibility index name
@@ -950,8 +950,9 @@ config:
   kafka:
     # -- Enable Kafka for async workflows
     enabled: false
-    # -- Kafka broker service. Can reference Kubernetes services
-    brokers: "kafka-service.kafka-namespace.svc.cluster.local"
+    # -- Kafka broker hostname. Auto-generated as {release-name}-kafka.{namespace}.svc.cluster.local
+    # when kafka.enabled=true. Set explicitly for external Kafka.
+    brokers: ""
     # -- Kafka port
     port: 9092
     # -- Kafka visibility topic name

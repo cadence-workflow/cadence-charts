@@ -128,7 +128,7 @@ spec:
         env:
         # Basic Elasticsearch connection parameters
         - name: ES_HOST
-          value: {{ $.Values.config.persistence.elasticsearch.hosts | quote }}
+          value: {{ include "cadence.searchHost" $ | quote }}
         - name: ES_PORT
           value: {{ $.Values.config.persistence.elasticsearch.port | default 9200 | quote }}
         - name: ES_PROTOCOL
@@ -396,7 +396,7 @@ spec:
         env:
         # Basic Elasticsearch connection parameters
         - name: ES_HOST
-          value: {{ $.Values.config.persistence.elasticsearch.hosts | quote }}
+          value: {{ include "cadence.searchHost" $ | quote }}
         - name: ES_PORT
           value: {{ $.Values.config.persistence.elasticsearch.port | default 9200 | quote }}
         - name: ES_PROTOCOL

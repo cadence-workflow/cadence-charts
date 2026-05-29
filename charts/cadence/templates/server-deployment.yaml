@@ -247,7 +247,7 @@ spec:
           value: {{ $.Values.config.persistence.elasticsearch.enabled | quote }}
         # Basic connection parameters
         - name: DB_HOST
-          value: {{ $.Values.config.persistence.database.cassandra.hosts | quote }}
+          value: {{ include "cadence.cassandraHost" $ | quote }}
         - name: DB_PORT
           value: {{ $.Values.config.persistence.database.cassandra.port | quote }}
         - name: DB_NAME
@@ -371,7 +371,7 @@ spec:
           value: {{ $.Values.config.persistence.elasticsearch.enabled | quote }}
         # Basic connection parameters
         - name: DB_HOST
-          value: {{ $.Values.config.persistence.database.sql.hosts | quote }}
+          value: {{ include "cadence.sqlHost" $ | quote }}
         - name: DB_PORT
           value: {{ $.Values.config.persistence.database.postgres.port | default $.Values.config.persistence.database.sql.port | default 5432 | quote }}
         - name: DB_NAME
@@ -509,7 +509,7 @@ spec:
           value: {{ $.Values.config.persistence.elasticsearch.enabled | quote }}
         # Basic connection parameters
         - name: DB_HOST
-          value: {{ $.Values.config.persistence.database.sql.hosts | quote }}
+          value: {{ include "cadence.sqlHost" $ | quote }}
         - name: DB_PORT
           value: {{ $.Values.config.persistence.database.mysql.port | default $.Values.config.persistence.database.sql.port | default 3306 | quote }}
         - name: DB_NAME
@@ -734,7 +734,7 @@ spec:
         env:
         # Basic Elasticsearch connection parameters
         - name: ES_HOST
-          value: {{ $.Values.config.persistence.elasticsearch.hosts | quote }}
+          value: {{ include "cadence.searchHost" $ | quote }}
         - name: ES_PORT
           value: {{ $.Values.config.persistence.elasticsearch.port | default 9200 | quote }}
         - name: ES_PROTOCOL

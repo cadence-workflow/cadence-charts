@@ -57,7 +57,7 @@ data:
           {{- if eq .Values.config.persistence.database.driver "cassandra" }}
           nosql:
             pluginName: "cassandra"
-            hosts: {{ .Values.config.persistence.database.cassandra.hosts | quote }}
+            hosts: {{ include "cadence.cassandraHost" . | quote }}
             {{- $port := .Values.config.persistence.database.cassandra.port | default 9042 | int }}
             {{- if ne $port 9042 }}
             port: {{ $port }}
@@ -138,11 +138,11 @@ data:
             {{- if eq .Values.config.persistence.database.driver "mysql" }}
             pluginName: "mysql"
             {{- $port := .Values.config.persistence.database.mysql.port | default .Values.config.persistence.database.sql.port | default 3306 }}
-            connectAddr: "{{ .Values.config.persistence.database.sql.hosts }}:{{ $port }}"
+            connectAddr: "{{ include "cadence.sqlHost" . }}:{{ $port }}"
             {{- else if eq .Values.config.persistence.database.driver "postgres" }}
             pluginName: "postgres"
             {{- $port := .Values.config.persistence.database.postgres.port | default .Values.config.persistence.database.sql.port | default 5432 }}
-            connectAddr: "{{ .Values.config.persistence.database.sql.hosts }}:{{ $port }}"
+            connectAddr: "{{ include "cadence.sqlHost" . }}:{{ $port }}"
             {{- end }}
             connectProtocol: "tcp"
             databaseName: {{ .Values.config.persistence.database.sql.dbname | default "cadence" | quote }}
@@ -226,7 +226,7 @@ data:
           {{- if eq .Values.config.persistence.database.driver "cassandra" }}
           nosql:
             pluginName: "cassandra"
-            hosts: {{ .Values.config.persistence.database.cassandra.hosts | quote }}
+            hosts: {{ include "cadence.cassandraHost" . | quote }}
             {{- $port := .Values.config.persistence.database.cassandra.port | default 9042 | int }}
             {{- if ne $port 9042 }}
             port: {{ $port }}
@@ -307,11 +307,11 @@ data:
             {{- if eq .Values.config.persistence.database.driver "mysql" }}
             pluginName: "mysql"
             {{- $port := .Values.config.persistence.database.mysql.port | default .Values.config.persistence.database.sql.port | default 3306 }}
-            connectAddr: "{{ .Values.config.persistence.database.sql.hosts }}:{{ $port }}"
+            connectAddr: "{{ include "cadence.sqlHost" . }}:{{ $port }}"
             {{- else if eq .Values.config.persistence.database.driver "postgres" }}
             pluginName: "postgres"
             {{- $port := .Values.config.persistence.database.postgres.port | default .Values.config.persistence.database.sql.port | default 5432 }}
-            connectAddr: "{{ .Values.config.persistence.database.sql.hosts }}:{{ $port }}"
+            connectAddr: "{{ include "cadence.sqlHost" . }}:{{ $port }}"
             {{- end }}
             connectProtocol: "tcp"
             databaseName: {{ .Values.config.persistence.database.sql.visibilityDbname | default "cadence_visibility" | quote }}
@@ -406,7 +406,7 @@ data:
               {{- else }}
               scheme: "http"
               {{- end }}
-              host: {{ .Values.config.persistence.elasticsearch.hosts }}:{{ .Values.config.persistence.elasticsearch.port | default 9200 }}
+              host: {{ include "cadence.searchHost" . }}:{{ .Values.config.persistence.elasticsearch.port | default 9200 }}
             indices:
               visibility: {{ .Values.config.persistence.elasticsearch.visibilityIndex | default "cadence-visibility" | quote }}
             {{- if .Values.config.persistence.elasticsearch.user }}
@@ -620,7 +620,7 @@ data:
       clusters:
         default:
           brokers:
-            - {{ .Values.config.kafka.brokers }}:{{ .Values.config.kafka.port | default 9092 }}
+            - {{ include "cadence.kafkaBroker" . }}:{{ .Values.config.kafka.port | default 9092 }}
       topics:
         {{ .Values.config.kafka.visibilityTopic | default "cadence-visibility" }}:
           cluster: default

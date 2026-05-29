@@ -26,7 +26,9 @@ config:
     database:
       driver: "postgres"
       sql:
-        hosts: "cadence-release-postgresql.cadence-postgres-os2.svc.cluster.local"
+        # Hostname auto-generated as {release-name}-postgresql.{namespace}.svc.cluster.local
+        # when postgresql.enabled=true. Set explicitly for external PostgreSQL.
+        hosts: ""
         port: 5432
         dbname: "cadence"
         user: "cadence"
@@ -36,18 +38,22 @@ config:
           sslMode: ""
     elasticsearch:
       enabled: true
-      version: "v7"
+      version: "os2"
       user: ""
       password: ""
       protocol: "http"
-      hosts: "opensearch-cluster-master.cadence-postgres-os2.svc.cluster.local"
+      # Hostname auto-generated as opensearch-cluster-master.{namespace}.svc.cluster.local
+      # when opensearch.enabled=true (based on opensearch.clusterName). Set explicitly for external OpenSearch.
+      hosts: ""
       port: 9200
       visibilityIndex: "cadence-visibility-os2"
       tls:
         enabled: false
   kafka: # needed by opensearch integration
     enabled: true
-    brokers: "cadence-release-kafka.cadence-postgres-os2.svc.cluster.local"
+    # Hostname auto-generated as {release-name}-kafka.{namespace}.svc.cluster.local
+    # when kafka.enabled=true. Set explicitly for external Kafka.
+    brokers: ""
 
 # Enable Cadence schema jobs
 schema:

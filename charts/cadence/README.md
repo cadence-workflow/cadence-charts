@@ -1,6 +1,6 @@
 # cadence
 
-![Version: 1.2.0](https://img.shields.io/badge/Version-1.2.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v1.3.6](https://img.shields.io/badge/AppVersion-v1.3.6-informational?style=flat-square)
+![Version: 1.3.0](https://img.shields.io/badge/Version-1.3.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v1.3.6](https://img.shields.io/badge/AppVersion-v1.3.6-informational?style=flat-square)
 
 Cadence is a distributed, scalable, durable, and highly available orchestration engine
 to execute asynchronous long-running business logic in a scalable and resilient way.
@@ -116,7 +116,7 @@ This chart deploys Uber Cadence server components and web UI.
 | config.dynamicConfig.client | string | `"filebased"` | Dynamic config client type: noop, filebased, configstore |
 | config.dynamicConfig.filebased.filepath | string | `"/etc/cadence/config/dynamicconfig/config.yaml"` | Path to dynamic config file |
 | config.dynamicConfig.filebased.pollInterval | string | `"60s"` | Poll interval for config changes |
-| config.kafka.brokers | string | `"kafka-service.kafka-namespace.svc.cluster.local"` | Kafka broker service. Can reference Kubernetes services |
+| config.kafka.brokers | string | `""` | Kafka broker hostname. Auto-generated as {release-name}-kafka.{namespace}.svc.cluster.local when kafka.enabled=true. Set explicitly for external Kafka. |
 | config.kafka.enabled | bool | `false` | Enable Kafka for async workflows |
 | config.kafka.port | int | `9092` | Kafka port |
 | config.kafka.sasl.enabled | bool | `false` | Enable SASL authentication |
@@ -147,7 +147,7 @@ This chart deploys Uber Cadence server components and web UI.
 | config.persistence.database.cassandra.consistency | string | `"LOCAL_QUORUM"` | Default consistency level |
 | config.persistence.database.cassandra.datacenter | string | `""` | Datacenter filter for Cassandra (Used for schema setup too) |
 | config.persistence.database.cassandra.hostSelectionPolicy | string | `"tokenaware,roundrobin"` | Host selection policy |
-| config.persistence.database.cassandra.hosts | string | `"cadence-release-cassandra.cadencetest.svc.cluster.local"` | Cassandra hosts. Can reference Kubernetes services |
+| config.persistence.database.cassandra.hosts | string | `""` | Cassandra hosts. Auto-generated as {release-name}-cassandra.{namespace}.svc.cluster.local when cassandra.enabled=true. Set this for external Cassandra. |
 | config.persistence.database.cassandra.keyspace | string | `"cadence"` | Cassandra keyspace for main data |
 | config.persistence.database.cassandra.maxConns | int | `10` | Maximum number of connections |
 | config.persistence.database.cassandra.password | string | `"cassandra"` | Cassandra password |
@@ -175,7 +175,7 @@ This chart deploys Uber Cadence server components and web UI.
 | config.persistence.database.sql.dbname | string | `"cadence"` | Database name for main data |
 | config.persistence.database.sql.decodingTypes | list | `["thriftrw"]` | Decoding types for SQL blobs |
 | config.persistence.database.sql.encodingType | string | `"thriftrw"` | Encoding type for SQL blobs |
-| config.persistence.database.sql.hosts | string | `"mysql-service.mysql-namespace.svc.cluster.local"` | Database host. Can reference Kubernetes services |
+| config.persistence.database.sql.hosts | string | `""` | Database host. Auto-generated as {release-name}-{db}.{namespace}.svc.cluster.local when postgresql/mysql.enabled=true |
 | config.persistence.database.sql.maxConnLifetime | string | `"1h"` | Maximum connection lifetime |
 | config.persistence.database.sql.maxConns | int | `20` | Maximum number of connections |
 | config.persistence.database.sql.maxIdleConns | int | `20` | Maximum number of idle connections |
@@ -198,7 +198,7 @@ This chart deploys Uber Cadence server components and web UI.
 | config.persistence.defaultStore | string | `"default"` | Name of the default datastore |
 | config.persistence.elasticsearch.awsSigning | object | `{"enabled":false,"region":"","service":"es"}` | Enable AWS signing (for AWS Elasticsearch) |
 | config.persistence.elasticsearch.enabled | bool | `false` | Enable Elasticsearch for advanced visibility |
-| config.persistence.elasticsearch.hosts | string | `"elasticsearch-service.elastic-namespace.svc.cluster.local"` | Elasticsearch host. |
+| config.persistence.elasticsearch.hosts | string | `""` | Elasticsearch host. Auto-generated as {release-name}-elasticsearch.{namespace}.svc.cluster.local when elasticsearch.enabled=true |
 | config.persistence.elasticsearch.password | string | `""` | Elasticsearch password |
 | config.persistence.elasticsearch.port | int | `9200` | Elasticsearch port |
 | config.persistence.elasticsearch.protocol | string | `""` | Protocol to use (http/https). If not specified, auto-detected based on TLS settings |
