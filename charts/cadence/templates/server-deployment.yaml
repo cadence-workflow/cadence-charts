@@ -866,6 +866,15 @@ spec:
         resources:
           {{- toYaml . | nindent 10 }}
         {{- end }}
+        {{- if ne $serviceName "worker" }}
+        livenessProbe:
+          initialDelaySeconds: 15
+          periodSeconds: 5
+          timeoutSeconds: 10
+          failureThreshold: 20
+          tcpSocket:
+            port: grpc
+        {{- end }}
       volumes:
       - name: config
         configMap:
