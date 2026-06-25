@@ -1,0 +1,4 @@
+cassandra:
+  enabled: true
+  persistence:
+    enabled: true
