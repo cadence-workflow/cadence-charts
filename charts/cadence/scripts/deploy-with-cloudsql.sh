@@ -229,30 +229,34 @@ else
 fi
 echo ""
 
-# Build Helm command
-HELM_CMD="helm upgrade --install $RELEASE_NAME $CHART_PATH \
-  --namespace $NAMESPACE \
-  --values $CHART_PATH/$VALUES_FILE \
-  --set config.persistence.database.sql.user=$DB_USER \
-  --create-namespace"
+# Build Helm command as an array (safer than string concatenation + eval)
+helm_args=(
+  upgrade --install "$RELEASE_NAME" "$CHART_PATH"
+  --namespace "$NAMESPACE"
+  --values "$CHART_PATH/$VALUES_FILE"
+  --set "config.persistence.database.sql.user=$DB_USER"
+  --create-namespace
+)
 
 if [ "$DIRECT_CONNECTION" = "true" ]; then
     # Direct connection mode
-    HELM_CMD="$HELM_CMD \
-      --set cloudSqlProxy.enabled=false \
-      --set config.persistence.database.sql.hosts=$DB_HOST \
-      --set config.persistence.database.mysql.port=$DB_PORT"
+    helm_args+=(
+      --set cloudSqlProxy.enabled=false
+      --set "config.persistence.database.sql.hosts=$DB_HOST"
+      --set "config.persistence.database.mysql.port=$DB_PORT"
+    )
 else
     # Cloud SQL Proxy mode
-    HELM_CMD="$HELM_CMD \
-      --set-string 'serviceAccount.annotations.iam\\.gke\\.io/gcp-service-account=$GCP_SA' \
-      --set cloudSqlProxy.instanceConnectionName=$INSTANCE_CONNECTION \
-      --set cloudSqlProxy.autoIamAuthn=$AUTO_IAM_AUTHN"
+    helm_args+=(
+      --set-string "serviceAccount.annotations.iam\.gke\.io/gcp-service-account=$GCP_SA"
+      --set "cloudSqlProxy.instanceConnectionName=$INSTANCE_CONNECTION"
+      --set "cloudSqlProxy.autoIamAuthn=$AUTO_IAM_AUTHN"
+    )
 fi
 
-# Add password if provided
+# Add password if provided (use --set-string to avoid type conversion issues)
 if [ -n "$PASSWORD" ]; then
-    HELM_CMD="$HELM_CMD --set config.persistence.database.sql.password=$PASSWORD"
+    helm_args+=(--set-string "config.persistence.database.sql.password=$PASSWORD")
 fi
 
 # Print or execute Helm command
@@ -262,7 +266,10 @@ if [ "$DRY_RUN" = "true" ]; then
     echo "DRY-RUN MODE - Command to be executed:"
     echo "=========================================="
     echo ""
-    echo "$HELM_CMD"
+    # Print the command in a readable format
+    printf "helm"
+    printf " %q" "${helm_args[@]}"
+    echo ""
     echo ""
     echo "=========================================="
     echo ""
@@ -271,7 +278,7 @@ if [ "$DRY_RUN" = "true" ]; then
 fi
 
 # Execute deployment
-eval $HELM_CMD
+helm "${helm_args[@]}"
 
 echo ""
 echo "Deployment complete! Check status with:"

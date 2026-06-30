@@ -371,9 +371,6 @@ spec:
             echo "  Using password: $([ -n "$MYSQL_PWD" ] && echo 'yes' || echo 'no (IAM auth)')"
             echo "  TLS enabled: $TLS_ENABLED"
             echo ""
-            echo "Testing connection with command:"
-            build_mysql_cmd
-            echo ""
 
             until $(build_mysql_cmd) -e "SELECT 1" 2>&1; do
               echo "[$(date '+%Y-%m-%d %H:%M:%S')] MySQL is not ready yet... (connection attempt failed)"
