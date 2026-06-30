@@ -46,6 +46,31 @@ spec:
       {{- end }}
       restartPolicy: OnFailure
       initContainers:
+      {{- if and $.Values.cloudSqlProxy.enabled (or (eq $dbDriver "postgres") (eq $dbDriver "mysql")) }}
+      - name: cloud-sql-proxy
+        restartPolicy: Always
+        image: {{ $.Values.cloudSqlProxy.image.repository }}:{{ $.Values.cloudSqlProxy.image.tag }}
+        imagePullPolicy: {{ $.Values.cloudSqlProxy.image.pullPolicy }}
+        args:
+          - "--port={{ $.Values.cloudSqlProxy.port }}"
+          {{- if $.Values.cloudSqlProxy.privateIp }}
+          - "--private-ip"
+          {{- end }}
+          {{- if $.Values.cloudSqlProxy.autoIamAuthn }}
+          - "--auto-iam-authn"
+          {{- end }}
+          - "{{ $.Values.cloudSqlProxy.instanceConnectionName }}"
+          {{- range $.Values.cloudSqlProxy.extraArgs }}
+          - {{ . | quote }}
+          {{- end }}
+        {{- with $.Values.cloudSqlProxy.resources }}
+        resources:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        securityContext:
+          runAsNonRoot: true
+          allowPrivilegeEscalation: false
+      {{- end }}
       - name: wait-for-database
         {{- if eq $dbDriver "cassandra" }}
         image: {{ $.Values.schema.checkSchema.cassandra.image.repository }}:{{ $.Values.schema.checkSchema.cassandra.image.tag }}
@@ -247,11 +272,13 @@ spec:
         - name: DB_USER
           value: {{ $.Values.config.persistence.database.sql.user | quote }}
         # Authentication parameters
+        {{- if $.Values.config.persistence.database.sql.password }}
         - name: POSTGRES_PWD
           valueFrom:
             secretKeyRef:
               name: {{ include "cadence.fullname" $ }}-frontend-secrets
               key: POSTGRES_PWD
+        {{- end }}
         # TLS Configuration
         - name: TLS_ENABLED
           value: {{ $.Values.config.persistence.database.sql.tls.enabled | quote }}
@@ -287,7 +314,12 @@ spec:
           - |
             # Build connection string based on TLS configuration
             build_mysql_cmd() {
-              local cmd="mariadb -h $DB_HOST -P $DB_PORT -u $DB_USER -p$MYSQL_PWD"
+              local cmd="mariadb -h $DB_HOST -P $DB_PORT -u $DB_USER"
+
+              # Add password if provided (not using IAM auth)
+              if [ -n "$MYSQL_PWD" ]; then
+                cmd="$cmd -p$MYSQL_PWD"
+              fi
 
               # Add SSL parameters if TLS is enabled
               if [ "$TLS_ENABLED" = "true" ]; then
@@ -332,8 +364,20 @@ spec:
 
             # Wait for MySQL to be ready
             echo "Waiting for MySQL to be ready..."
-            until $(build_mysql_cmd) -e "SELECT 1" >/dev/null 2>&1; do
-              echo 'MySQL is not ready yet...'
+            echo "Connection details:"
+            echo "  Host: $DB_HOST"
+            echo "  Port: $DB_PORT"
+            echo "  User: $DB_USER"
+            echo "  Using password: $([ -n "$MYSQL_PWD" ] && echo 'yes' || echo 'no (IAM auth)')"
+            echo "  TLS enabled: $TLS_ENABLED"
+            echo ""
+            echo "Testing connection with command:"
+            build_mysql_cmd
+            echo ""
+
+            until $(build_mysql_cmd) -e "SELECT 1" 2>&1; do
+              echo "[$(date '+%Y-%m-%d %H:%M:%S')] MySQL is not ready yet... (connection attempt failed)"
+              echo "Last error output shown above"
               sleep 5
             done
             echo "MySQL is ready!"
@@ -352,11 +396,13 @@ spec:
         - name: DB_USER
           value: {{ $.Values.config.persistence.database.sql.user | quote }}
         # Authentication parameters
+        {{- if $.Values.config.persistence.database.sql.password }}
         - name: MYSQL_PWD
           valueFrom:
             secretKeyRef:
               name: {{ include "cadence.fullname" $ }}-frontend-secrets
               key: MYSQL_PWD
+        {{- end }}
         # TLS Configuration
         - name: TLS_ENABLED
           value: {{ $.Values.config.persistence.database.sql.tls.enabled | quote }}
@@ -615,11 +661,13 @@ spec:
         - name: DB_USER
           value: {{ .Values.config.persistence.database.sql.user | quote }}
         # Authentication parameters
+        {{- if $.Values.config.persistence.database.sql.password }}
         - name: POSTGRES_PWD
           valueFrom:
             secretKeyRef:
               name: {{ include "cadence.fullname" $ }}-frontend-secrets
               key: POSTGRES_PWD
+        {{- end }}
         # TLS Configuration
         - name: TLS_ENABLED
           value: {{ .Values.config.persistence.database.sql.tls.enabled | quote }}
@@ -720,11 +768,13 @@ spec:
         - name: DB_USER
           value: {{ .Values.config.persistence.database.sql.user | quote }}
         # Authentication parameters
+        {{- if $.Values.config.persistence.database.sql.password }}
         - name: MYSQL_PWD
           valueFrom:
             secretKeyRef:
               name: {{ include "cadence.fullname" $ }}-frontend-secrets
               key: MYSQL_PWD
+        {{- end }}
         # TLS Configuration
         - name: TLS_ENABLED
           value: {{ .Values.config.persistence.database.sql.tls.enabled | quote }}

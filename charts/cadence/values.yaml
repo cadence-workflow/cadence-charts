@@ -573,6 +573,35 @@ serviceAccount:
   # -- Automatically mount service account token
   automountServiceAccountToken: true
 
+# Cloud SQL Proxy configuration
+cloudSqlProxy:
+  # -- Enable Cloud SQL Proxy sidecar container
+  enabled: false
+  # -- Cloud SQL Proxy image
+  image:
+    repository: gcr.io/cloud-sql-connectors/cloud-sql-proxy
+    tag: "2.14.1"
+    pullPolicy: IfNotPresent
+  # -- Cloud SQL instance connection name (format: project:region:instance)
+  instanceConnectionName: ""
+  # -- Port for Cloud SQL Proxy to listen on
+  port: 5432
+  # -- Use private IP for Cloud SQL instance connection (requires VPC peering)
+  privateIp: false
+  # -- Enable automatic IAM authentication (requires proper IAM permissions, no database password needed)
+  autoIamAuthn: false
+  # -- Additional command-line arguments for cloud-sql-proxy
+  # Example: ["--max-connections=100", "--max-sigterm-delay=30s"]
+  extraArgs: []
+  # -- Resource limits and requests for the proxy sidecar
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+
 # RBAC configuration
 rbac:
   # -- Enable RBAC creation

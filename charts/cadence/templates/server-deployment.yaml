@@ -78,6 +78,31 @@ spec:
         {{- toYaml $serviceTopologySpreadConstraints | nindent 8 }}
       {{- end }}
       initContainers:
+      {{- if and $.Values.cloudSqlProxy.enabled (or (eq $.Values.config.persistence.database.driver "postgres") (eq $.Values.config.persistence.database.driver "mysql")) }}
+      - name: cloud-sql-proxy
+        restartPolicy: Always
+        image: {{ $.Values.cloudSqlProxy.image.repository }}:{{ $.Values.cloudSqlProxy.image.tag }}
+        imagePullPolicy: {{ $.Values.cloudSqlProxy.image.pullPolicy }}
+        args:
+          - "--port={{ $.Values.cloudSqlProxy.port }}"
+          {{- if $.Values.cloudSqlProxy.privateIp }}
+          - "--private-ip"
+          {{- end }}
+          {{- if $.Values.cloudSqlProxy.autoIamAuthn }}
+          - "--auto-iam-authn"
+          {{- end }}
+          - "{{ $.Values.cloudSqlProxy.instanceConnectionName }}"
+          {{- range $.Values.cloudSqlProxy.extraArgs }}
+          - {{ . | quote }}
+          {{- end }}
+        {{- with $.Values.cloudSqlProxy.resources }}
+        resources:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        securityContext:
+          runAsNonRoot: true
+          allowPrivilegeEscalation: false
+      {{- end }}
       - name: extract-schema-versions
         {{- $globalImage := $.Values.global.image | default dict }}
         {{- $serviceImage := $service.image | default dict }}
@@ -381,11 +406,13 @@ spec:
         - name: DB_USER
           value: {{ $.Values.config.persistence.database.sql.user | quote }}
         # Authentication parameters
+        {{- if $.Values.config.persistence.database.sql.password }}
         - name: POSTGRES_PWD
           valueFrom:
             secretKeyRef:
               name: {{ include "cadence.fullname" $ }}-{{ $serviceName }}-secrets
               key: POSTGRES_PWD
+        {{- end }}
         # TLS Configuration
         - name: TLS_ENABLED
           value: {{ $.Values.config.persistence.database.sql.tls.enabled | quote }}
@@ -519,11 +546,13 @@ spec:
         - name: DB_USER
           value: {{ $.Values.config.persistence.database.sql.user | quote }}
         # Authentication parameters
+        {{- if $.Values.config.persistence.database.sql.password }}
         - name: MYSQL_PWD
           valueFrom:
             secretKeyRef:
               name: {{ include "cadence.fullname" $ }}-{{ $serviceName }}-secrets
               key: MYSQL_PWD
+        {{- end }}
         # TLS Configuration
         - name: TLS_ENABLED
           value: {{ $.Values.config.persistence.database.sql.tls.enabled | quote }}

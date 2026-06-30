@@ -1,0 +1,71 @@
+# Example: Cadence with Cloud SQL for MySQL via Cloud SQL Proxy
+#
+# This example demonstrates:
+# - Cloud SQL Proxy sidecar for secure database connection
+# - GKE Workload Identity for authentication
+# - MySQL as the primary database and the visibility database
+# - No subcharts (using external Cloud SQL instance)
+
+# Service Account with Workload Identity annotation
+serviceAccount:
+  create: true
+  name: "cadence"
+  # Add GKE Workload Identity annotation to bind K8s SA to GCP SA
+  annotations:
+    # reference: https://docs.cloud.google.com/sql/docs/mysql/connect-kubernetes-engine#workload-identity
+    iam.gke.io/gcp-service-account: ""
+
+# Cloud SQL Proxy configuration
+cloudSqlProxy:
+  # Enable Cloud SQL Proxy sidecar
+  enabled: true
+  # Cloud SQL instance connection name (format: projectID:region:instance)
+  instanceConnectionName: ""
+  # Port for the proxy to listen on
+  port: 3306
+  # Use private IP (requires VPC peering with Cloud SQL)
+  privateIp: true
+  # Enable automatic IAM authentication (no database password needed)
+  # Requires GKE Workload Identity and proper IAM permissions
+  autoIamAuthn: true 
+  # Optional: additional arguments for fine-tuning
+  #extraArgs:
+  #  - "--max-connections=100"
+  #  - "--max-sigterm-delay=30s"
+
+# Cadence configuration
+config:
+  persistence:
+    database:
+      driver: "mysql"
+      sql:
+        # Connect to localhost since Cloud SQL Proxy runs as a sidecar
+        hosts: "127.0.0.1"
+        user: "cadence"
+        # Password can be empty when using Cloud SQL IAM authentication
+        # or set it if using database authentication
+        password: ""
+        tls:
+          enabled: false
+          sslMode: ""
+      mysql:
+        port: 3306
+
+# Enable schema job
+schema:
+  serverJob:
+    enabled: true
+
+# Disable all database subcharts (using Cloud SQL)
+postgresql:
+  enabled: false
+mysql:
+  enabled: false
+cassandra:
+  enabled: false
+elasticsearch:
+  enabled: false
+opensearch:
+  enabled: false
+kafka:
+  enabled: false
