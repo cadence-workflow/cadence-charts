@@ -2,6 +2,8 @@ apiVersion: v2
 name: cadence
 version: 1.3.2
 appVersion: v1.3.6
+# Requires Kubernetes 1.29+ for native sidecar init containers (Cloud SQL Proxy)
+kubeVersion: ">=1.29.0-0"
 
 description: |
   Cadence is a distributed, scalable, durable, and highly available orchestration engine
