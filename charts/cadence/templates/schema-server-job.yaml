@@ -46,30 +46,8 @@ spec:
       {{- end }}
       restartPolicy: OnFailure
       initContainers:
-      {{- if and $.Values.cloudSqlProxy.enabled (or (eq $dbDriver "postgres") (eq $dbDriver "mysql")) }}
-      - name: cloud-sql-proxy
-        restartPolicy: Always
-        image: {{ $.Values.cloudSqlProxy.image.repository }}:{{ $.Values.cloudSqlProxy.image.tag }}
-        imagePullPolicy: {{ $.Values.cloudSqlProxy.image.pullPolicy }}
-        args:
-          - "--port={{ $.Values.cloudSqlProxy.port }}"
-          {{- if $.Values.cloudSqlProxy.privateIp }}
-          - "--private-ip"
-          {{- end }}
-          {{- if $.Values.cloudSqlProxy.autoIamAuthn }}
-          - "--auto-iam-authn"
-          {{- end }}
-          - "{{ $.Values.cloudSqlProxy.instanceConnectionName }}"
-          {{- range $.Values.cloudSqlProxy.extraArgs }}
-          - {{ . | quote }}
-          {{- end }}
-        {{- with $.Values.cloudSqlProxy.resources }}
-        resources:
-          {{- toYaml . | nindent 10 }}
-        {{- end }}
-        securityContext:
-          runAsNonRoot: true
-          allowPrivilegeEscalation: false
+      {{- if and $.Values.cloudSqlProxy.enabled $.Values.cloudSqlProxy.initContainer }}
+      - {{- toYaml $.Values.cloudSqlProxy.initContainer | nindent 8 }}
       {{- end }}
       - name: wait-for-database
         {{- if eq $dbDriver "cassandra" }}

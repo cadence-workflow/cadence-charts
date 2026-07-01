@@ -137,20 +137,12 @@ data:
           sql:
             {{- if eq .Values.config.persistence.database.driver "mysql" }}
             pluginName: "mysql"
-            {{- if .Values.cloudSqlProxy.enabled }}
-            connectAddr: "127.0.0.1:{{ .Values.cloudSqlProxy.port }}"
-            {{- else }}
             {{- $port := .Values.config.persistence.database.mysql.port | default .Values.config.persistence.database.sql.port | default 3306 }}
             connectAddr: "{{ include "cadence.sqlHost" . }}:{{ $port }}"
-            {{- end }}
             {{- else if eq .Values.config.persistence.database.driver "postgres" }}
             pluginName: "postgres"
-            {{- if .Values.cloudSqlProxy.enabled }}
-            connectAddr: "127.0.0.1:{{ .Values.cloudSqlProxy.port }}"
-            {{- else }}
             {{- $port := .Values.config.persistence.database.postgres.port | default .Values.config.persistence.database.sql.port | default 5432 }}
             connectAddr: "{{ include "cadence.sqlHost" . }}:{{ $port }}"
-            {{- end }}
             {{- end }}
             connectProtocol: "tcp"
             databaseName: {{ .Values.config.persistence.database.sql.dbname | default "cadence" | quote }}

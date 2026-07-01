@@ -73,10 +73,10 @@ gcloud sql users create cadence-user \
 
 ```bash
 # Get the private IP (if using VPC peering)
-gcloud sql instances describe YOUR-INSTANCE-NAME --format="value(ipAddresses[0].ipAddress)"
+gcloud sql instances describe YOUR-INSTANCE-NAME --format=json | jq -r '.ipAddresses[] | select(.type=="PRIVATE") | .ipAddress'
 
 # Or get the public IP (if using authorized networks)
-gcloud sql instances describe YOUR-INSTANCE-NAME --format="value(ipAddresses[1].ipAddress)"
+gcloud sql instances describe YOUR-INSTANCE-NAME --format=json | jq -r '.ipAddresses[] | select(.type=="PUBLIC") | .ipAddress'
 ```
 
 #### Step 3: Deploy Cadence
