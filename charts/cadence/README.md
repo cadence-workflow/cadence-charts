@@ -21,6 +21,8 @@ This chart deploys Uber Cadence server components and web UI.
 
 ## Requirements
 
+Kubernetes: `>=1.29.0-0`
+
 | Repository | Name | Version |
 |------------|------|---------|
 | https://opensearch-project.github.io/helm-charts/ | opensearch | 2.x.x |
@@ -72,14 +74,9 @@ This chart deploys Uber Cadence server components and web UI.
 | cassandra.tls.resourcesPreset | string | `"nano"` | Resource preset for TLS containers |
 | cassandra.tls.tlsEncryptionSecretName | string | `""` | TLS encryption secret name |
 | cassandra.tls.truststorePassword | string | `""` | Truststore password |
-| cloudSqlProxy.autoIamAuthn | bool | `false` | Enable automatic IAM authentication (requires proper IAM permissions, no database password needed) |
-| cloudSqlProxy.enabled | bool | `false` | Enable Cloud SQL Proxy sidecar container |
-| cloudSqlProxy.extraArgs | list | `[]` | Additional command-line arguments for cloud-sql-proxy Example: ["--max-connections=100", "--max-sigterm-delay=30s"] |
-| cloudSqlProxy.image | object | `{"pullPolicy":"IfNotPresent","repository":"gcr.io/cloud-sql-connectors/cloud-sql-proxy","tag":"2.14.1"}` | Cloud SQL Proxy image |
-| cloudSqlProxy.instanceConnectionName | string | `""` | Cloud SQL instance connection name (format: project:region:instance) |
-| cloudSqlProxy.port | int | `5432` | Port for Cloud SQL Proxy to listen on |
-| cloudSqlProxy.privateIp | bool | `false` | Use private IP for Cloud SQL instance connection (requires VPC peering) |
-| cloudSqlProxy.resources | object | `{"limits":{"cpu":"200m","memory":"256Mi"},"requests":{"cpu":"100m","memory":"128Mi"}}` | Resource limits and requests for the proxy sidecar |
+| cloudSqlProxy.container | object | `{}` | Regular sidecar container specification Uncomment and configure to add a database proxy as a regular container |
+| cloudSqlProxy.enabled | bool | `false` | Enable database proxy containers |
+| cloudSqlProxy.initContainer | object | `{}` | Init container specification (runs as native sidecar with restartPolicy: Always) Uncomment and configure to add a database proxy init container |
 | config.archival.history.enableRead | bool | `false` | Enable reading from archives |
 | config.archival.history.provider | object | `{"filestore":{"dirMode":"0755","fileMode":"0644"},"gstorage":{"credentialsPath":""},"s3store":{"endpoint":"","region":"","s3ForcePathStyle":false},"type":"filestore"}` | Archive providers configuration |
 | config.archival.history.provider.filestore.dirMode | string | `"0755"` | Directory mode for archive directories |

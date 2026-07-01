@@ -78,30 +78,8 @@ spec:
         {{- toYaml $serviceTopologySpreadConstraints | nindent 8 }}
       {{- end }}
       initContainers:
-      {{- if and $.Values.cloudSqlProxy.enabled (or (eq $.Values.config.persistence.database.driver "postgres") (eq $.Values.config.persistence.database.driver "mysql")) }}
-      - name: cloud-sql-proxy
-        restartPolicy: Always
-        image: {{ $.Values.cloudSqlProxy.image.repository }}:{{ $.Values.cloudSqlProxy.image.tag }}
-        imagePullPolicy: {{ $.Values.cloudSqlProxy.image.pullPolicy }}
-        args:
-          - "--port={{ $.Values.cloudSqlProxy.port }}"
-          {{- if $.Values.cloudSqlProxy.privateIp }}
-          - "--private-ip"
-          {{- end }}
-          {{- if $.Values.cloudSqlProxy.autoIamAuthn }}
-          - "--auto-iam-authn"
-          {{- end }}
-          - "{{ $.Values.cloudSqlProxy.instanceConnectionName }}"
-          {{- range $.Values.cloudSqlProxy.extraArgs }}
-          - {{ . | quote }}
-          {{- end }}
-        {{- with $.Values.cloudSqlProxy.resources }}
-        resources:
-          {{- toYaml . | nindent 10 }}
-        {{- end }}
-        securityContext:
-          runAsNonRoot: true
-          allowPrivilegeEscalation: false
+      {{- if and $.Values.cloudSqlProxy.enabled $.Values.cloudSqlProxy.initContainer }}
+      - {{- toYaml $.Values.cloudSqlProxy.initContainer | nindent 8 }}
       {{- end }}
       - name: extract-schema-versions
         {{- $globalImage := $.Values.global.image | default dict }}
@@ -821,6 +799,9 @@ spec:
         {{- toYaml . | nindent 8 }}
         {{- end }}
       containers:
+      {{- if and $.Values.cloudSqlProxy.enabled $.Values.cloudSqlProxy.container }}
+      - {{- toYaml $.Values.cloudSqlProxy.container | nindent 8 }}
+      {{- end }}
       - name: cadence-{{ $serviceName }}
         {{- $globalImage := $.Values.global.image | default dict }}
         {{- $serviceImage := $service.image | default dict }}

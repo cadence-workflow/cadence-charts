@@ -246,12 +246,18 @@ if [ "$DIRECT_CONNECTION" = "true" ]; then
       --set "config.persistence.database.mysql.port=$DB_PORT"
     )
 else
-    # Cloud SQL Proxy mode
+    # Cloud SQL Proxy mode - always use private IP
     helm_args+=(
       --set-string "serviceAccount.annotations.iam\.gke\.io/gcp-service-account=$GCP_SA"
-      --set "cloudSqlProxy.instanceConnectionName=$INSTANCE_CONNECTION"
-      --set "cloudSqlProxy.autoIamAuthn=$AUTO_IAM_AUTHN"
+      --set "cloudSqlProxy.initContainer.args[0]=$INSTANCE_CONNECTION"
+      --set "cloudSqlProxy.initContainer.args[1]=--port=3306"
+      --set "cloudSqlProxy.initContainer.args[2]=--private-ip"
     )
+
+    # Add --auto-iam-authn if enabled
+    if [ "$AUTO_IAM_AUTHN" = "true" ]; then
+        helm_args+=(--set "cloudSqlProxy.initContainer.args[3]=--auto-iam-authn")
+    fi
 fi
 
 # Add password if provided (use --set-string to avoid type conversion issues)

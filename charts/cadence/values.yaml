@@ -574,33 +574,58 @@ serviceAccount:
   automountServiceAccountToken: true
 
 # Cloud SQL Proxy configuration
+# Generic configuration for database proxy containers (Cloud SQL Proxy, Azure DB Proxy, etc.)
+# The template will add these containers as-is to server deployments and schema jobs
 cloudSqlProxy:
-  # -- Enable Cloud SQL Proxy sidecar container
+  # -- Enable database proxy containers
   enabled: false
-  # -- Cloud SQL Proxy image
-  image:
-    repository: gcr.io/cloud-sql-connectors/cloud-sql-proxy
-    tag: "2.14.1"
-    pullPolicy: IfNotPresent
-  # -- Cloud SQL instance connection name (format: project:region:instance)
-  instanceConnectionName: ""
-  # -- Port for Cloud SQL Proxy to listen on
-  port: 5432
-  # -- Use private IP for Cloud SQL instance connection (requires VPC peering)
-  privateIp: false
-  # -- Enable automatic IAM authentication (requires proper IAM permissions, no database password needed)
-  autoIamAuthn: false
-  # -- Additional command-line arguments for cloud-sql-proxy
-  # Example: ["--max-connections=100", "--max-sigterm-delay=30s"]
-  extraArgs: []
-  # -- Resource limits and requests for the proxy sidecar
-  resources:
-    requests:
-      cpu: 100m
-      memory: 128Mi
-    limits:
-      cpu: 200m
-      memory: 256Mi
+
+  # -- Init container specification (runs as native sidecar with restartPolicy: Always)
+  # Uncomment and configure to add a database proxy init container
+  initContainer: {}
+    # Example: Cloud SQL Proxy for Google Cloud
+    # name: cloud-sql-proxy
+    # restartPolicy: Always  # Required for native sidecar pattern (K8s 1.29+)
+    # image: gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.14.1
+    # imagePullPolicy: IfNotPresent
+    # args:
+    #   - "PROJECT:REGION:INSTANCE"  # Replace with your instance connection name
+    #   - "--port=3306"
+    #   - "--private-ip"  # Optional: use private IP (requires VPC peering)
+    #   - "--auto-iam-authn"  # Optional: enable IAM authentication
+    # resources:
+    #   requests:
+    #     cpu: 100m
+    #     memory: 128Mi
+    #   limits:
+    #     cpu: 200m
+    #     memory: 256Mi
+    # securityContext:
+    #   runAsNonRoot: true
+    #   allowPrivilegeEscalation: false
+
+  # -- Regular sidecar container specification
+  # Uncomment and configure to add a database proxy as a regular container
+  container: {}
+    # Example: Cloud SQL Proxy for Google Cloud (if you're using Cloud Service Mesh or Istio)
+    # name: cloud-sql-proxy
+    # image: gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.14.1
+    # imagePullPolicy: IfNotPresent
+    # args:
+    #   - "PROJECT:REGION:INSTANCE"  # Replace with your instance connection name
+    #   - "--port=3306"
+    #   - "--private-ip"  # Optional: use private IP (requires VPC peering)
+    #   - "--auto-iam-authn"  # Optional: enable IAM authentication
+    # resources:
+    #   requests:
+    #     cpu: 100m
+    #     memory: 128Mi
+    #   limits:
+    #     cpu: 200m
+    #     memory: 256Mi
+    # securityContext:
+    #   runAsNonRoot: true
+    #   allowPrivilegeEscalation: false
 
 # RBAC configuration
 rbac:
