@@ -1,6 +1,6 @@
 # cadence
 
-![Version: 1.3.1](https://img.shields.io/badge/Version-1.3.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v1.3.6](https://img.shields.io/badge/AppVersion-v1.3.6-informational?style=flat-square)
+![Version: 1.3.2](https://img.shields.io/badge/Version-1.3.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v1.3.6](https://img.shields.io/badge/AppVersion-v1.3.6-informational?style=flat-square)
 
 Cadence is a distributed, scalable, durable, and highly available orchestration engine
 to execute asynchronous long-running business logic in a scalable and resilient way.
@@ -20,6 +20,8 @@ This chart deploys Uber Cadence server components and web UI.
 * <https://github.com/cadence-workflow/cadence-web>
 
 ## Requirements
+
+Kubernetes: `>=1.29.0-0`
 
 | Repository | Name | Version |
 |------------|------|---------|
@@ -72,6 +74,9 @@ This chart deploys Uber Cadence server components and web UI.
 | cassandra.tls.resourcesPreset | string | `"nano"` | Resource preset for TLS containers |
 | cassandra.tls.tlsEncryptionSecretName | string | `""` | TLS encryption secret name |
 | cassandra.tls.truststorePassword | string | `""` | Truststore password |
+| cloudSqlProxy.container | object | `{}` | Regular sidecar container specification Uncomment and configure to add a database proxy as a regular container |
+| cloudSqlProxy.enabled | bool | `false` | Enable database proxy containers |
+| cloudSqlProxy.initContainer | object | `{}` | Init container specification (runs as native sidecar with restartPolicy: Always) Uncomment and configure to add a database proxy init container |
 | config.archival.history.enableRead | bool | `false` | Enable reading from archives |
 | config.archival.history.provider | object | `{"filestore":{"dirMode":"0755","fileMode":"0644"},"gstorage":{"credentialsPath":""},"s3store":{"endpoint":"","region":"","s3ForcePathStyle":false},"type":"filestore"}` | Archive providers configuration |
 | config.archival.history.provider.filestore.dirMode | string | `"0755"` | Directory mode for archive directories |

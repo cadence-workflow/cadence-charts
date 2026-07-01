@@ -1,0 +1,80 @@
+# Example: Cadence with Cloud SQL for MySQL via Cloud SQL Proxy
+#
+# This example demonstrates:
+# - Cloud SQL Proxy as native sidecar init container for secure database connection
+# - GKE Workload Identity for authentication
+# - MySQL as the primary database and the visibility database
+# - No subcharts (using external Cloud SQL instance)
+
+# Service Account with Workload Identity annotation
+serviceAccount:
+  create: true
+  name: "cadence"
+  # Add GKE Workload Identity annotation to bind K8s SA to GCP SA
+  annotations:
+    # reference: https://docs.cloud.google.com/sql/docs/mysql/connect-kubernetes-engine#workload-identity
+    iam.gke.io/gcp-service-account: ""
+
+# Cloud SQL Proxy configuration
+cloudSqlProxy:
+  # Enable Cloud SQL Proxy init container
+  enabled: true
+
+  # Init container specification (native sidecar pattern with restartPolicy: Always)
+  initContainer:
+    name: cloud-sql-proxy
+    restartPolicy: Always  # Required for native sidecar (K8s 1.29+)
+    image: gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.14.1
+    imagePullPolicy: IfNotPresent
+    args:
+      - "PROJECT:REGION:INSTANCE"  # Replace with your instance connection name
+      - "--port=3306"
+      - "--private-ip"           # Use private IP (requires VPC peering)
+      # --auto-iam-authn is controlled by the deployment script via --auto-iam-authn flag
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 200m
+        memory: 256Mi
+    securityContext:
+      runAsNonRoot: true
+      allowPrivilegeEscalation: false
+
+# Cadence configuration
+config:
+  persistence:
+    database:
+      driver: "mysql"
+      sql:
+        # Connect to localhost since Cloud SQL Proxy runs as a sidecar
+        hosts: "127.0.0.1"
+        user: "cadence"
+        # Password can be empty when using Cloud SQL IAM authentication
+        # or set it if using database authentication
+        password: ""
+        tls:
+          enabled: false
+          sslMode: ""
+      mysql:
+        port: 3306
+
+# Enable schema job
+schema:
+  serverJob:
+    enabled: true
+
+# Disable all database subcharts (using Cloud SQL)
+postgresql:
+  enabled: false
+mysql:
+  enabled: false
+cassandra:
+  enabled: false
+elasticsearch:
+  enabled: false
+opensearch:
+  enabled: false
+kafka:
+  enabled: false

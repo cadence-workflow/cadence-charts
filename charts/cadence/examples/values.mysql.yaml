@@ -1,0 +1,35 @@
+# Force Cadence to use PostgreSQL for main DB
+config:
+  persistence:
+    database:
+      driver: "mysql"
+      sql:
+        # Hostname auto-generated as {release-name}-postgresql.{namespace}.svc.cluster.local
+        # when postgresql.enabled=true. Set explicitly for external PostgreSQL.
+        hosts: ""
+        user: "cadence"
+        password: "changeme-strong"
+        tls:
+          enabled: false
+          sslMode: ""
+      mysql:
+        port: 3306
+
+# Enable Cadence schema jobs
+schema:
+  serverJob:
+    enabled: true
+
+# Do NOT deploy ES, Kafka, Cassandra or MySQL
+elasticsearch:
+  enabled: false
+opensearch:
+  enabled: false
+kafka:
+  enabled: false
+cassandra:
+  enabled: false
+mysql:
+  enabled: false
+postgresql:
+  enabled: false
