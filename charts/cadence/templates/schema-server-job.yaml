@@ -572,7 +572,12 @@ spec:
 
             # Build sql-tool command with TLS options
             build_postgres_cmd() {
-              local cmd="cadence-sql-tool --ep $DB_HOST -p $DB_PORT -u $DB_USER -pw $POSTGRES_PWD --plugin postgres"
+              local cmd="cadence-sql-tool --ep $DB_HOST -p $DB_PORT -u $DB_USER --plugin postgres"
+
+              # Add password only if provided (not using IAM auth)
+              if [ -n "$POSTGRES_PWD" ]; then
+                cmd="$cmd -pw $POSTGRES_PWD"
+              fi
 
               # Add TLS options if enabled
               if [ "$TLS_ENABLED" = "true" ]; then
@@ -679,7 +684,12 @@ spec:
 
             # Build sql-tool command with TLS options
             build_mysql_cmd() {
-              local cmd="cadence-sql-tool --ep $DB_HOST -p $DB_PORT -u $DB_USER -pw $MYSQL_PWD --plugin mysql"
+              local cmd="cadence-sql-tool --ep $DB_HOST -p $DB_PORT -u $DB_USER --plugin mysql"
+
+              # Add password only if provided (not using IAM auth)
+              if [ -n "$MYSQL_PWD" ]; then
+                cmd="$cmd -pw $MYSQL_PWD"
+              fi
 
               # Add TLS options if enabled
               if [ "$TLS_ENABLED" = "true" ]; then

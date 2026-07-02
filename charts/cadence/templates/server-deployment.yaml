@@ -481,10 +481,17 @@ spec:
 
             # Wait for MySQL to be ready
             echo "Waiting for MySQL to be ready..."
-            until mariadb-admin ping -h $DB_HOST -P $DB_PORT -u $DB_USER --password=$MYSQL_PWD --skip-ssl --silent; do
-              echo 'MySQL is not ready yet...'
-              sleep 5
-            done
+            if [ -n "$MYSQL_PWD" ]; then
+              until mariadb-admin ping -h $DB_HOST -P $DB_PORT -u $DB_USER --password=$MYSQL_PWD --skip-ssl --silent; do
+                echo 'MySQL is not ready yet...'
+                sleep 5
+              done
+            else
+              until mariadb-admin ping -h $DB_HOST -P $DB_PORT -u $DB_USER --skip-ssl --silent; do
+                echo 'MySQL is not ready yet...'
+                sleep 5
+              done
+            fi
             echo "MySQL is ready!"
 
             # Check schema versions in both databases
