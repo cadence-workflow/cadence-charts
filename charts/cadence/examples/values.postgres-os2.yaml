@@ -8,8 +8,6 @@
 
 # Allow Bitnami charts to use legacy repository images
 global:
-  image:
-    tag: "v1.3.6"  # Default version 
   security:
     allowInsecureImages: true
 

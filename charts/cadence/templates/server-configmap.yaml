@@ -720,7 +720,7 @@ data:
       client: {{ .Values.config.dynamicConfig.client | default "filebased" | quote }}
       {{- if eq .Values.config.dynamicConfig.client "filebased" }}
       filebased:
-        filepath: {{ .Values.config.dynamicConfig.filebased.filepath | default "/etc/cadence/config/dynamicconfig/config.yaml" | quote }}
+        filepath: {{ .Values.config.dynamicConfig.filebased.filepath | default "/etc/cadence/dynamicconfig/config.yaml" | quote }}
         pollInterval: {{ .Values.config.dynamicConfig.filebased.pollInterval | default "60s" | quote }}
       {{- end }}
     {{- end }}
