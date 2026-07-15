@@ -1,6 +1,6 @@
 # cadence
 
-![Version: 1.4.1](https://img.shields.io/badge/Version-1.4.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v1.3.6](https://img.shields.io/badge/AppVersion-v1.3.6-informational?style=flat-square)
+![Version: 1.4.2](https://img.shields.io/badge/Version-1.4.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v1.4.1](https://img.shields.io/badge/AppVersion-v1.4.1-informational?style=flat-square)
 
 Cadence is a distributed, scalable, durable, and highly available orchestration engine
 to execute asynchronous long-running business logic in a scalable and resilient way.
@@ -259,7 +259,7 @@ Kubernetes: `>=1.29.0-0`
 | global.affinity | object | `{}` | Global affinity rules |
 | global.containerSecurityContext | object | `{}` | Global container security context |
 | global.env | list | `[]` | Global environment variables (shared only by Cadence Server services [frontend, worker, matching and history]) |
-| global.image | object | `{"pullPolicy":"IfNotPresent","repository":"docker.io/ubercadence/server","tag":"v1.3.6"}` | Global image configuration (shared only by Cadence Server services [frontend, worker, matching and history]) |
+| global.image | object | `{"pullPolicy":"IfNotPresent","repository":"docker.io/ubercadence/server","tag":"v1.4.1"}` | Global image configuration (shared only by Cadence Server services [frontend, worker, matching and history]) |
 | global.imagePullSecrets | list | `[]` | Image pull secrets for private registries |
 | global.log | object | `{"level":"info","stdout":true}` | Global logging configuration (shared only by Cadence Server services [frontend, worker, matching and history]) |
 | global.log.level | string | `"info"` | Logging level (debug, info, warn, error) |

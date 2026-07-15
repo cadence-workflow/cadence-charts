@@ -1,7 +1,7 @@
 apiVersion: v2
 name: cadence
-version: 1.4.1
-appVersion: v1.3.6
+version: 1.4.2
+appVersion: v1.4.1
 # Requires Kubernetes 1.29+ for native sidecar init containers (Cloud SQL Proxy)
 kubeVersion: ">=1.29.0-0"
 

@@ -839,10 +839,10 @@ spec:
         {{- end }}
         volumeMounts:
         - name: config
-          mountPath: /etc/cadence/config/config_template.yaml
+          mountPath: /etc/cadence/config_template.yaml
           subPath: config_template.yaml
         - name: config
-          mountPath: {{ $.Values.config.dynamicConfig.filebased.filepath | default "/etc/cadence/config/dynamicconfig/config.yaml" }}
+          mountPath: {{ $.Values.config.dynamicConfig.filebased.filepath | default "/etc/cadence/dynamicconfig/config.yaml" }}
           subPath: dynamic_config.yaml
         {{- with $.Values.global.tls.volumeMounts }}
         {{- toYaml . | nindent 8 }}
