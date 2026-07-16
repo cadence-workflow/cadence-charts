@@ -1151,7 +1151,52 @@ config:
       filepath: "/etc/cadence/dynamicconfig/config.yaml"
       # -- Poll interval for config changes
       pollInterval: "60s"
-  
+
+  # Histogram metrics migration configuration (Available in v1.4.1+)
+  # This allows migrating metrics from timers to histograms
+  histograms:
+    # -- Default behavior for metrics: "timer" (original timer), "histogram" (histogram), "both" (emit both)
+    # Leave empty (~) to maintain backward compatibility (all metrics as timers)
+    default: ~
+    # -- Per-metric histogram configuration
+    # Set to true to emit histogram, false to suppress
+    names: {}
+    # Example migration configuration:
+    # default: "both"  # Emit both timer and histogram for all metrics during migration
+    # names:
+    #   acquire_shards_latency: false  # Suppress histogram for this metric
+    #   cache_latency: true             # Emit histogram for this metric
+    #   elasticsearch_latency: true
+
+  # Gauge metrics migration configuration (Available in v1.4.1+)
+  # This allows migrating metrics from timers to gauges
+  gauge-migration:
+    # -- Default behavior for metrics: "timer" (original timer), "gauge" (gauge), "both" (emit both)
+    # Leave empty (~) to maintain backward compatibility (all metrics as timers)
+    default: ~
+    # -- Per-metric gauge configuration
+    # Set to true to emit gauge, false to suppress
+    names: {}
+    # Example migration configuration:
+    # default: "both"  # Emit both timer and gauge for all metrics during migration
+    # names:
+    #   workflow_context_counter: true  # Emit gauge for this metric
+    #   task_list_count: false          # Suppress gauge for this metric
+
+  # Counter metrics migration configuration (Available in v1.4.1+)
+  # This allows migrating metrics from timers to counters
+  counter-migration:
+    # -- Default behavior for metrics: "timer" (original timer), "counter" (counter), "both" (emit both)
+    # Leave empty (~) to maintain backward compatibility
+    default: ~
+    # -- Per-metric counter configuration
+    # Set to true to emit counter, false to suppress
+    names: {}
+    # Example migration configuration:
+    # default: "counter"
+    # names:
+    #   specific_counter_metric: false  # Suppress counter for this metric
+
   # Async workflow queues configuration
   # This is not operative yet. It will be in next releases.
   asyncWorkflowQueues:

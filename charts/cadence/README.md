@@ -1,6 +1,6 @@
 # cadence
 
-![Version: 1.4.2](https://img.shields.io/badge/Version-1.4.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v1.4.1](https://img.shields.io/badge/AppVersion-v1.4.1-informational?style=flat-square)
+![Version: 1.4.3](https://img.shields.io/badge/Version-1.4.3-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v1.4.1](https://img.shields.io/badge/AppVersion-v1.4.1-informational?style=flat-square)
 
 Cadence is a distributed, scalable, durable, and highly available orchestration engine
 to execute asynchronous long-running business logic in a scalable and resilient way.
@@ -113,14 +113,20 @@ Kubernetes: `>=1.29.0-0`
 | config.cluster.isNotPrimary | bool | `false` | Whether this cluster is not the primary cluster |
 | config.cluster.primaryClusterName | string | `"cluster0"` | Name of the primary cluster in a multi-cluster setup |
 | config.cluster.rpcTransport | string | `"grpc"` | RPC transport protocol (grpc or tchannel) |
+| config.counter-migration.default | string | `nil` | Default behavior for metrics: "timer" (original timer), "counter" (counter), "both" (emit both) Leave empty (~) to maintain backward compatibility |
+| config.counter-migration.names | object | `{}` | Per-metric counter configuration Set to true to emit counter, false to suppress |
 | config.domainDefaults.archival | object | `{"history":{"URI":"","status":"disabled"},"visibility":{"URI":"","status":"disabled"}}` | Default archival settings for new domains - Documentation for S3 here: https://github.com/cadence-workflow/cadence/blob/v1.3.0/common/archiver/s3store/README.md - Documentation for GStorage here: https://github.com/cadence-workflow/cadence/blob/v1.3.0/common/archiver/gcloud/README.md |
 | config.domainDefaults.archival.history.URI | string | `""` | Default history archival URI |
 | config.domainDefaults.archival.history.status | string | `"disabled"` | Default history archival status: enabled, disabled |
 | config.domainDefaults.archival.visibility.URI | string | `""` | Default visibility archival URI |
 | config.domainDefaults.archival.visibility.status | string | `"disabled"` | Default visibility archival status: enabled, disabled |
 | config.dynamicConfig.client | string | `"filebased"` | Dynamic config client type: noop, filebased, configstore |
-| config.dynamicConfig.filebased.filepath | string | `"/etc/cadence/config/dynamicconfig/config.yaml"` | Path to dynamic config file |
+| config.dynamicConfig.filebased.filepath | string | `"/etc/cadence/dynamicconfig/config.yaml"` | Path to dynamic config file |
 | config.dynamicConfig.filebased.pollInterval | string | `"60s"` | Poll interval for config changes |
+| config.gauge-migration.default | string | `nil` | Default behavior for metrics: "timer" (original timer), "gauge" (gauge), "both" (emit both) Leave empty (~) to maintain backward compatibility (all metrics as timers) |
+| config.gauge-migration.names | object | `{}` | Per-metric gauge configuration Set to true to emit gauge, false to suppress |
+| config.histograms.default | string | `nil` | Default behavior for metrics: "timer" (original timer), "histogram" (histogram), "both" (emit both) Leave empty (~) to maintain backward compatibility (all metrics as timers) |
+| config.histograms.names | object | `{}` | Per-metric histogram configuration Set to true to emit histogram, false to suppress |
 | config.kafka.brokers | string | `""` | Kafka broker hostname. Auto-generated as {release-name}-kafka.{namespace}.svc.cluster.local when kafka.enabled=true. Set explicitly for external Kafka. |
 | config.kafka.enabled | bool | `false` | Enable Kafka for async workflows |
 | config.kafka.port | int | `9092` | Kafka port |

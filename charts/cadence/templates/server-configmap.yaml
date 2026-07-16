@@ -725,6 +725,24 @@ data:
       {{- end }}
     {{- end }}
 
+    {{- if or .Values.config.histograms.default .Values.config.histograms.names }}
+    # Histogram metrics migration configuration
+    histograms:
+      {{- toYaml .Values.config.histograms | nindent 6 }}
+    {{- end }}
+
+    {{- if or (index .Values.config "gauge-migration" "default") (index .Values.config "gauge-migration" "names") }}
+    # Gauge metrics migration configuration
+    gauge-migration:
+      {{- toYaml (index .Values.config "gauge-migration") | nindent 6 }}
+    {{- end }}
+
+    {{- if or (index .Values.config "counter-migration" "default") (index .Values.config "counter-migration" "names") }}
+    # Counter metrics migration configuration
+    counter-migration:
+      {{- toYaml (index .Values.config "counter-migration") | nindent 6 }}
+    {{- end }}
+
     {{ if .Values.config.asyncWorkflowQueues.enabled -}}
     # Async workflow queues configuration
     asyncWorkflowQueues:

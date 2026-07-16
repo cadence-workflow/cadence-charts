@@ -1,0 +1,57 @@
+# Example configuration for migrating metrics to histograms, gauges, and counters
+# This example demonstrates how to gradually migrate metrics using Cadence v1.4.1+
+
+# ==============================================================================
+# METRICS MIGRATION - Step 1: Gradual Migration with "both"
+# ==============================================================================
+# Start migration by emitting both old (timer) and new metric types
+# This allows your monitoring dashboards to continue working while you update them
+#config:
+#  histograms:
+#    default: timer
+    # Override for specific metrics:
+    # - true: emit histogram 
+    # - false: suppress histogram 
+#    names:
+#      acquire_shards_latency: true
+#      elasticsearch_latency: true
+
+#  # Gauge metrics migration configuration
+#  gauge-migration:
+#    default: timer
+    # Override for specific metrics
+    # - true: emit gauge
+    # - false: suppress gauge
+#    names:
+#      workflow_context_counter: true
+#      task_list_count: true
+#      cache_size: true
+
+  # Counter metrics migration configuration
+#  counter-migration:
+#    default: timer
+    # Override for specific metrics
+    # - true: emit counter
+    # - false: suppress counter
+#    names:
+#       some_counter_metric: true
+#       another_counter: true
+
+# ==============================================================================
+# ALTERNATIVE CONFIGURATIONS
+# ==============================================================================
+
+# Step 2: After updating your dashboards, switch to new metric types only
+# Uncomment the configuration below and comment out Step 1 above
+config:
+  histograms:
+    default: histogram
+    names: {}
+
+  gauge-migration:
+    default: gauge
+    names: {}
+
+  counter-migration:
+    default: counter
+    names: {}
