@@ -1323,24 +1323,60 @@ schema:
         repository: "cassandra"
         tag: "4"
         pullPolicy: IfNotPresent
+      # -- Container security context for cassandra init container
+      containerSecurityContext:
+        runAsNonRoot: true
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+            - ALL
+        # runAsUser: 999  # cassandra user in official image, uncomment if needed
+        # runAsGroup: 999
     # -- MySQL schema validation image
     mysql:
       image:
         repository: "alpine/mysql"
         tag: "latest"
         pullPolicy: IfNotPresent
+      # -- Container security context for mysql init container
+      containerSecurityContext:
+        runAsNonRoot: true
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+            - ALL
+        # runAsUser: 1000  # default user in alpine/mysql, uncomment if needed
+        # runAsGroup: 1000
     # -- PostgreSQL schema validation image
     postgres:
       image:
         repository: "alpine/psql"
         tag: "latest"
         pullPolicy: IfNotPresent
+      # -- Container security context for postgres init container
+      containerSecurityContext:
+        runAsNonRoot: true
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+            - ALL
+        # runAsUser: 1000  # default user in alpine/psql, uncomment if needed
+        # runAsGroup: 1000
     # -- ElasticSearch schema validation image
     elasticsearch:
       image:
         repository: alpine/curl
         tag: "latest"
         pullPolicy: IfNotPresent
+      # -- Container security context for elasticsearch init container
+      containerSecurityContext:
+        runAsNonRoot: true
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+            - ALL
+        # runAsUser: 1000  # default user in alpine/curl, uncomment if needed
+        # runAsGroup: 1000
 
 ##################################################################
 #################### DATABASE CONFIGURATION ######################

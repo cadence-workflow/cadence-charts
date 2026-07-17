@@ -59,11 +59,9 @@ spec:
         {{- if eq $dbDriver "cassandra" }}
         image: {{ $.Values.schema.checkSchema.cassandra.image.repository }}:{{ $.Values.schema.checkSchema.cassandra.image.tag }}
         imagePullPolicy: {{ $.Values.schema.checkSchema.cassandra.image.pullPolicy }}
-        {{- $globalContainerSecurityContext := $.Values.global.containerSecurityContext | default dict }}
-        {{- $schemaContainerSecurityContext := $.Values.schema.serverJob.containerSecurityContext | default $globalContainerSecurityContext }}
-        {{- if $schemaContainerSecurityContext }}
+        {{- with $.Values.schema.checkSchema.cassandra.containerSecurityContext }}
         securityContext:
-          {{- toYaml $schemaContainerSecurityContext | nindent 10 }}
+          {{- toYaml . | nindent 10 }}
         {{- end }}
         command:
           - sh
@@ -211,11 +209,9 @@ spec:
         {{- else if eq $dbDriver "postgres" }}
         image: {{ $.Values.schema.checkSchema.postgres.image.repository }}:{{ $.Values.schema.checkSchema.postgres.image.tag }}
         imagePullPolicy: {{ $.Values.schema.checkSchema.postgres.image.pullPolicy }}
-        {{- $globalContainerSecurityContext := $.Values.global.containerSecurityContext | default dict }}
-        {{- $schemaContainerSecurityContext := $.Values.schema.serverJob.containerSecurityContext | default $globalContainerSecurityContext }}
-        {{- if $schemaContainerSecurityContext }}
+        {{- with $.Values.schema.checkSchema.postgres.containerSecurityContext }}
         securityContext:
-          {{- toYaml $schemaContainerSecurityContext | nindent 10 }}
+          {{- toYaml . | nindent 10 }}
         {{- end }}
         command:
           - sh
@@ -304,11 +300,9 @@ spec:
         {{- else if eq $dbDriver "mysql" }}
         image: {{ $.Values.schema.checkSchema.mysql.image.repository }}:{{ $.Values.schema.checkSchema.mysql.image.tag }}
         imagePullPolicy: {{ $.Values.schema.checkSchema.mysql.image.pullPolicy }}
-        {{- $globalContainerSecurityContext := $.Values.global.containerSecurityContext | default dict }}
-        {{- $schemaContainerSecurityContext := $.Values.schema.serverJob.containerSecurityContext | default $globalContainerSecurityContext }}
-        {{- if $schemaContainerSecurityContext }}
+        {{- with $.Values.schema.checkSchema.mysql.containerSecurityContext }}
         securityContext:
-          {{- toYaml $schemaContainerSecurityContext | nindent 10 }}
+          {{- toYaml . | nindent 10 }}
         {{- end }}
         command:
           - sh

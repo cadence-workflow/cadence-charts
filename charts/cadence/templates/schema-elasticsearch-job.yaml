@@ -54,11 +54,9 @@ spec:
       - name: wait-for-elasticsearch
         image: {{ $.Values.schema.checkSchema.elasticsearch.image.repository | default "alpine/curl" }}:{{ $.Values.schema.checkSchema.elasticsearch.image.tag | default "latest" }}
         imagePullPolicy: {{ $.Values.schema.checkSchema.elasticsearch.image.pullPolicy | default "IfNotPresent" }}
-        {{- $globalContainerSecurityContext := $.Values.global.containerSecurityContext | default dict }}
-        {{- $schemaContainerSecurityContext := $.Values.schema.elasticSearchJob.containerSecurityContext | default $globalContainerSecurityContext }}
-        {{- if $schemaContainerSecurityContext }}
+        {{- with $.Values.schema.checkSchema.elasticsearch.containerSecurityContext }}
         securityContext:
-          {{- toYaml $schemaContainerSecurityContext | nindent 10 }}
+          {{- toYaml . | nindent 10 }}
         {{- end }}
         command:
           - sh
