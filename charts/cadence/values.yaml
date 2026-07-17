@@ -512,7 +512,7 @@ web:
     capabilities:
       drop:
         - ALL
-    readOnlyRootFilesystem: true
+    # readOnlyRootFilesystem: true TODO: Uncomment this when we don't need write access
 
   # -- Affinity rules (inherits from global if not specified)
   affinity: {}
@@ -1324,14 +1324,14 @@ schema:
         tag: "4"
         pullPolicy: IfNotPresent
       # -- Container security context for cassandra init container
-      containerSecurityContext:
-        runAsNonRoot: true
-        allowPrivilegeEscalation: false
-        capabilities:
-          drop:
-            - ALL
-        # runAsUser: 999  # cassandra user in official image, uncomment if needed
+      containerSecurityContext: {}
+        # runAsUser: 999
         # runAsGroup: 999
+        # runAsNonRoot: true
+        # allowPrivilegeEscalation: false
+        # capabilities:
+        #   drop:
+        #     - ALL
     # -- MySQL schema validation image
     mysql:
       image:
@@ -1339,12 +1339,12 @@ schema:
         tag: "latest"
         pullPolicy: IfNotPresent
       # -- Container security context for mysql init container
-      containerSecurityContext:
-        runAsNonRoot: true
-        allowPrivilegeEscalation: false
-        capabilities:
-          drop:
-            - ALL
+      containerSecurityContext: {}
+        # runAsNonRoot: true
+        # allowPrivilegeEscalation: false
+        # capabilities:
+        #   drop:
+        #     - ALL
         # runAsUser: 1000  # default user in alpine/mysql, uncomment if needed
         # runAsGroup: 1000
     # -- PostgreSQL schema validation image
@@ -1354,12 +1354,12 @@ schema:
         tag: "latest"
         pullPolicy: IfNotPresent
       # -- Container security context for postgres init container
-      containerSecurityContext:
-        runAsNonRoot: true
-        allowPrivilegeEscalation: false
-        capabilities:
-          drop:
-            - ALL
+      containerSecurityContext: {}
+        # runAsNonRoot: true
+        # allowPrivilegeEscalation: false
+        # capabilities:
+        #   drop:
+        #     - ALL
         # runAsUser: 1000  # default user in alpine/psql, uncomment if needed
         # runAsGroup: 1000
     # -- ElasticSearch schema validation image
@@ -1369,12 +1369,12 @@ schema:
         tag: "latest"
         pullPolicy: IfNotPresent
       # -- Container security context for elasticsearch init container
-      containerSecurityContext:
-        runAsNonRoot: true
-        allowPrivilegeEscalation: false
-        capabilities:
-          drop:
-            - ALL
+      containerSecurityContext: {}
+        # runAsNonRoot: true
+        # allowPrivilegeEscalation: false
+        # capabilities:
+        #   drop:
+        #     - ALL
         # runAsUser: 1000  # default user in alpine/curl, uncomment if needed
         # runAsGroup: 1000
 

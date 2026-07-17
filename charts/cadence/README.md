@@ -395,11 +395,15 @@ Kubernetes: `>=1.29.0-0`
 | postgresql.tls.enabled | bool | `false` | Enable TLS traffic support |
 | postgresql.tls.preferServerCiphers | bool | `true` | Use server's TLS cipher preferences over client's |
 | rbac.create | bool | `false` | Enable RBAC creation |
-| schema.checkSchema | object | `{"cassandra":{"image":{"pullPolicy":"IfNotPresent","repository":"cassandra","tag":"4"}},"elasticsearch":{"image":{"pullPolicy":"IfNotPresent","repository":"alpine/curl","tag":"latest"}},"mysql":{"image":{"pullPolicy":"IfNotPresent","repository":"alpine/mysql","tag":"latest"}},"postgres":{"image":{"pullPolicy":"IfNotPresent","repository":"alpine/psql","tag":"latest"}}}` | Container images for schema validation |
-| schema.checkSchema.cassandra | object | `{"image":{"pullPolicy":"IfNotPresent","repository":"cassandra","tag":"4"}}` | Cassandra schema validation image |
-| schema.checkSchema.elasticsearch | object | `{"image":{"pullPolicy":"IfNotPresent","repository":"alpine/curl","tag":"latest"}}` | ElasticSearch schema validation image |
-| schema.checkSchema.mysql | object | `{"image":{"pullPolicy":"IfNotPresent","repository":"alpine/mysql","tag":"latest"}}` | MySQL schema validation image |
-| schema.checkSchema.postgres | object | `{"image":{"pullPolicy":"IfNotPresent","repository":"alpine/psql","tag":"latest"}}` | PostgreSQL schema validation image |
+| schema.checkSchema | object | `{"cassandra":{"containerSecurityContext":{},"image":{"pullPolicy":"IfNotPresent","repository":"cassandra","tag":"4"}},"elasticsearch":{"containerSecurityContext":{},"image":{"pullPolicy":"IfNotPresent","repository":"alpine/curl","tag":"latest"}},"mysql":{"containerSecurityContext":{},"image":{"pullPolicy":"IfNotPresent","repository":"alpine/mysql","tag":"latest"}},"postgres":{"containerSecurityContext":{},"image":{"pullPolicy":"IfNotPresent","repository":"alpine/psql","tag":"latest"}}}` | Container images for schema validation |
+| schema.checkSchema.cassandra | object | `{"containerSecurityContext":{},"image":{"pullPolicy":"IfNotPresent","repository":"cassandra","tag":"4"}}` | Cassandra schema validation image |
+| schema.checkSchema.cassandra.containerSecurityContext | object | `{}` | Container security context for cassandra init container |
+| schema.checkSchema.elasticsearch | object | `{"containerSecurityContext":{},"image":{"pullPolicy":"IfNotPresent","repository":"alpine/curl","tag":"latest"}}` | ElasticSearch schema validation image |
+| schema.checkSchema.elasticsearch.containerSecurityContext | object | `{}` | Container security context for elasticsearch init container |
+| schema.checkSchema.mysql | object | `{"containerSecurityContext":{},"image":{"pullPolicy":"IfNotPresent","repository":"alpine/mysql","tag":"latest"}}` | MySQL schema validation image |
+| schema.checkSchema.mysql.containerSecurityContext | object | `{}` | Container security context for mysql init container |
+| schema.checkSchema.postgres | object | `{"containerSecurityContext":{},"image":{"pullPolicy":"IfNotPresent","repository":"alpine/psql","tag":"latest"}}` | PostgreSQL schema validation image |
+| schema.checkSchema.postgres.containerSecurityContext | object | `{}` | Container security context for postgres init container |
 | schema.elasticSearchJob | object | `{"affinity":{},"containerSecurityContext":{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"runAsGroup":1000,"runAsNonRoot":true,"runAsUser":1000},"enabled":false,"nodeSelector":{},"podSecurityContext":{"fsGroup":1000},"resources":{},"tolerations":[]}` | ElasticSearch schema job configuration |
 | schema.elasticSearchJob.affinity | object | `{}` | ElasticSearch schema job affinity rules |
 | schema.elasticSearchJob.containerSecurityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"runAsGroup":1000,"runAsNonRoot":true,"runAsUser":1000}` | ElasticSearch schema job container security context (uses cadence-server UID 1000) |
@@ -422,7 +426,7 @@ Kubernetes: `>=1.29.0-0`
 | serviceAccount.name | string | `""` | Service account name (generated if not set) |
 | web.affinity | object | `{}` | Affinity rules (inherits from global if not specified) |
 | web.busybox | object | `{"enabled":true,"image":{"imagePullSecrets":[],"pullPolicy":"IfNotPresent","repository":"busybox","tag":"latest"}}` | Image configuration for BusyBox to check frontend service |
-| web.containerSecurityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"readOnlyRootFilesystem":true,"runAsGroup":1001,"runAsNonRoot":true,"runAsUser":1001}` | Container security context (cadence-web runs as UID 1001) |
+| web.containerSecurityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"runAsGroup":1001,"runAsNonRoot":true,"runAsUser":1001}` | Container security context (cadence-web runs as UID 1001) |
 | web.env | list | `[{"name":"CADENCE_WEB_PORT","value":"8088"}]` | Environment variables for web UI |
 | web.image | object | `{"imagePullSecrets":[],"pullPolicy":"IfNotPresent","repository":"docker.io/ubercadence/web","tag":"v4.0.11"}` | Image configuration for Web UI |
 | web.ingress.annotations | object | `{}` | Ingress annotations |
