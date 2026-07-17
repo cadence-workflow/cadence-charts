@@ -34,21 +34,24 @@ global:
   #   value: "value"
  
   # -- Global pod security context
-  podSecurityContext: {}
+  podSecurityContext:
+    fsGroup: 1000
     # runAsNonRoot: true
     # runAsUser: 1000
     # runAsGroup: 1000
-    # fsGroup: 1000
     # seccompProfile:
     #   type: RuntimeDefault
 
-  # -- Global container security context
-  containerSecurityContext: {}
-    # allowPrivilegeEscalation: false
-    # readOnlyRootFilesystem: true
-    # capabilities:
-    #   drop:
-    #     - ALL
+  # -- Global container security context (for cadence-server containers running as UID 1000)
+  containerSecurityContext:
+    runAsUser: 1000
+    runAsGroup: 1000
+    runAsNonRoot: true
+    allowPrivilegeEscalation: false
+    # readOnlyRootFilesystem: true TODO: Uncomment this when we don't need write access
+    capabilities:
+      drop:
+        - ALL
 
   # -- Global affinity rules
   affinity: {}
@@ -497,10 +500,19 @@ web:
     # maxUnavailable: 0
 
   # -- Pod security context (inherits from global if not specified)
-  podSecurityContext: {}
+  podSecurityContext:
+    fsGroup: 1001
 
-  # -- Container security context (inherits from global if not specified)
-  containerSecurityContext: {}
+  # -- Container security context (cadence-web runs as UID 1001)
+  containerSecurityContext:
+    runAsUser: 1001
+    runAsGroup: 1001
+    runAsNonRoot: true
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop:
+        - ALL
+    readOnlyRootFilesystem: true
 
   # -- Affinity rules (inherits from global if not specified)
   affinity: {}
@@ -1251,6 +1263,19 @@ schema:
       # requests:
       #   cpu: "500m"
       #   memory: "1Gi"
+    # -- Schema job pod security context
+    podSecurityContext:
+      fsGroup: 1000
+    # -- Schema job container security context (uses cadence-server UID 1000)
+    containerSecurityContext:
+      runAsUser: 1000
+      runAsGroup: 1000
+      runAsNonRoot: true
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+          - ALL
+      # readOnlyRootFilesystem: true TODO: Uncomment this when we don't need write access
     # -- Schema job affinity rules
     affinity: {}
     # -- Schema job tolerations
@@ -1270,6 +1295,19 @@ schema:
       # requests:
       #   cpu: "500m"
       #   memory: "1Gi"
+    # -- ElasticSearch schema job pod security context
+    podSecurityContext:
+      fsGroup: 1000
+    # -- ElasticSearch schema job container security context (uses cadence-server UID 1000)
+    containerSecurityContext:
+      runAsUser: 1000
+      runAsGroup: 1000
+      runAsNonRoot: true
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+          - ALL
+      # readOnlyRootFilesystem: true TODO: Uncomment this when we don't need write access
     # -- ElasticSearch schema job affinity rules
     affinity: {}
     # -- ElasticSearch schema job tolerations

@@ -43,11 +43,23 @@ spec:
       tolerations:
         {{- toYaml $schemaTolerations | nindent 8 }}
       {{- end }}
+      {{- $globalPodSecurityContext := $.Values.global.podSecurityContext | default dict }}
+      {{- $schemaPodSecurityContext := $.Values.schema.elasticSearchJob.podSecurityContext | default $globalPodSecurityContext }}
+      {{- if $schemaPodSecurityContext }}
+      securityContext:
+        {{- toYaml $schemaPodSecurityContext | nindent 8 }}
+      {{- end }}
       restartPolicy: OnFailure
       initContainers:
       - name: wait-for-elasticsearch
         image: {{ $.Values.schema.checkSchema.elasticsearch.image.repository | default "alpine/curl" }}:{{ $.Values.schema.checkSchema.elasticsearch.image.tag | default "latest" }}
         imagePullPolicy: {{ $.Values.schema.checkSchema.elasticsearch.image.pullPolicy | default "IfNotPresent" }}
+        {{- $globalContainerSecurityContext := $.Values.global.containerSecurityContext | default dict }}
+        {{- $schemaContainerSecurityContext := $.Values.schema.elasticSearchJob.containerSecurityContext | default $globalContainerSecurityContext }}
+        {{- if $schemaContainerSecurityContext }}
+        securityContext:
+          {{- toYaml $schemaContainerSecurityContext | nindent 10 }}
+        {{- end }}
         command:
           - sh
           - -c
@@ -190,6 +202,12 @@ spec:
         image: {{ $repository }}:{{ $tag }}
         {{- $pullPolicy := $schemaImage.pullPolicy | default $globalImage.pullPolicy | default "IfNotPresent" }}
         imagePullPolicy: {{ $pullPolicy }}
+        {{- $globalContainerSecurityContext := $.Values.global.containerSecurityContext | default dict }}
+        {{- $schemaContainerSecurityContext := $.Values.schema.elasticSearchJob.containerSecurityContext | default $globalContainerSecurityContext }}
+        {{- if $schemaContainerSecurityContext }}
+        securityContext:
+          {{- toYaml $schemaContainerSecurityContext | nindent 10 }}
+        {{- end }}
         command:
           - sh
           - -c

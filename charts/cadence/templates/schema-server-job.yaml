@@ -44,6 +44,12 @@ spec:
       tolerations:
         {{- toYaml $schemaTolerations | nindent 8 }}
       {{- end }}
+      {{- $globalPodSecurityContext := $.Values.global.podSecurityContext | default dict }}
+      {{- $schemaPodSecurityContext := $.Values.schema.serverJob.podSecurityContext | default $globalPodSecurityContext }}
+      {{- if $schemaPodSecurityContext }}
+      securityContext:
+        {{- toYaml $schemaPodSecurityContext | nindent 8 }}
+      {{- end }}
       restartPolicy: OnFailure
       initContainers:
       {{- if and $.Values.cloudSqlProxy.enabled $.Values.cloudSqlProxy.initContainer }}
@@ -53,6 +59,12 @@ spec:
         {{- if eq $dbDriver "cassandra" }}
         image: {{ $.Values.schema.checkSchema.cassandra.image.repository }}:{{ $.Values.schema.checkSchema.cassandra.image.tag }}
         imagePullPolicy: {{ $.Values.schema.checkSchema.cassandra.image.pullPolicy }}
+        {{- $globalContainerSecurityContext := $.Values.global.containerSecurityContext | default dict }}
+        {{- $schemaContainerSecurityContext := $.Values.schema.serverJob.containerSecurityContext | default $globalContainerSecurityContext }}
+        {{- if $schemaContainerSecurityContext }}
+        securityContext:
+          {{- toYaml $schemaContainerSecurityContext | nindent 10 }}
+        {{- end }}
         command:
           - sh
           - -c
@@ -199,6 +211,12 @@ spec:
         {{- else if eq $dbDriver "postgres" }}
         image: {{ $.Values.schema.checkSchema.postgres.image.repository }}:{{ $.Values.schema.checkSchema.postgres.image.tag }}
         imagePullPolicy: {{ $.Values.schema.checkSchema.postgres.image.pullPolicy }}
+        {{- $globalContainerSecurityContext := $.Values.global.containerSecurityContext | default dict }}
+        {{- $schemaContainerSecurityContext := $.Values.schema.serverJob.containerSecurityContext | default $globalContainerSecurityContext }}
+        {{- if $schemaContainerSecurityContext }}
+        securityContext:
+          {{- toYaml $schemaContainerSecurityContext | nindent 10 }}
+        {{- end }}
         command:
           - sh
           - -c
@@ -286,6 +304,12 @@ spec:
         {{- else if eq $dbDriver "mysql" }}
         image: {{ $.Values.schema.checkSchema.mysql.image.repository }}:{{ $.Values.schema.checkSchema.mysql.image.tag }}
         imagePullPolicy: {{ $.Values.schema.checkSchema.mysql.image.pullPolicy }}
+        {{- $globalContainerSecurityContext := $.Values.global.containerSecurityContext | default dict }}
+        {{- $schemaContainerSecurityContext := $.Values.schema.serverJob.containerSecurityContext | default $globalContainerSecurityContext }}
+        {{- if $schemaContainerSecurityContext }}
+        securityContext:
+          {{- toYaml $schemaContainerSecurityContext | nindent 10 }}
+        {{- end }}
         command:
           - sh
           - -c
@@ -418,6 +442,12 @@ spec:
         image: {{ $repository }}:{{ $tag }}
         {{- $pullPolicy := $schemaImage.pullPolicy | default $globalImage.pullPolicy | default "IfNotPresent" }}
         imagePullPolicy: {{ $pullPolicy }}
+        {{- $globalContainerSecurityContext := $.Values.global.containerSecurityContext | default dict }}
+        {{- $schemaContainerSecurityContext := $.Values.schema.serverJob.containerSecurityContext | default $globalContainerSecurityContext }}
+        {{- if $schemaContainerSecurityContext }}
+        securityContext:
+          {{- toYaml $schemaContainerSecurityContext | nindent 10 }}
+        {{- end }}
         {{- if eq $dbDriver "cassandra" }}
         # Cassandra Schema Setup
         command:

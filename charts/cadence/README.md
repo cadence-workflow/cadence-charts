@@ -1,6 +1,6 @@
 # cadence
 
-![Version: 1.4.3](https://img.shields.io/badge/Version-1.4.3-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v1.4.1](https://img.shields.io/badge/AppVersion-v1.4.1-informational?style=flat-square)
+![Version: 1.5.0](https://img.shields.io/badge/Version-1.5.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v1.4.1](https://img.shields.io/badge/AppVersion-v1.4.1-informational?style=flat-square)
 
 Cadence is a distributed, scalable, durable, and highly available orchestration engine
 to execute asynchronous long-running business logic in a scalable and resilient way.
@@ -263,7 +263,7 @@ Kubernetes: `>=1.29.0-0`
 | frontend.topologySpreadConstraints | list | `[]` | Topology spread constraints (inherits from global if not specified) |
 | fullnameOverride | string | `nil` | Provide a name to override the full names of resources |
 | global.affinity | object | `{}` | Global affinity rules |
-| global.containerSecurityContext | object | `{}` | Global container security context |
+| global.containerSecurityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"runAsGroup":1000,"runAsNonRoot":true,"runAsUser":1000}` | Global container security context (for cadence-server containers running as UID 1000) |
 | global.env | list | `[]` | Global environment variables (shared only by Cadence Server services [frontend, worker, matching and history]) |
 | global.image | object | `{"pullPolicy":"IfNotPresent","repository":"docker.io/ubercadence/server","tag":"v1.4.1"}` | Global image configuration (shared only by Cadence Server services [frontend, worker, matching and history]) |
 | global.imagePullSecrets | list | `[]` | Image pull secrets for private registries |
@@ -271,7 +271,7 @@ Kubernetes: `>=1.29.0-0`
 | global.log.level | string | `"info"` | Logging level (debug, info, warn, error) |
 | global.log.stdout | bool | `true` | Enable stdout logging |
 | global.nodeSelector | object | `{}` | Global node selector |
-| global.podSecurityContext | object | `{}` | Global pod security context |
+| global.podSecurityContext | object | `{"fsGroup":1000}` | Global pod security context |
 | global.priorityClassName | string | `""` | Global priority class name for pod scheduling |
 | global.secretEnv | list | `[]` | Global secret environment variables (shared only by Cadence Server services [frontend, worker, matching and history]) |
 | global.tls | object | `{"volumeMounts":[],"volumes":[]}` | Global TLS volumes configuration |
@@ -400,16 +400,20 @@ Kubernetes: `>=1.29.0-0`
 | schema.checkSchema.elasticsearch | object | `{"image":{"pullPolicy":"IfNotPresent","repository":"alpine/curl","tag":"latest"}}` | ElasticSearch schema validation image |
 | schema.checkSchema.mysql | object | `{"image":{"pullPolicy":"IfNotPresent","repository":"alpine/mysql","tag":"latest"}}` | MySQL schema validation image |
 | schema.checkSchema.postgres | object | `{"image":{"pullPolicy":"IfNotPresent","repository":"alpine/psql","tag":"latest"}}` | PostgreSQL schema validation image |
-| schema.elasticSearchJob | object | `{"affinity":{},"enabled":false,"nodeSelector":{},"resources":{},"tolerations":[]}` | ElasticSearch schema job configuration |
+| schema.elasticSearchJob | object | `{"affinity":{},"containerSecurityContext":{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"runAsGroup":1000,"runAsNonRoot":true,"runAsUser":1000},"enabled":false,"nodeSelector":{},"podSecurityContext":{"fsGroup":1000},"resources":{},"tolerations":[]}` | ElasticSearch schema job configuration |
 | schema.elasticSearchJob.affinity | object | `{}` | ElasticSearch schema job affinity rules |
+| schema.elasticSearchJob.containerSecurityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"runAsGroup":1000,"runAsNonRoot":true,"runAsUser":1000}` | ElasticSearch schema job container security context (uses cadence-server UID 1000) |
 | schema.elasticSearchJob.enabled | bool | `false` | Enable ElasticSearch schema job |
 | schema.elasticSearchJob.nodeSelector | object | `{}` | ElasticSearch schema job node selector |
+| schema.elasticSearchJob.podSecurityContext | object | `{"fsGroup":1000}` | ElasticSearch schema job pod security context |
 | schema.elasticSearchJob.resources | object | `{}` | ElasticSearch schema job resource allocation |
 | schema.elasticSearchJob.tolerations | list | `[]` | ElasticSearch schema job tolerations |
-| schema.serverJob | object | `{"affinity":{},"enabled":true,"nodeSelector":{},"resources":{},"tolerations":[]}` | Schema job for main database schema management |
+| schema.serverJob | object | `{"affinity":{},"containerSecurityContext":{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"runAsGroup":1000,"runAsNonRoot":true,"runAsUser":1000},"enabled":true,"nodeSelector":{},"podSecurityContext":{"fsGroup":1000},"resources":{},"tolerations":[]}` | Schema job for main database schema management |
 | schema.serverJob.affinity | object | `{}` | Schema job affinity rules |
+| schema.serverJob.containerSecurityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"runAsGroup":1000,"runAsNonRoot":true,"runAsUser":1000}` | Schema job container security context (uses cadence-server UID 1000) |
 | schema.serverJob.enabled | bool | `true` | Enable server schema job |
 | schema.serverJob.nodeSelector | object | `{}` | Schema job node selector |
+| schema.serverJob.podSecurityContext | object | `{"fsGroup":1000}` | Schema job pod security context |
 | schema.serverJob.resources | object | `{}` | Schema job resource allocation |
 | schema.serverJob.tolerations | list | `[]` | Schema job tolerations |
 | serviceAccount.annotations | object | `{}` | Annotations for service account |
@@ -418,7 +422,7 @@ Kubernetes: `>=1.29.0-0`
 | serviceAccount.name | string | `""` | Service account name (generated if not set) |
 | web.affinity | object | `{}` | Affinity rules (inherits from global if not specified) |
 | web.busybox | object | `{"enabled":true,"image":{"imagePullSecrets":[],"pullPolicy":"IfNotPresent","repository":"busybox","tag":"latest"}}` | Image configuration for BusyBox to check frontend service |
-| web.containerSecurityContext | object | `{}` | Container security context (inherits from global if not specified) |
+| web.containerSecurityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"readOnlyRootFilesystem":true,"runAsGroup":1001,"runAsNonRoot":true,"runAsUser":1001}` | Container security context (cadence-web runs as UID 1001) |
 | web.env | list | `[{"name":"CADENCE_WEB_PORT","value":"8088"}]` | Environment variables for web UI |
 | web.image | object | `{"imagePullSecrets":[],"pullPolicy":"IfNotPresent","repository":"docker.io/ubercadence/web","tag":"v4.0.11"}` | Image configuration for Web UI |
 | web.ingress.annotations | object | `{}` | Ingress annotations |
@@ -430,7 +434,7 @@ Kubernetes: `>=1.29.0-0`
 | web.podAnnotations | object | `{}` | Additional pod annotations |
 | web.podDisruptionBudget | object | `{"enabled":false,"minAvailable":1}` | Pod Disruption Budget |
 | web.podLabels | object | `{}` | Additional pod labels |
-| web.podSecurityContext | object | `{}` | Pod security context (inherits from global if not specified) |
+| web.podSecurityContext | object | `{"fsGroup":1001}` | Pod security context (inherits from global if not specified) |
 | web.priorityClassName | string | `""` | Priority class name for pod scheduling (inherits from global if not specified) |
 | web.replicas | int | `1` | Number of web UI replicas to deploy |
 | web.resources | object | `{}` | Resource limits and requests |
