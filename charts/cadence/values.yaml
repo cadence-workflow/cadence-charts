@@ -699,7 +699,7 @@ metrics:
     scrapeInterval: 15s
     # -- Scrape timeout
     timeout: ""
-    # -- Target labels from pod metadata. Specify as {metadata: [pod, container, node, ...]}. Permitted metadata values: pod, container, node, top_level_controller_name, top_level_controller_type
+    # -- Target labels to add to metrics. Supports 'metadata' (permitted: pod, container, node, top_level_controller_name, top_level_controller_type) and 'fromPod' for custom pod labels
     targetLabels: {}
     # -- Metric relabeling configs
     metricRelabeling: []

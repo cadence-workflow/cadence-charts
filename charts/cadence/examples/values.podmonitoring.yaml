@@ -13,14 +13,19 @@ metrics:
     enabled: true
     scrapeInterval: 30s
     timeout: 10s
-    # Include Kubernetes metadata in metrics
-    # Permitted values: pod, container, node, top_level_controller_name, top_level_controller_type
-    # Default: [container, pod, top_level_controller_name, top_level_controller_type]
+    # Configure which labels to add to scraped metrics
     # targetLabels:
+    #   # Include Kubernetes metadata labels
+    #   # Permitted values: pod, container, node, top_level_controller_name, top_level_controller_type
+    #   # Default: [container, pod, top_level_controller_name, top_level_controller_type]
     #   metadata:
     #     - pod
     #     - container
     #     - node
+    #   # Map custom pod labels to metric labels 
+    #   fromPod:
+    #     - from: app.kubernetes.io/component
+    #       to: cadence_component
     # Example metric relabeling to drop unwanted metrics or rename labels
     # metricRelabeling:
     #   - sourceLabels: [__name__]
