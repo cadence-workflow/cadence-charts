@@ -323,9 +323,8 @@ Kubernetes: `>=1.29.0-0`
 | metrics.podMonitoring.annotations | object | `{}` | Annotations for PodMonitoring |
 | metrics.podMonitoring.enabled | bool | `false` | Enable PodMonitoring creation |
 | metrics.podMonitoring.metricRelabeling | list | `[]` | Metric relabeling configs |
-| metrics.podMonitoring.namespace | string | `""` | Namespace for PodMonitoring (defaults to release namespace) |
 | metrics.podMonitoring.scrapeInterval | string | `"15s"` | Scrape interval |
-| metrics.podMonitoring.targetLabels | list | `[]` | Target labels to be added from pod metadata |
+| metrics.podMonitoring.targetLabels | object | `{}` | Target labels from pod metadata. Specify as {metadata: [pod, container, node, ...]}. Permitted metadata values: pod, container, node, top_level_controller_name, top_level_controller_type |
 | metrics.podMonitoring.timeout | string | `""` | Scrape timeout |
 | metrics.port | int | `9090` | Metrics port |
 | metrics.portName | string | `"metrics"` | Metrics port name |

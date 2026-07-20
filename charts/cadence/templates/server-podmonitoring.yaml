@@ -3,11 +3,7 @@ apiVersion: monitoring.googleapis.com/v1
 kind: PodMonitoring
 metadata:
   name: {{ include "cadence.fullname" . }}
-  {{- if .Values.metrics.podMonitoring.namespace }}
-  namespace: {{ .Values.metrics.podMonitoring.namespace }}
-  {{- else }}
   namespace: {{ .Release.Namespace }}
-  {{- end }}
   labels:
     {{- include "cadence.labels" . | nindent 4 }}
     {{- if .Values.metrics.podMonitoring.additionalLabels }}
@@ -30,8 +26,7 @@ spec:
     {{- if .Values.metrics.podMonitoring.metricRelabeling }}
     metricRelabeling: {{ toYaml .Values.metrics.podMonitoring.metricRelabeling | nindent 4 }}
     {{- end }}
-  {{- if .Values.metrics.podMonitoring.targetLabels }}
-  targetLabels:
-    metadata: {{ toYaml .Values.metrics.podMonitoring.targetLabels | nindent 4 }}
+  {{- with .Values.metrics.podMonitoring.targetLabels }}
+  targetLabels: {{ toYaml . | nindent 4 }}
   {{- end }}
 {{- end }}

@@ -695,14 +695,12 @@ metrics:
     additionalLabels: {}
     # -- Annotations for PodMonitoring
     annotations: {}
-    # -- Namespace for PodMonitoring (defaults to release namespace)
-    namespace: ""
     # -- Scrape interval
     scrapeInterval: 15s
     # -- Scrape timeout
     timeout: ""
-    # -- Target labels to be added from pod metadata
-    targetLabels: []
+    # -- Target labels from pod metadata. Specify as {metadata: [pod, container, node, ...]}. Permitted metadata values: pod, container, node, top_level_controller_name, top_level_controller_type
+    targetLabels: {}
     # -- Metric relabeling configs
     metricRelabeling: []
 
