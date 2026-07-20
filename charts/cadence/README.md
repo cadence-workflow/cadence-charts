@@ -1,6 +1,6 @@
 # cadence
 
-![Version: 1.5.0](https://img.shields.io/badge/Version-1.5.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v1.4.1](https://img.shields.io/badge/AppVersion-v1.4.1-informational?style=flat-square)
+![Version: 1.6.0](https://img.shields.io/badge/Version-1.6.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v1.4.1](https://img.shields.io/badge/AppVersion-v1.4.1-informational?style=flat-square)
 
 Cadence is a distributed, scalable, durable, and highly available orchestration engine
 to execute asynchronous long-running business logic in a scalable and resilient way.
@@ -319,6 +319,14 @@ Kubernetes: `>=1.29.0-0`
 | matching.tolerations | list | `[]` | Tolerations (inherits from global if not specified) |
 | matching.topologySpreadConstraints | list | `[]` | Topology spread constraints (inherits from global if not specified) |
 | metrics.enabled | bool | `true` | Enable metrics collection |
+| metrics.podMonitoring.additionalLabels | object | `{}` | Additional labels for PodMonitoring |
+| metrics.podMonitoring.annotations | object | `{}` | Annotations for PodMonitoring |
+| metrics.podMonitoring.enabled | bool | `false` | Enable PodMonitoring creation |
+| metrics.podMonitoring.metricRelabeling | list | `[]` | Metric relabeling configs |
+| metrics.podMonitoring.namespace | string | `""` | Namespace for PodMonitoring (defaults to release namespace) |
+| metrics.podMonitoring.scrapeInterval | string | `"15s"` | Scrape interval |
+| metrics.podMonitoring.targetLabels | list | `[]` | Target labels to be added from pod metadata |
+| metrics.podMonitoring.timeout | string | `""` | Scrape timeout |
 | metrics.port | int | `9090` | Metrics port |
 | metrics.portName | string | `"metrics"` | Metrics port name |
 | metrics.serviceMonitor.additionalLabels | object | `{}` | Additional labels for ServiceMonitor |

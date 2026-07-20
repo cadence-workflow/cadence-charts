@@ -1,0 +1,37 @@
+{{- if and .Values.metrics.enabled .Values.metrics.podMonitoring.enabled -}}
+apiVersion: monitoring.googleapis.com/v1
+kind: PodMonitoring
+metadata:
+  name: {{ include "cadence.fullname" . }}
+  {{- if .Values.metrics.podMonitoring.namespace }}
+  namespace: {{ .Values.metrics.podMonitoring.namespace }}
+  {{- else }}
+  namespace: {{ .Release.Namespace }}
+  {{- end }}
+  labels:
+    {{- include "cadence.labels" . | nindent 4 }}
+    {{- if .Values.metrics.podMonitoring.additionalLabels }}
+    {{- toYaml .Values.metrics.podMonitoring.additionalLabels | nindent 4 }}
+    {{- end }}
+  {{- if .Values.metrics.podMonitoring.annotations }}
+  annotations:
+    {{- toYaml .Values.metrics.podMonitoring.annotations | nindent 4 }}
+  {{- end }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "cadence.selectorLabels" . | nindent 6 }}
+  endpoints:
+  - port: {{ .Values.metrics.portName }}
+    interval: {{ .Values.metrics.podMonitoring.scrapeInterval }}
+    {{- if .Values.metrics.podMonitoring.timeout }}
+    timeout: {{ .Values.metrics.podMonitoring.timeout }}
+    {{- end }}
+    {{- if .Values.metrics.podMonitoring.metricRelabeling }}
+    metricRelabeling: {{ toYaml .Values.metrics.podMonitoring.metricRelabeling | nindent 4 }}
+    {{- end }}
+  {{- if .Values.metrics.podMonitoring.targetLabels }}
+  targetLabels:
+    metadata: {{ toYaml .Values.metrics.podMonitoring.targetLabels | nindent 4 }}
+  {{- end }}
+{{- end }}

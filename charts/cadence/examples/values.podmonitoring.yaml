@@ -1,0 +1,24 @@
+# Example values for using Cadence with PodMonitoring on GKE with Managed Service for Prometheus
+# This configuration enables a single PodMonitoring resource that scrapes metrics from all
+# server-deployment pods (frontend, history, matching, worker). The service type is automatically
+# distinguished in metrics via the app.kubernetes.io/component label.
+
+# Enable metrics collection
+metrics:
+  enabled: true
+  port: 9090
+  portName: metrics
+
+  # Enable PodMonitoring for GCP Managed Service for Prometheus
+  podMonitoring:
+    enabled: true
+    scrapeInterval: 30s
+    timeout: 10s
+    # Include pod labels in metrics (e.g., to distinguish between frontend/history/matching/worker)
+    # targetLabels:
+    #   - app.kubernetes.io/component
+    # Example metric relabeling to drop unwanted metrics or rename labels
+    # metricRelabeling:
+    #   - sourceLabels: [__name__]
+    #     regex: 'go_.*'
+    #     action: drop
