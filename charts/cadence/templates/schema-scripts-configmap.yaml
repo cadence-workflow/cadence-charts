@@ -1,0 +1,11 @@
+{{- if .Values.schema.serverJob.enabled -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "cadence.fullname" . }}-schema-scripts
+  labels:
+    {{- include "cadence.labels" . | nindent 4 }}
+    app.kubernetes.io/component: schema-scripts
+data:
+{{ (.Files.Glob "files/schema/*.sh").AsConfig | indent 2 }}
+{{- end }}
