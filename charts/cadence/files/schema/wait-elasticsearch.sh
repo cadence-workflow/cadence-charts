@@ -49,11 +49,23 @@ build_es_connection() {
 
     # Add authentication if user/password provided
     if [ -n "$ES_USER" ] && [ -n "$ES_PWD" ]; then
-        CURL_OPTS="$CURL_OPTS -u $ES_USER:$ES_PWD"
+        # Use netrc to avoid exposing password in process list
+        NETRC_FILE=$(mktemp)
+        chmod 600 "$NETRC_FILE"
+        cat > "$NETRC_FILE" << EOF
+machine $ES_HOST
+login $ES_USER
+password $ES_PWD
+EOF
+        CURL_OPTS="$CURL_OPTS --netrc-file $NETRC_FILE"
     fi
 
-    # Set global variables
-    BASE_URL="$PROTOCOL://$ES_HOST:$ES_PORT"
+    # Set base URL using SSL_SERVER_NAME if provided (for SNI), otherwise ES_HOST
+    if [ -n "$SSL_SERVER_NAME" ]; then
+        BASE_URL="$PROTOCOL://$SSL_SERVER_NAME:$ES_PORT"
+    else
+        BASE_URL="$PROTOCOL://$ES_HOST:$ES_PORT"
+    fi
 
     echo "Connecting to Elasticsearch at: $BASE_URL"
     echo "TLS Enabled: $TLS_ENABLED"
@@ -72,5 +84,10 @@ until curl $CURL_OPTS -s -f "$BASE_URL/_cluster/health?wait_for_status=yellow&ti
     echo "Elasticsearch is not ready yet..."
     sleep 10
 done
+
+# Cleanup netrc file if created
+if [ -n "$NETRC_FILE" ]; then
+    rm -f "$NETRC_FILE"
+fi
 
 echo "Elasticsearch is ready!"

@@ -41,11 +41,23 @@ build_es_connection() {
 
     # Add authentication if user/password provided
     if [ -n "$ES_USER" ] && [ -n "$ES_PWD" ]; then
-        CURL_OPTS="$CURL_OPTS -u $ES_USER:$ES_PWD"
+        # Use netrc to avoid exposing password in process list
+        NETRC_FILE=$(mktemp)
+        chmod 600 "$NETRC_FILE"
+        cat > "$NETRC_FILE" << EOF
+machine $ES_HOST
+login $ES_USER
+password $ES_PWD
+EOF
+        CURL_OPTS="$CURL_OPTS --netrc-file $NETRC_FILE"
     fi
 
-    # Set global variables
-    BASE_URL="$PROTOCOL://$ES_HOST:$ES_PORT"
+    # Set base URL using SSL_SERVER_NAME if provided (for SNI), otherwise ES_HOST
+    if [ -n "$SSL_SERVER_NAME" ]; then
+        BASE_URL="$PROTOCOL://$SSL_SERVER_NAME:$ES_PORT"
+    else
+        BASE_URL="$PROTOCOL://$ES_HOST:$ES_PORT"
+    fi
 
     echo "Connecting to Elasticsearch at: $BASE_URL"
     echo "TLS Enabled: $TLS_ENABLED"
@@ -90,8 +102,8 @@ TEMPLATE_URL="$BASE_URL/_template/cadence-visibility-template"
 
 echo "Uploading template to: $TEMPLATE_URL"
 TEMPLATE_RESPONSE=$(curl $CURL_OPTS -s -w "%{http_code}" -X PUT "$TEMPLATE_URL" -H 'Content-Type: application/json' --data-binary "@$SCHEMA_FILE")
-TEMPLATE_HTTP_CODE=$(echo "$TEMPLATE_RESPONSE" | tail -c 4)
-TEMPLATE_BODY=$(echo "$TEMPLATE_RESPONSE" | head -c -4)
+TEMPLATE_HTTP_CODE=$(printf '%s' "$TEMPLATE_RESPONSE" | tail -c 3)
+TEMPLATE_BODY=${TEMPLATE_RESPONSE%???}
 
 if [ "$TEMPLATE_HTTP_CODE" -eq 200 ] || [ "$TEMPLATE_HTTP_CODE" -eq 201 ]; then
     echo "✓ Template installed successfully"
@@ -108,8 +120,8 @@ INDEX_URL="$BASE_URL/$VISIBILITY_INDEX"
 
 echo "Creating index: $INDEX_URL"
 INDEX_RESPONSE=$(curl $CURL_OPTS -s -w "%{http_code}" -X PUT "$INDEX_URL")
-INDEX_HTTP_CODE=$(echo "$INDEX_RESPONSE" | tail -c 4)
-INDEX_BODY=$(echo "$INDEX_RESPONSE" | head -c -4)
+INDEX_HTTP_CODE=$(printf '%s' "$INDEX_RESPONSE" | tail -c 3)
+INDEX_BODY=${INDEX_RESPONSE%???}
 
 if [ "$INDEX_HTTP_CODE" -eq 200 ] || [ "$INDEX_HTTP_CODE" -eq 201 ]; then
     echo "✓ Index created successfully"
@@ -196,5 +208,10 @@ echo "Mapping: Verified ✓"
 echo "Version: $ES_VERSION"
 echo "Schema File: $SCHEMA_FILE"
 echo "==============================================="
+
+# Cleanup netrc file if created
+if [ -n "$NETRC_FILE" ]; then
+    rm -f "$NETRC_FILE"
+fi
 
 echo "Elasticsearch schema installation completed successfully!"
