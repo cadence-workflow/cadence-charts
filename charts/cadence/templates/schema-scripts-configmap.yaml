@@ -1,4 +1,4 @@
-{{- if .Values.schema.serverJob.enabled -}}
+{{- if or .Values.schema.serverJob.enabled .Values.schema.elasticSearchJob.enabled -}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
