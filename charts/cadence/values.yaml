@@ -933,7 +933,7 @@ config:
       # -- Protocol to use (http/https). If not specified, auto-detected based on TLS settings
       protocol: ""
       # -- Elasticsearch host. Auto-generated as {release-name}-elasticsearch.{namespace}.svc.cluster.local when elasticsearch.enabled=true
-      hosts: ""
+      hosts: "" # Must be an ip address if tls is enabled and tls.serverName is set
       # -- Elasticsearch port
       port: 9200
       # -- Elasticsearch visibility index name
