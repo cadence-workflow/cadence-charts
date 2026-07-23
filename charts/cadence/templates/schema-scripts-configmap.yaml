@@ -1,4 +1,3 @@
-{{- if or .Values.schema.serverJob.enabled .Values.schema.elasticSearchJob.enabled -}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -8,4 +7,3 @@ metadata:
     app.kubernetes.io/component: schema-scripts
 data:
 {{ (.Files.Glob "files/schema/*.sh").AsConfig | indent 2 }}
-{{- end }}
