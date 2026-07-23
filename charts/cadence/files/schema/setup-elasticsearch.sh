@@ -4,56 +4,8 @@ set -e
 echo "Starting ElasticSearch schema setup..."
 echo "=== Installing ElasticSearch Schema ==="
 
-# Build Elasticsearch connection parameters
-build_es_connection() {
-    # Determine protocol - allow override from values or default based on TLS
-    if [ -n "$ES_PROTOCOL" ]; then
-        PROTOCOL="$ES_PROTOCOL"
-    elif [ "$TLS_ENABLED" = "true" ]; then
-        PROTOCOL="https"
-    else
-        PROTOCOL="http"
-    fi
-
-    # Build curl options for TLS
-    CURL_OPTS=""
-    if [ "$TLS_ENABLED" = "true" ]; then
-        # Configure SSL verification based on host verification setting
-        if [ "$ENABLE_HOST_VERIFICATION" = "false" ]; then
-            CURL_OPTS="$CURL_OPTS -k"
-        fi
-
-        # Add CA certificate if provided
-        if [ -n "$SSL_CA_FILE" ]; then
-            CURL_OPTS="$CURL_OPTS --cacert $SSL_CA_FILE"
-        fi
-
-        # Add client certificate for mutual TLS if provided
-        if [ -n "$SSL_CLIENT_CERT" ] && [ -n "$SSL_CLIENT_KEY" ]; then
-            CURL_OPTS="$CURL_OPTS --cert $SSL_CLIENT_CERT --key $SSL_CLIENT_KEY"
-        fi
-
-        # Override server name if specified
-        if [ -n "$SSL_SERVER_NAME" ]; then
-            CURL_OPTS="$CURL_OPTS --resolve $SSL_SERVER_NAME:$ES_PORT:$ES_HOST"
-        fi
-    fi
-
-    # Add authentication if user/password provided
-    if [ -n "$ES_USER" ] && [ -n "$ES_PWD" ]; then
-        CURL_OPTS="$CURL_OPTS -u $ES_USER:$ES_PWD"
-    fi
-
-    # Set global variables
-    BASE_URL="$PROTOCOL://$ES_HOST:$ES_PORT"
-
-    echo "Connecting to Elasticsearch at: $BASE_URL"
-    echo "TLS Enabled: $TLS_ENABLED"
-    if [ "$TLS_ENABLED" = "true" ]; then
-        echo "Host Verification: $ENABLE_HOST_VERIFICATION"
-        echo "Client Auth Required: $REQUIRE_CLIENT_AUTH"
-    fi
-}
+# Source shared utilities from same directory as this script
+. "$(dirname "$0")/elasticsearch-utils.sh"
 
 # Initialize connection parameters
 build_es_connection
@@ -90,8 +42,8 @@ TEMPLATE_URL="$BASE_URL/_template/cadence-visibility-template"
 
 echo "Uploading template to: $TEMPLATE_URL"
 TEMPLATE_RESPONSE=$(curl $CURL_OPTS -s -w "%{http_code}" -X PUT "$TEMPLATE_URL" -H 'Content-Type: application/json' --data-binary "@$SCHEMA_FILE")
-TEMPLATE_HTTP_CODE=$(echo "$TEMPLATE_RESPONSE" | tail -c 4)
-TEMPLATE_BODY=$(echo "$TEMPLATE_RESPONSE" | head -c -4)
+TEMPLATE_HTTP_CODE=$(printf '%s' "$TEMPLATE_RESPONSE" | tail -c 3)
+TEMPLATE_BODY=${TEMPLATE_RESPONSE%???}
 
 if [ "$TEMPLATE_HTTP_CODE" -eq 200 ] || [ "$TEMPLATE_HTTP_CODE" -eq 201 ]; then
     echo "✓ Template installed successfully"
@@ -108,8 +60,8 @@ INDEX_URL="$BASE_URL/$VISIBILITY_INDEX"
 
 echo "Creating index: $INDEX_URL"
 INDEX_RESPONSE=$(curl $CURL_OPTS -s -w "%{http_code}" -X PUT "$INDEX_URL")
-INDEX_HTTP_CODE=$(echo "$INDEX_RESPONSE" | tail -c 4)
-INDEX_BODY=$(echo "$INDEX_RESPONSE" | head -c -4)
+INDEX_HTTP_CODE=$(printf '%s' "$INDEX_RESPONSE" | tail -c 3)
+INDEX_BODY=${INDEX_RESPONSE%???}
 
 if [ "$INDEX_HTTP_CODE" -eq 200 ] || [ "$INDEX_HTTP_CODE" -eq 201 ]; then
     echo "✓ Index created successfully"
@@ -196,5 +148,8 @@ echo "Mapping: Verified ✓"
 echo "Version: $ES_VERSION"
 echo "Schema File: $SCHEMA_FILE"
 echo "==============================================="
+
+# Cleanup
+cleanup_es_connection
 
 echo "Elasticsearch schema installation completed successfully!"
