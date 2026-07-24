@@ -19,12 +19,9 @@ build_mysql_cmd() {
       "preferred")
         ;;
       "required"|"true"|"skip-verify")
-        _cmd="$_cmd --ssl --ssl-verify-server-cert=off"
+        _cmd="$_cmd --ssl --skip-ssl-verify-server-cert"
         ;;
-      "verify-ca")
-        _cmd="$_cmd --ssl --ssl-verify-server-cert"
-        ;;
-      "verify-identity")
+      "verify-ca"|"verify-identity")
         _cmd="$_cmd --ssl --ssl-verify-server-cert"
         ;;
       *)
