@@ -168,15 +168,6 @@ spec:
         - name: SSL_VALIDATE
           value: {{ $.Values.config.persistence.database.cassandra.tls.enableHostVerification | quote }}
         {{- end }}
-        volumeMounts:
-        - name: schema-scripts
-          mountPath: /scripts
-          readOnly: true
-        - name: versions-data
-          mountPath: /shared
-        {{- with $.Values.global.tls.volumeMounts }}
-        {{- toYaml . | nindent 8 }}
-        {{- end }}
         {{- else if eq $dbDriver "postgres" }}
         image: {{ $.Values.schema.checkSchema.postgres.image.repository }}:{{ $.Values.schema.checkSchema.postgres.image.tag }}
         imagePullPolicy: {{ $.Values.schema.checkSchema.postgres.image.pullPolicy }}
@@ -228,15 +219,6 @@ spec:
         - name: SSL_CLIENT_KEY
           value: {{ $.Values.config.persistence.database.sql.tls.keyFile | quote }}
         {{- end }}
-        {{- end }}
-        volumeMounts:
-        - name: schema-scripts
-          mountPath: /scripts
-          readOnly: true
-        - name: versions-data
-          mountPath: /shared
-        {{- with $.Values.global.tls.volumeMounts }}
-        {{- toYaml . | nindent 8 }}
         {{- end }}
         {{- else if eq $dbDriver "mysql" }}
         image: {{ $.Values.schema.checkSchema.mysql.image.repository }}:{{ $.Values.schema.checkSchema.mysql.image.tag }}
@@ -362,13 +344,13 @@ spec:
           value: {{ $.Values.config.persistence.elasticsearch.tls.serverName | quote }}
         {{- end }}
         {{- end }}
-        {{- end }}
         volumeMounts:
         - name: schema-scripts
           mountPath: /scripts
           readOnly: true
         {{- with $.Values.global.tls.volumeMounts }}
         {{- toYaml . | nindent 8 }}
+        {{- end }}
         {{- end }}
       containers:
       {{- if and $.Values.cloudSqlProxy.enabled $.Values.cloudSqlProxy.container }}
