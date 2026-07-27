@@ -40,8 +40,8 @@ wait_postgres_ready() {
   echo "Waiting for PostgreSQL to be ready..."
   setup_postgres_env
 
-  until psql -h $DB_HOST -p $DB_PORT -U $DB_USER -d postgres -c "SELECT 1" >/dev/null 2>&1; do
-    echo "[$(date +'%Y-%m-%d %H:%M:%S')] PostgreSQL is not ready yet..."
+  until psql -h $DB_HOST -p $DB_PORT -U $DB_USER -d postgres -c "SELECT 1"; do
+    echo "PostgreSQL is not ready yet..."
     sleep 5
   done
 

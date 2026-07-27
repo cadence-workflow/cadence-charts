@@ -62,8 +62,8 @@ wait_mysql_ready() {
   echo "  TLS enabled: $TLS_ENABLED"
   echo ""
 
-  until $(build_mysql_cmd) -e "SELECT 1" >/dev/null 2>&1; do
-    echo "[$(date +'%Y-%m-%d %H:%M:%S')] MySQL is not ready yet..."
+  until $(build_mysql_cmd) -e "SELECT 1"; do
+    echo "MySQL is not ready yet..."
     sleep 5
   done
 

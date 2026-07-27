@@ -85,8 +85,8 @@ wait_cassandra_ready() {
   echo "Waiting for Cassandra to be ready..."
   build_cqlshrc
 
-  until $(build_cqlsh_cmd) -e "SELECT now() FROM system.local;" > /dev/null 2>&1; do
-    echo "[$(date +'%Y-%m-%d %H:%M:%S')] Cassandra is not ready yet..."
+  until $(build_cqlsh_cmd) -e "SELECT now() FROM system.local;"; do
+    echo "Cassandra is not ready yet..."
     sleep 5
   done
 
