@@ -55,7 +55,7 @@ docker run --rm -v $(pwd)/files/schema:/scripts \
 Use ShellCheck to lint scripts (POSIX mode):
 
 ```bash
-shellcheck -s sh files/schema/*.sh
+shellcheck -s sh ./*.sh
 ```
 
 ### Adding New Scripts

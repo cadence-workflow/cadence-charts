@@ -11,8 +11,9 @@ while [ ! -f /shared/schema-versions.env ]; do
 done
 
 # Load extracted versions
-# shellcheck disable=SC2046
-export $(cat /shared/schema-versions.env | xargs)
+set -a
+. /shared/schema-versions.env
+set +a
 echo "Using extracted versions:"
 echo "  DEFAULT_VERSION=$DEFAULT_VERSION"
 echo "  VISIBILITY_VERSION=$VISIBILITY_VERSION"

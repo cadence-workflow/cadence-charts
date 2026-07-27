@@ -10,7 +10,7 @@ echo "Starting Elasticsearch readiness check..."
 build_es_connection
 
 # Check Elasticsearch health
-until curl $CURL_OPTS -s -f "$BASE_URL/_cluster/health?wait_for_status=yellow&timeout=5s" > /dev/null; do
+until curl "$CURL_OPTS" -s -f "$BASE_URL/_cluster/health?wait_for_status=yellow&timeout=5s" > /dev/null; do
     echo "Elasticsearch is not ready yet..."
     sleep 10
 done
