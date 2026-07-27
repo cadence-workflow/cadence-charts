@@ -33,14 +33,15 @@ until
 
   # Check main keyspace schema version
   echo "  Querying main keyspace ($DB_NAME)..."
-  MAIN_VERSION=$($(build_cqlsh_cmd) -e "EXPAND ON; USE $DB_NAME; SELECT curr_version FROM schema_version WHERE keyspace_name = '$DB_NAME';" | grep 'curr_version.*|' | cut -d'|' -f2 | xargs)
+  MAIN_OUTPUT=$($(build_cqlsh_cmd) -e "EXPAND ON; USE $DB_NAME; SELECT curr_version FROM schema_version WHERE keyspace_name = '$DB_NAME';")
   MAIN_EXIT_CODE=$?
+  MAIN_VERSION=$(echo "$MAIN_OUTPUT" | grep 'curr_version.*|' | cut -d'|' -f2 | xargs)
   echo "    Query exit code: $MAIN_EXIT_CODE"
   echo "    Current version: '$MAIN_VERSION'"
   echo "    Expected version: '$DEFAULT_VERSION'"
 
-  if [ $MAIN_EXIT_CODE -ne 0 ]; then
-    echo "    ERROR: Query failed!"
+  if [ $MAIN_EXIT_CODE -ne 0 ] || [ -z "$MAIN_VERSION" ]; then
+    echo "    ERROR: Query failed or returned empty!"
     false
   elif echo "$MAIN_VERSION" | grep -q "$DEFAULT_VERSION"; then
     echo "    ✓ Main keyspace version matches!"
@@ -48,14 +49,15 @@ until
     # Check visibility keyspace schema version (only if ES is not enabled)
     if [ "$ES_ENABLED" = "false" ]; then
       echo "  Querying visibility keyspace ($DB_VISIBILITY_NAME)..."
-      VIS_VERSION=$($(build_cqlsh_cmd) -e "EXPAND ON; USE $DB_VISIBILITY_NAME; SELECT curr_version FROM schema_version WHERE keyspace_name = '$DB_VISIBILITY_NAME';" | grep 'curr_version.*|' | cut -d'|' -f2 | xargs)
+      VIS_OUTPUT=$($(build_cqlsh_cmd) -e "EXPAND ON; USE $DB_VISIBILITY_NAME; SELECT curr_version FROM schema_version WHERE keyspace_name = '$DB_VISIBILITY_NAME';")
       VIS_EXIT_CODE=$?
+      VIS_VERSION=$(echo "$VIS_OUTPUT" | grep 'curr_version.*|' | cut -d'|' -f2 | xargs)
       echo "    Query exit code: $VIS_EXIT_CODE"
       echo "    Current version: '$VIS_VERSION'"
       echo "    Expected version: '$VISIBILITY_VERSION'"
 
-      if [ $VIS_EXIT_CODE -ne 0 ]; then
-        echo "    ERROR: Query failed!"
+      if [ $VIS_EXIT_CODE -ne 0 ] || [ -z "$VIS_VERSION" ]; then
+        echo "    ERROR: Query failed or returned empty!"
         false
       elif echo "$VIS_VERSION" | grep -q "$VISIBILITY_VERSION"; then
         echo "    ✓ Visibility keyspace version matches!"
