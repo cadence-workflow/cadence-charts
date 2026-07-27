@@ -22,20 +22,59 @@ build_cqlshrc
 
 # Check schema versions
 echo "Checking Cassandra schema versions..."
-until $(build_cqlsh_cmd) -e "
-  USE $DB_NAME;
-  SELECT curr_version FROM schema_version WHERE keyspace_name = '$DB_NAME';" | grep -q "$DEFAULT_VERSION" &&
-  {
+echo "  Expected DEFAULT_VERSION: $DEFAULT_VERSION"
+echo "  Expected VISIBILITY_VERSION: $VISIBILITY_VERSION"
+echo "  ES_ENABLED: $ES_ENABLED"
+
+ATTEMPT=0
+until
+  ATTEMPT=$((ATTEMPT + 1))
+  echo "[Attempt $ATTEMPT] Checking schema versions..."
+
+  # Check main keyspace schema version
+  echo "  Querying main keyspace ($DB_NAME)..."
+  MAIN_VERSION=$($(build_cqlsh_cmd) -e "EXPAND ON; USE $DB_NAME; SELECT curr_version FROM schema_version WHERE keyspace_name = '$DB_NAME';" | grep 'curr_version.*|' | cut -d'|' -f2 | xargs)
+  MAIN_EXIT_CODE=$?
+  echo "    Query exit code: $MAIN_EXIT_CODE"
+  echo "    Current version: '$MAIN_VERSION'"
+  echo "    Expected version: '$DEFAULT_VERSION'"
+
+  if [ $MAIN_EXIT_CODE -ne 0 ]; then
+    echo "    ERROR: Query failed!"
+    false
+  elif echo "$MAIN_VERSION" | grep -q "$DEFAULT_VERSION"; then
+    echo "    ✓ Main keyspace version matches!"
+
+    # Check visibility keyspace schema version (only if ES is not enabled)
     if [ "$ES_ENABLED" = "false" ]; then
-      $(build_cqlsh_cmd) -e "
-        USE $DB_VISIBILITY_NAME;
-        SELECT curr_version FROM schema_version WHERE keyspace_name = '$DB_VISIBILITY_NAME';" | grep -q "$VISIBILITY_VERSION"
+      echo "  Querying visibility keyspace ($DB_VISIBILITY_NAME)..."
+      VIS_VERSION=$($(build_cqlsh_cmd) -e "EXPAND ON; USE $DB_VISIBILITY_NAME; SELECT curr_version FROM schema_version WHERE keyspace_name = '$DB_VISIBILITY_NAME';" | grep 'curr_version.*|' | cut -d'|' -f2 | xargs)
+      VIS_EXIT_CODE=$?
+      echo "    Query exit code: $VIS_EXIT_CODE"
+      echo "    Current version: '$VIS_VERSION'"
+      echo "    Expected version: '$VISIBILITY_VERSION'"
+
+      if [ $VIS_EXIT_CODE -ne 0 ]; then
+        echo "    ERROR: Query failed!"
+        false
+      elif echo "$VIS_VERSION" | grep -q "$VISIBILITY_VERSION"; then
+        echo "    ✓ Visibility keyspace version matches!"
+        true
+      else
+        echo "    ✗ Visibility keyspace version mismatch!"
+        false
+      fi
     else
+      echo "  ✓ Skipping visibility keyspace check (ES is enabled)"
       true
     fi
-  }
+  else
+    echo "    ✗ Main keyspace version mismatch!"
+    false
+  fi
 do
-  echo 'Waiting for Cassandra schema to be ready...'
+  echo "---"
+  echo 'Schema not ready yet, waiting 10 seconds before retry...'
   sleep 10
 done
 
