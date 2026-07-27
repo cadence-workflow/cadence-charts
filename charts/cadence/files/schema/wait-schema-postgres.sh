@@ -1,6 +1,9 @@
 #!/bin/sh
 set -e
 
+# Source shared utilities from same directory as this script
+. "$(dirname "$0")/postgres-utils.sh"
+
 # Wait for versions file from extract-schema-version init container
 while [ ! -f /shared/schema-versions.env ]; do
   echo "Waiting for schema versions file..."
@@ -14,33 +17,8 @@ echo "Using extracted versions:"
 echo "  DEFAULT_VERSION=$DEFAULT_VERSION"
 echo "  VISIBILITY_VERSION=$VISIBILITY_VERSION"
 
-# Set up PostgreSQL password
-export PGPASSWORD="$POSTGRES_PWD"
-
-# Build psql command with TLS options
-build_psql_cmd() {
-  _cmd="psql -h $DB_HOST -p $DB_PORT -U $DB_USER"
-
-  # Add SSL mode if TLS is enabled
-  if [ "$TLS_ENABLED" = "true" ] && [ -n "$SSL_MODE" ]; then
-    _cmd="$_cmd --set=sslmode=$SSL_MODE"
-
-    # Add SSL certificate parameters if provided
-    if [ -n "$SSL_CERTFILE" ]; then
-      _cmd="$_cmd --set=sslrootcert=$SSL_CERTFILE"
-    fi
-
-    if [ -n "$SSL_CLIENT_CERT" ]; then
-      _cmd="$_cmd --set=sslcert=$SSL_CLIENT_CERT"
-    fi
-
-    if [ -n "$SSL_CLIENT_KEY" ]; then
-      _cmd="$_cmd --set=sslkey=$SSL_CLIENT_KEY"
-    fi
-  fi
-
-  echo "$_cmd"
-}
+# Setup PostgreSQL environment
+setup_postgres_env
 
 # Wait for PostgreSQL to be ready
 echo "Waiting for PostgreSQL to be ready..."
