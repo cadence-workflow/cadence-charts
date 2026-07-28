@@ -4,6 +4,12 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: {{ include "cadence.fullname" . }}-schema-elasticsearch
+  {{- if not (include "cadence.waitForElasticsearch" .) }}
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "-5"
+    "helm.sh/hook-delete-policy": before-hook-creation
+  {{- end }}
   labels:
     {{- include "cadence.labels" . | nindent 4 }}
     app.kubernetes.io/component: schema-elasticsearch
@@ -53,6 +59,7 @@ spec:
       {{- end }}
       restartPolicy: OnFailure
       initContainers:
+      {{- if include "cadence.waitForElasticsearch" $ }}
       - name: wait-for-elasticsearch
         image: {{ $.Values.schema.checkSchema.elasticsearch.image.repository | default "alpine/curl" }}:{{ $.Values.schema.checkSchema.elasticsearch.image.tag | default "latest" }}
         imagePullPolicy: {{ $.Values.schema.checkSchema.elasticsearch.image.pullPolicy | default "IfNotPresent" }}
@@ -120,6 +127,7 @@ spec:
         {{- with .Values.global.tls.volumeMounts }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
+      {{- end }}
       containers:
       - name: cadence-schema-elasticsearch
         {{- $globalImage := .Values.global.image | default dict }}
