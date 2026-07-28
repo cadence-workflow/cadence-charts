@@ -41,7 +41,10 @@ echo "Step 1: Installing Cadence visibility template..."
 TEMPLATE_URL="$BASE_URL/_template/cadence-visibility-template"
 
 echo "Uploading template to: $TEMPLATE_URL"
-TEMPLATE_RESPONSE=$(curl "$CURL_OPTS" -s -w "%{http_code}" -X PUT "$TEMPLATE_URL" -H 'Content-Type: application/json' --data-binary "@$SCHEMA_FILE")
+# CURL_OPTS is intentionally unquoted - it's a space-separated string of options
+# that must be word-split (e.g., "-k --cacert /path" becomes separate arguments).
+# shellcheck disable=SC2086
+TEMPLATE_RESPONSE=$(curl $CURL_OPTS -s -w "%{http_code}" -X PUT "$TEMPLATE_URL" -H 'Content-Type: application/json' --data-binary "@$SCHEMA_FILE")
 TEMPLATE_HTTP_CODE=$(printf '%s' "$TEMPLATE_RESPONSE" | tail -c 3)
 TEMPLATE_BODY=${TEMPLATE_RESPONSE%???}
 
@@ -59,7 +62,8 @@ echo "Step 2: Creating visibility index..."
 INDEX_URL="$BASE_URL/$VISIBILITY_INDEX"
 
 echo "Creating index: $INDEX_URL"
-INDEX_RESPONSE=$(curl "$CURL_OPTS" -s -w "%{http_code}" -X PUT "$INDEX_URL")
+# shellcheck disable=SC2086
+INDEX_RESPONSE=$(curl $CURL_OPTS -s -w "%{http_code}" -X PUT "$INDEX_URL")
 INDEX_HTTP_CODE=$(printf '%s' "$INDEX_RESPONSE" | tail -c 3)
 INDEX_BODY=${INDEX_RESPONSE%???}
 
@@ -80,7 +84,8 @@ echo "Step 3: Verifying installation..."
 
 # Check template exists
 echo "Checking template..."
-if TEMPLATE_CHECK=$(curl "$CURL_OPTS" -s -f "$TEMPLATE_URL"); then
+# shellcheck disable=SC2086
+if TEMPLATE_CHECK=$(curl $CURL_OPTS -s -f "$TEMPLATE_URL"); then
     echo "✓ Template verification successful"
     if echo "$TEMPLATE_CHECK" | grep -q "cadence-visibility-template"; then
         echo "✓ Template structure is valid"
@@ -92,11 +97,13 @@ fi
 
 # Check index exists and is healthy
 echo "Checking index..."
-if curl "$CURL_OPTS" -s -f "$INDEX_URL" > /dev/null; then
+# shellcheck disable=SC2086
+if curl $CURL_OPTS -s -f "$INDEX_URL" > /dev/null; then
     echo "✓ Index verification successful"
 
     # Get index stats
-    if INDEX_STATS=$(curl "$CURL_OPTS" -s "$INDEX_URL/_stats"); then
+    # shellcheck disable=SC2086
+    if INDEX_STATS=$(curl $CURL_OPTS -s "$INDEX_URL/_stats"); then
         echo "✓ Index is healthy and accessible"
         # Try to extract document count
         DOC_COUNT=$(echo "$INDEX_STATS" | grep -o '"count":[0-9]*' | head -1 | cut -d':' -f2)
@@ -115,7 +122,8 @@ case "$ES_VERSION" in
     "v6")
         # Check ES6 document type mapping
         TYPE_URL="$BASE_URL/$VISIBILITY_INDEX/_mapping/_doc"
-        if curl "$CURL_OPTS" -s -f "$TYPE_URL" > /dev/null; then
+        # shellcheck disable=SC2086
+        if curl $CURL_OPTS -s -f "$TYPE_URL" > /dev/null; then
             echo "✓ ES6 document type mapping exists"
         else
             echo "✗ ES6 document type mapping check failed"
@@ -125,7 +133,8 @@ case "$ES_VERSION" in
     "v7")
         # Check ES7/8 index mapping
         MAPPING_URL="$BASE_URL/$VISIBILITY_INDEX/_mapping"
-        if curl "$CURL_OPTS" -s -f "$MAPPING_URL" > /dev/null; then
+        # shellcheck disable=SC2086
+        if curl $CURL_OPTS -s -f "$MAPPING_URL" > /dev/null; then
             echo "✓ ES7 index mapping exists"
         else
             echo "✗ ES7 index mapping check failed"
