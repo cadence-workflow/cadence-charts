@@ -329,3 +329,32 @@ Cadence GRPC Peers endpoint
 {{- define "cadence.grpcPeers" -}}
 {{ include "cadence.fullname" . }}-frontend.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.frontend.grpcPort | default 7833 }}
 {{- end }}
+
+{{/*
+Check if we should wait for database to be ready
+Returns true if the database subchart is enabled (embedded database)
+Returns empty string if using external database (subchart disabled)
+Usage: {{- if include "cadence.waitForDatabase" $ }}
+*/}}
+{{- define "cadence.waitForDatabase" -}}
+{{- $dbDriver := .Values.config.persistence.database.driver -}}
+{{- if eq $dbDriver "cassandra" -}}
+  {{- if .Values.cassandra.enabled -}}true{{- end -}}
+{{- else if eq $dbDriver "postgres" -}}
+  {{- if .Values.postgresql.enabled -}}true{{- end -}}
+{{- else if eq $dbDriver "mysql" -}}
+  {{- if .Values.mysql.enabled -}}true{{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Check if we should wait for Elasticsearch/OpenSearch to be ready
+Returns true if the search subchart is enabled (embedded search)
+Returns empty string if using external search (subchart disabled)
+Usage: {{- if include "cadence.waitForElasticsearch" $ }}
+*/}}
+{{- define "cadence.waitForElasticsearch" -}}
+{{- if .Values.config.persistence.elasticsearch.enabled -}}
+  {{- if or .Values.elasticsearch.enabled .Values.opensearch.enabled -}}true{{- end -}}
+{{- end -}}
+{{- end -}}
