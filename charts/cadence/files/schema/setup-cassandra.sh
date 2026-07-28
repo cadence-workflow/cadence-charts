@@ -44,8 +44,8 @@ build_cassandra_cmd() {
 # Setup main database schema
 echo "Creating main keyspace: $DB_NAME"
 if [ "$DATA_CENTER" = "" ]; then
-  if ! $(build_cassandra_cmd) create -k $DB_NAME --rf $REPLICATION_FACTOR; then
-    if $(build_cassandra_cmd) -e "DESCRIBE KEYSPACE $DB_NAME;" > /dev/null 2>&1; then
+  if ! $(build_cassandra_cmd) create -k "$DB_NAME" --rf "$REPLICATION_FACTOR"; then
+    if $(build_cassandra_cmd) -e "DESCRIBE KEYSPACE $DB_NAME;"; then
       echo "Keyspace $DB_NAME already exists, continuing..."
     else
       echo "ERROR: Failed to create keyspace $DB_NAME"
@@ -53,8 +53,8 @@ if [ "$DATA_CENTER" = "" ]; then
     fi
   fi
 else
-  if ! $(build_cassandra_cmd) create -k $DB_NAME --rf $REPLICATION_FACTOR -dc $DATA_CENTER; then
-    if $(build_cassandra_cmd) -e "DESCRIBE KEYSPACE $DB_NAME;" > /dev/null 2>&1; then
+  if ! $(build_cassandra_cmd) create -k "$DB_NAME" --rf "$REPLICATION_FACTOR" -dc "$DATA_CENTER"; then
+    if $(build_cassandra_cmd) -e "DESCRIBE KEYSPACE $DB_NAME;"; then
       echo "Keyspace $DB_NAME already exists, continuing..."
     else
       echo "ERROR: Failed to create keyspace $DB_NAME"
@@ -64,17 +64,17 @@ else
 fi
 
 echo "Setting up main schema version 0.0"
-$(build_cassandra_cmd) -k $DB_NAME setup-schema -v 0.0 || echo "Schema 0.0 already exists"
+$(build_cassandra_cmd) -k "$DB_NAME" setup-schema -v 0.0 || echo "Schema 0.0 already exists"
 
 echo "Updating main schema to latest version"
-$(build_cassandra_cmd) -k $DB_NAME update-schema -d $CADENCE_HOME/schema/cassandra/cadence/versioned || echo "Rollback is not allowed"
+$(build_cassandra_cmd) -k "$DB_NAME" update-schema -d "$CADENCE_HOME/schema/cassandra/cadence/versioned" || echo "Rollback is not allowed"
 
 # Setup visibility database schema (only if ES is not enabled)
 if [ "$ES_ENABLED" = "false" ]; then
   echo "Creating visibility keyspace: $DB_VISIBILITY_NAME"
   if [ "$DATA_CENTER" = "" ]; then
-    if ! $(build_cassandra_cmd) create -k $DB_VISIBILITY_NAME --rf $REPLICATION_FACTOR; then
-      if $(build_cassandra_cmd) -e "DESCRIBE KEYSPACE $DB_VISIBILITY_NAME;" > /dev/null 2>&1; then
+    if ! $(build_cassandra_cmd) create -k "$DB_VISIBILITY_NAME" --rf "$REPLICATION_FACTOR"; then
+      if $(build_cassandra_cmd) -e "DESCRIBE KEYSPACE $DB_VISIBILITY_NAME;"; then
         echo "Keyspace $DB_VISIBILITY_NAME already exists, continuing..."
       else
         echo "ERROR: Failed to create keyspace $DB_VISIBILITY_NAME"
@@ -82,8 +82,8 @@ if [ "$ES_ENABLED" = "false" ]; then
       fi
     fi
   else
-    if ! $(build_cassandra_cmd) create -k $DB_VISIBILITY_NAME --rf $REPLICATION_FACTOR -dc $DATA_CENTER; then
-      if $(build_cassandra_cmd) -e "DESCRIBE KEYSPACE $DB_VISIBILITY_NAME;" > /dev/null 2>&1; then
+    if ! $(build_cassandra_cmd) create -k "$DB_VISIBILITY_NAME" --rf "$REPLICATION_FACTOR" -dc "$DATA_CENTER"; then
+      if $(build_cassandra_cmd) -e "DESCRIBE KEYSPACE $DB_VISIBILITY_NAME;"; then
         echo "Keyspace $DB_VISIBILITY_NAME already exists, continuing..."
       else
         echo "ERROR: Failed to create keyspace $DB_VISIBILITY_NAME"
@@ -93,10 +93,10 @@ if [ "$ES_ENABLED" = "false" ]; then
   fi
 
   echo "Setting up visibility schema version 0.0"
-  $(build_cassandra_cmd) -k $DB_VISIBILITY_NAME setup-schema -v 0.0 || echo "Schema 0.0 already exists"
+  $(build_cassandra_cmd) -k "$DB_VISIBILITY_NAME" setup-schema -v 0.0 || echo "Schema 0.0 already exists"
 
   echo "Updating visibility schema to latest version"
-  $(build_cassandra_cmd) -k $DB_VISIBILITY_NAME update-schema -d $CADENCE_HOME/schema/cassandra/visibility/versioned || echo "Rollback is not allowed"
+  $(build_cassandra_cmd) -k "$DB_VISIBILITY_NAME" update-schema -d "$CADENCE_HOME/schema/cassandra/visibility/versioned" || echo "Rollback is not allowed"
 else
   echo "Skipping visibility schema setup (Elasticsearch enabled)"
 fi

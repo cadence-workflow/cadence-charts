@@ -11,8 +11,9 @@ while [ ! -f /shared/schema-versions.env ]; do
 done
 
 # Load extracted versions
-# shellcheck disable=SC2046
-export $(cat /shared/schema-versions.env | xargs)
+set -a
+. /shared/schema-versions.env
+set +a
 echo "Using extracted versions:"
 echo "  DEFAULT_VERSION=$DEFAULT_VERSION"
 echo "  VISIBILITY_VERSION=$VISIBILITY_VERSION"
@@ -22,7 +23,7 @@ setup_postgres_env
 
 # Wait for PostgreSQL to be ready
 echo "Waiting for PostgreSQL to be ready..."
-until pg_isready -h $DB_HOST -p $DB_PORT -U $DB_USER; do
+until pg_isready -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER"; do
   echo 'PostgreSQL is not ready yet...'
   sleep 5
 done
@@ -41,7 +42,7 @@ until
 
   # Check main database schema version
   echo "  Querying main database ($DB_NAME)..."
-  MAIN_OUTPUT=$($(build_psql_cmd) -d $DB_NAME -t -c "SELECT curr_version FROM schema_version WHERE db_name = '$DB_NAME';")
+  MAIN_OUTPUT=$($(build_psql_cmd) -d "$DB_NAME" -t -c "SELECT curr_version FROM schema_version WHERE db_name = '$DB_NAME';")
   MAIN_EXIT_CODE=$?
   MAIN_VERSION=$(echo "$MAIN_OUTPUT" | xargs)
   echo "    Query exit code: $MAIN_EXIT_CODE"
@@ -57,7 +58,7 @@ until
     # Check visibility database schema version (only if ES is not enabled)
     if [ "$ES_ENABLED" = "false" ]; then
       echo "  Querying visibility database ($DB_VISIBILITY_NAME)..."
-      VIS_OUTPUT=$($(build_psql_cmd) -d $DB_VISIBILITY_NAME -t -c "SELECT curr_version FROM schema_version WHERE db_name = '$DB_VISIBILITY_NAME';")
+      VIS_OUTPUT=$($(build_psql_cmd) -d "$DB_VISIBILITY_NAME" -t -c "SELECT curr_version FROM schema_version WHERE db_name = '$DB_VISIBILITY_NAME';")
       VIS_EXIT_CODE=$?
       VIS_VERSION=$(echo "$VIS_OUTPUT" | xargs)
       echo "    Query exit code: $VIS_EXIT_CODE"

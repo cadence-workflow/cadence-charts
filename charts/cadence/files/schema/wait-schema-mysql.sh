@@ -11,8 +11,9 @@ while [ ! -f /shared/schema-versions.env ]; do
 done
 
 # Load extracted versions
-# shellcheck disable=SC2046
-export $(cat /shared/schema-versions.env | xargs)
+set -a
+. /shared/schema-versions.env
+set +a
 echo "Using extracted versions:"
 echo "  DEFAULT_VERSION=$DEFAULT_VERSION"
 echo "  VISIBILITY_VERSION=$VISIBILITY_VERSION"
@@ -20,12 +21,12 @@ echo "  VISIBILITY_VERSION=$VISIBILITY_VERSION"
 # Wait for MySQL to be ready
 echo "Waiting for MySQL to be ready..."
 if [ -n "$MYSQL_PWD" ]; then
-  until mariadb-admin ping -h $DB_HOST -P $DB_PORT -u $DB_USER --password=$MYSQL_PWD --skip-ssl --silent; do
+  until mariadb-admin ping -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USER" --password="$MYSQL_PWD" --skip-ssl --silent; do
     echo 'MySQL is not ready yet...'
     sleep 5
   done
 else
-  until mariadb-admin ping -h $DB_HOST -P $DB_PORT -u $DB_USER --skip-ssl --silent; do
+  until mariadb-admin ping -h "$DB_HOST" -P "$DB_PORT" -u "$DB_USER" --skip-ssl --silent; do
     echo 'MySQL is not ready yet...'
     sleep 5
   done
@@ -45,7 +46,7 @@ until
 
   # Check main database schema version
   echo "  Querying main database ($DB_NAME)..."
-  MAIN_OUTPUT=$($(build_mysql_cmd) -D $DB_NAME -e "SELECT curr_version FROM schema_version WHERE db_name = '$DB_NAME';")
+  MAIN_OUTPUT=$($(build_mysql_cmd) -D "$DB_NAME" -e "SELECT curr_version FROM schema_version WHERE db_name = '$DB_NAME';")
   MAIN_EXIT_CODE=$?
   MAIN_VERSION=$(echo "$MAIN_OUTPUT" | grep -v "curr_version" | xargs)
   echo "    Query exit code: $MAIN_EXIT_CODE"
@@ -61,7 +62,7 @@ until
     # Check visibility database schema version (only if ES is not enabled)
     if [ "$ES_ENABLED" = "false" ]; then
       echo "  Querying visibility database ($DB_VISIBILITY_NAME)..."
-      VIS_OUTPUT=$($(build_mysql_cmd) -D $DB_VISIBILITY_NAME -e "SELECT curr_version FROM schema_version WHERE db_name = '$DB_VISIBILITY_NAME';")
+      VIS_OUTPUT=$($(build_mysql_cmd) -D "$DB_VISIBILITY_NAME" -e "SELECT curr_version FROM schema_version WHERE db_name = '$DB_VISIBILITY_NAME';")
       VIS_EXIT_CODE=$?
       VIS_VERSION=$(echo "$VIS_OUTPUT" | grep -v "curr_version" | xargs)
       echo "    Query exit code: $VIS_EXIT_CODE"

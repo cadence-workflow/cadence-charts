@@ -1,0 +1,31 @@
+name: Shellcheck
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'charts/cadence/files/schema/*.sh'
+      - '.github/workflows/shellcheck.yml'
+  pull_request:
+    paths:
+      - 'charts/cadence/files/schema/*.sh'
+      - '.github/workflows/shellcheck.yml'
+
+jobs:
+  shellcheck:
+    name: Run shellcheck
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run ShellCheck
+        uses: ludeeus/action-shellcheck@master
+        with:
+          scandir: 'charts/cadence/files/schema'
+          check_together: 'yes'
+          severity: warning
+          format: gcc
+        env:
+          SHELLCHECK_OPTS: -s sh
