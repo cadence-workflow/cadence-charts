@@ -504,6 +504,18 @@ data:
           grpcPort: {{ .Values.frontend.grpcPort | default 7833 }}
           bindOnIP: "0.0.0.0"
           grpcMaxMsgSize: {{ .Values.config.services.grpcMaxMsgSize | default 4194304 | int }}
+          {{- if .Values.frontend.httpApi.enabled }}
+          http:
+            port: {{ .Values.frontend.httpApi.port | default 8800 }}
+            procedures:
+            {{- if .Values.frontend.httpApi.procedures }}
+            {{- range .Values.frontend.httpApi.procedures }}
+            - {{ . | quote }}
+            {{- end }}
+            {{- else }}
+            []
+            {{- end }}
+          {{- end }}
         metrics:
           {{- if eq .Values.config.services.metrics.type "statsd" }}
           statsd:

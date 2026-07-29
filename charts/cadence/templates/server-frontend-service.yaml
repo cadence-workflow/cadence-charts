@@ -19,3 +19,9 @@ spec:
       protocol: TCP
       port: {{ $service.grpcPort }}
       targetPort: grpc
+    {{- if $service.httpApi.enabled }}
+    - name: http
+      protocol: TCP
+      port: {{ $service.httpApi.port }}
+      targetPort: http
+    {{- end }}
