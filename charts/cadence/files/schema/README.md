@@ -39,6 +39,10 @@ files/schema/
     └── check-elasticsearch-schema.sh # Validate Elasticsearch schema
 ```
 
+## Re-running the schema Job (SQL)
+
+`cadence-sql-tool setup-schema` resets `schema_version` to `0.0` every time it runs. For PostgreSQL and MySQL, `wait-*.sh` writes `/schema-state/<db>.versioned` for each database that already has a `schema_version` row, and `setup-*.sh` skips `setup-schema` for those databases. This keeps a re-run of the Job (e.g. a GitOps tool re-creating it after `ttlSecondsAfterFinished`) from resetting a migrated database.
+
 ## Development
 
 ### Testing Scripts Locally

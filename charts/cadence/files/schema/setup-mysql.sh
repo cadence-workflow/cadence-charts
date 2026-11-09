@@ -34,8 +34,13 @@ build_mysql_cmd() {
 echo "Creating main database: $DB_NAME"
 $(build_mysql_cmd) create-database --db "$DB_NAME" || echo "Database $DB_NAME already exists"
 
-echo "Setting up main schema version 0.0"
-$(build_mysql_cmd) --db "$DB_NAME" setup-schema -v 0.0 || echo "Schema 0.0 already exists"
+if [ -f "/schema-state/$DB_NAME.versioned" ]; then
+  echo "Skipping main schema setup (already versioned)"
+else
+  echo "Setting up main schema version 0.0"
+  $(build_mysql_cmd) --db "$DB_NAME" setup-schema -v 0.0
+  touch "/schema-state/$DB_NAME.versioned"
+fi
 
 echo "Updating main schema to latest version"
 $(build_mysql_cmd) --db "$DB_NAME" update-schema -d "$CADENCE_HOME/schema/mysql/v8/cadence/versioned" || echo "Rollback is not allowed"
@@ -45,8 +50,13 @@ if [ "$ES_ENABLED" = "false" ]; then
   echo "Creating visibility database: $DB_VISIBILITY_NAME"
   $(build_mysql_cmd) create-database --db "$DB_VISIBILITY_NAME" || echo "Database $DB_VISIBILITY_NAME already exists"
 
-  echo "Setting up visibility schema version 0.0"
-  $(build_mysql_cmd) --db "$DB_VISIBILITY_NAME" setup-schema -v 0.0 || echo "Schema 0.0 already exists"
+  if [ -f "/schema-state/$DB_VISIBILITY_NAME.versioned" ]; then
+    echo "Skipping visibility schema setup (already versioned)"
+  else
+    echo "Setting up visibility schema version 0.0"
+    $(build_mysql_cmd) --db "$DB_VISIBILITY_NAME" setup-schema -v 0.0
+    touch "/schema-state/$DB_VISIBILITY_NAME.versioned"
+  fi
 
   echo "Updating visibility schema to latest version"
   $(build_mysql_cmd) --db "$DB_VISIBILITY_NAME" update-schema -d "$CADENCE_HOME/schema/mysql/v8/visibility/versioned" || echo "Rollback is not allowed"

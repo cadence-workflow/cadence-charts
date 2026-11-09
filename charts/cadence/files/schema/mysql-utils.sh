@@ -69,3 +69,21 @@ wait_mysql_ready() {
 
   echo "MySQL is ready!"
 }
+
+# setup-schema resets schema_version to 0.0 on every run, so mark databases
+# that are already versioned and let the schema Job skip it for them.
+mark_if_versioned() {
+  _db=$1
+
+  _hasTable=$($(build_mysql_cmd) -N -s -e "SELECT 1 FROM information_schema.tables WHERE table_schema = '$_db' AND table_name = 'schema_version'")
+  if [ "$_hasTable" != "1" ]; then
+    echo "Database $_db has no schema_version table yet"
+    return 0
+  fi
+
+  _hasRow=$($(build_mysql_cmd) -N -s -e "SELECT 1 FROM \`$_db\`.schema_version WHERE db_name = '$_db'")
+  if [ "$_hasRow" = "1" ]; then
+    echo "Database $_db is already versioned"
+    touch "/schema-state/$_db.versioned"
+  fi
+}
