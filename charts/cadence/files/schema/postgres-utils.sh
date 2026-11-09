@@ -47,3 +47,27 @@ wait_postgres_ready() {
 
   echo "PostgreSQL is ready!"
 }
+
+# setup-schema resets schema_version to 0.0 on every run, so mark databases
+# that are already versioned and let the schema Job skip it for them.
+mark_if_versioned() {
+  _db=$1
+
+  _dbExists=$($(build_psql_cmd) -d postgres -tAc "SELECT 1 FROM pg_database WHERE datname = '$_db'")
+  if [ "$_dbExists" != "1" ]; then
+    echo "Database $_db does not exist yet"
+    return 0
+  fi
+
+  _hasTable=$($(build_psql_cmd) -d "$_db" -tAc "SELECT to_regclass('schema_version') IS NOT NULL")
+  if [ "$_hasTable" != "t" ]; then
+    echo "Database $_db has no schema_version table yet"
+    return 0
+  fi
+
+  _hasRow=$($(build_psql_cmd) -d "$_db" -tAc "SELECT 1 FROM schema_version WHERE db_name = '$_db'")
+  if [ "$_hasRow" = "1" ]; then
+    echo "Database $_db is already versioned"
+    touch "/schema-state/$_db.versioned"
+  fi
+}

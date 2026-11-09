@@ -212,6 +212,8 @@ spec:
         - name: schema-scripts
           mountPath: /scripts
           readOnly: true
+        - name: schema-state
+          mountPath: /schema-state
         {{- with $.Values.global.tls.volumeMounts }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
@@ -364,6 +366,8 @@ spec:
         - name: schema-scripts
           mountPath: /scripts
           readOnly: true
+        - name: schema-state
+          mountPath: /schema-state
         {{- with .Values.global.tls.volumeMounts }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
@@ -376,6 +380,8 @@ spec:
         configMap:
           name: {{ include "cadence.fullname" . }}-schema-scripts
           defaultMode: 0555
+      - name: schema-state
+        emptyDir: {}
       {{- with .Values.global.tls.volumes }}
       {{- toYaml . | nindent 6 }}
       {{- end }}
